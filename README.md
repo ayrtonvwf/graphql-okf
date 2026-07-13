@@ -58,6 +58,32 @@ The specifications live in [`docs/northstar-specs/`](docs/northstar-specs/):
 - [`SETUP.md`](docs/northstar-specs/SETUP.md) — the tooling and infrastructure required
   to build it.
 
+## Developing
+
+The runtime and package manager are pinned (Node `>=24`, see `.nvmrc`; pnpm, see
+the `packageManager` field), so a clean checkout only needs:
+
+```sh
+pnpm install
+```
+
+This also installs the git pre-commit hook (lint + typecheck on staged files).
+
+Each CI check can be run the same way locally:
+
+| Check | Command |
+| --- | --- |
+| Lint + format check | `pnpm run lint` |
+| Auto-format | `pnpm run format` |
+| Type check | `pnpm run typecheck` |
+| Tests (fast, no coverage) | `pnpm test` (watch: `pnpm run test:watch`) |
+| Tests + coverage (the enforced gate) | `pnpm run coverage` |
+| Dead code / unused exports | `pnpm run knip` |
+| Build (dual ESM/CJS + `.d.ts`, plus the CLI bundle) | `pnpm run build` |
+
+See [`docs/northstar-specs/SETUP.md`](docs/northstar-specs/SETUP.md) for the
+full tooling spec these commands implement.
+
 ## Why OKF
 
 OKF is an open, vendor-neutral format published by Google Cloud that represents
