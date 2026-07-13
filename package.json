@@ -33,10 +33,15 @@
     "node": ">=24"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
-    "typescript": "^7.0.2"
+    "@vitest/coverage-v8": "^4.1.10",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   }
 }
