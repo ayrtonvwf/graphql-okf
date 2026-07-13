@@ -13,9 +13,7 @@ describe("main", () => {
 
     main(["."]);
 
-    expect(errorSpy).toHaveBeenCalledWith(
-      "graphql-okf: not implemented yet (GOAL-M1 in progress)",
-    );
+    expect(errorSpy).toHaveBeenCalledWith("graphql-okf: not implemented yet (GOAL-M1 in progress)");
     expect(process.exitCode).toBe(1);
   });
 

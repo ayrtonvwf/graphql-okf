@@ -36,11 +36,16 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "lint": "biome ci .",
+    "format": "biome check --write .",
+    "knip": "knip"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.3",
     "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^4.1.10",
+    "knip": "^6.26.0",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   }
