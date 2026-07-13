@@ -18,6 +18,17 @@
   "author": "ayrtonvwf",
   "type": "module",
   "packageManager": "pnpm@10.14.0",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
   "bin": {
     "graphql-okf": "./dist/cli.js"
   },
@@ -39,14 +50,22 @@
     "coverage": "vitest run --coverage",
     "lint": "biome ci .",
     "format": "biome check --write .",
-    "knip": "knip"
+    "knip": "knip",
+    "build": "tsup",
+    "prepack": "pnpm run build"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.3",
     "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^4.1.10",
     "knip": "^6.26.0",
-    "typescript": "^7.0.2",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.10"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }
