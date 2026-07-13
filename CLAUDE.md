@@ -10,13 +10,14 @@ and points CI agents at the skills they must follow.
 `graphql-okf` reads a GraphQL schema (SDL file or live introspection) and produces
 — and keeps up to date — a conformant Open Knowledge Format (OKF) bundle
 describing the API's interface. The full requirements live in
-`docs/northstar-specs/GOAL.md`; the tooling and process live in
-`docs/northstar-specs/SETUP.md`. When in doubt, those specs win over this file.
+`docs/northstar-specs/GOAL-M1.md` (and `GOAL-M2.md` for the next milestone); the
+tooling and process live in `docs/northstar-specs/SETUP.md`. When in doubt, those
+specs win over this file.
 
 - npm package name: **`graphql-okf`**. CLI command: **`graphql-okf`**.
 - Milestone 1 is **fully deterministic** — no LLM at runtime. The same schema MUST
   always produce the same bundle. Do not add runtime model calls, non-deterministic
-  ordering, or timestamp churn (see `GOAL-8.1`, `NG-6`).
+  ordering, or timestamp churn (see `M1/GOAL-8.1`, `M1/NG-6`).
 
 ## Stack
 
@@ -32,7 +33,7 @@ describing the API's interface. The full requirements live in
   Nothing outside it is part of the supported API.
 - **Naming scheme is the single source of truth.** The mapping from a schema
   element to a concept file path lives in `src/model/` and is consumed by both the
-  emitter and the reconciler. Never re-derive paths independently (see `GOAL-4.5`).
+  emitter and the reconciler. Never re-derive paths independently (see `M1/GOAL-4.5`).
 - **Determinism is load-bearing.** Re-running against an unchanged schema is a
   no-op: byte-identical paths, no content changes, no `log.md` entry.
 - **Coverage thresholds are enforced, not aspirational:** lines ≥ 90%, functions
@@ -41,7 +42,8 @@ describing the API's interface. The full requirements live in
 ## Running checks locally
 
 - Install: `pnpm install --frozen-lockfile`
-- Test + coverage: `pnpm run coverage`
+- Test (fast, no coverage): `pnpm test` (watch: `pnpm run test:watch`)
+- Test + coverage (the enforced gate): `pnpm run coverage`
 - Lint + format check: `pnpm run lint`
 - Auto-format: `pnpm run format`
 - Type check: `pnpm run typecheck`
@@ -67,7 +69,7 @@ no such hook**, so when you are asked (e.g. via an issue tagged `@claude` or
      its test. Do not backfill tests after the fact.
    - the plan-execution skill — work through the plan **one task at a time**, and
      run each task's stated verification step before moving to the next.
-3. **Respect determinism (`GOAL-8.1`, `NG-6`).** No runtime LLM calls, no
+3. **Respect determinism (`M1/GOAL-8.1`, `M1/NG-6`).** No runtime LLM calls, no
    nondeterministic iteration order, no wall-clock-dependent output beyond the
    ISO-8601 timestamps the spec defines.
 4. **Validate before opening the PR.** Run `pnpm run coverage`, `pnpm run lint`,

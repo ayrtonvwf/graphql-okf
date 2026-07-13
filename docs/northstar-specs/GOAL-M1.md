@@ -243,11 +243,14 @@ following. These are named here so they are not smuggled in:
   LLM-assisted enrichment of descriptions is a Milestone 2 concern.
 - `NG-6` — **No LLM inference at runtime.** All M1 output is a deterministic,
   mechanical function of the schema. The same source MUST always produce the same
-  bundle. This is required by `GOAL-6.2` (no invented information), `GOAL-6.3`
-  (faithful, non-paraphrased doc-strings), `GOAL-4.2` (byte-identical paths), and
-  `GOAL-8.1` (idempotent no-op re-runs) — all of which non-deterministic
-  generation would violate. AI is used to *build* graphql-okf (see `SETUP.md`), not
-  to run it.
+  bundle, byte-for-byte, with the sole exception of the ISO-8601 `timestamp`
+  values defined in `GOAL-5.2` on a concept's first emission. Every other byte —
+  paths, ordering, body content — is a pure function of the schema. Re-runs
+  against an existing bundle are fully identical, timestamps included (`GOAL-8.1`).
+  This is required by `GOAL-6.2` (no invented information), `GOAL-6.3` (faithful,
+  non-paraphrased doc-strings), `GOAL-4.2` (byte-identical paths), and `GOAL-8.1`
+  (idempotent no-op re-runs) — all of which non-deterministic generation would
+  violate. AI is used to *build* graphql-okf (see `SETUP.md`), not to run it.
 
 ---
 

@@ -63,7 +63,9 @@ without disruption, but does NOT introduce a monorepo prematurely.
 ```
 graphql-okf/
 ├── src/
-│   ├── index.ts            # The public API. The ONLY intended entry point.
+│   ├── index.ts            # The public API. The ONLY intended library entry point.
+│   ├── cli.ts              # CLI entry (bin: graphql-okf → dist/cli.js). A thin
+│   │                       #   wrapper over src/index.ts; not part of the public API.
 │   ├── ingest/             # Schema loading (SDL file, introspection endpoint)
 │   ├── model/              # Internal concept model + naming scheme
 │   ├── emit/               # OKF bundle emitter
@@ -124,7 +126,10 @@ nobody reads.
 - `SETUP-4.5` — A corpus of **fixture GraphQL schemas** (small SDL files plus at
   least one introspection JSON) MUST live in the repo and back the emitter and
   reconciler tests. Golden-file bundles (expected emitter output) are the
-  preferred assertion mechanism for emitter tests.
+  preferred assertion mechanism for emitter tests. Because the `timestamp` field
+  is wall-clock on first emission (`GOAL-M1.md` `GOAL-5.2`, `NG-6`), golden-file
+  comparisons MUST normalize/mask timestamps so a fixture assertion is stable
+  across runs; every other byte is compared verbatim.
 
 ---
 
@@ -168,7 +173,10 @@ is a deliverable.
 
 **Requirements**
 
-- `SETUP-6.1` — The build MUST emit ESM and CJS outputs plus type declarations.
+- `SETUP-6.1` — The build MUST emit ESM and CJS outputs plus type declarations
+  for the library entry (`src/index.ts`), and MUST additionally bundle the CLI
+  entry (`src/cli.ts`) to `dist/cli.js` for the `bin`. The CLI is a wrapper over
+  the public API and MUST NOT export new surface (`SETUP-3.1` still holds).
 - `SETUP-6.2` — `package.json` MUST declare correct `exports`, `main`, `module`,
   and `types` fields so both ESM and CJS consumers resolve correctly.
 - `SETUP-6.3` — CI MUST run the build and fail if it errors or if declarations
@@ -400,8 +408,10 @@ M1 setup is complete when all of the following hold:
 
 - `DOD-S-1` — A fresh clone reaches a working dev environment with one install
   command, using pinned Node and pnpm.
-- `DOD-S-2` — `pnpm test` runs Vitest with coverage and enforces the §4.3
-  thresholds against the fixture corpus.
+- `DOD-S-2` — `pnpm run coverage` runs Vitest with the v8 provider and enforces
+  the §4.3 thresholds against the fixture corpus; `pnpm test` runs the same suite
+  without coverage for the fast local loop, and `pnpm run test:watch` provides
+  watch mode (§4.1).
 - `DOD-S-3` — `biome ci`, `tsc --noEmit`, the build, and knip all run clean
   locally and in CI.
 - `DOD-S-4` — CI runs all five jobs on PRs and on `main`, with **test** and

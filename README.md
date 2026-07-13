@@ -51,9 +51,9 @@ federation, resolvers, or backend behavior — those are later milestones.
 
 ## Specs
 
-The full M1 specification lives in [`docs/northstar-specs/`](docs/northstar-specs/):
+The specifications live in [`docs/northstar-specs/`](docs/northstar-specs/):
 
-- [`GOAL-M1.md`](docs/northstar-specs/GOAL-M1.md) — what M1 delivers (functional requirements).
+- [`GOAL-M1.md`](docs/northstar-specs/GOAL-M1.md) — what M1 delivers (functional requirements). The current focus.
 - [`GOAL-M2.md`](docs/northstar-specs/GOAL-M2.md) — the M2 LLM-enrichment milestone (planned).
 - [`SETUP.md`](docs/northstar-specs/SETUP.md) — the tooling and infrastructure required
   to build it.
