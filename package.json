@@ -1,0 +1,34 @@
+{
+  "name": "graphql-okf",
+  "version": "0.0.0",
+  "description": "Generate and maintain an Open Knowledge Format (OKF) bundle from a GraphQL schema",
+  "keywords": [
+    "okf",
+    "open-knowledge-format",
+    "graphql",
+    "introspection",
+    "sdl",
+    "schema",
+    "knowledge-base",
+    "ai-agents",
+    "documentation",
+    "codegen"
+  ],
+  "license": "MIT",
+  "author": "ayrtonvwf",
+  "type": "module",
+  "bin": {
+    "graphql-okf": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "next"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
