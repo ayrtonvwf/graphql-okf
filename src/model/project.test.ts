@@ -7,6 +7,7 @@ import type {
   InputObjectTypeNode,
   InterfaceTypeNode,
   ObjectTypeNode,
+  OperationNode,
   ScalarTypeNode,
   UnionTypeNode,
 } from "./ir.js";
@@ -254,5 +255,93 @@ describe("project unions, inputs, and default values", () => {
     const wrapper = conceptAt(ir.concepts, "types/objects/Wrapper.md") as ObjectTypeNode;
 
     expect(wrapper.fields[0]?.args[0]?.defaultValue).toBe("25");
+  });
+});
+
+describe("project root operations", () => {
+  it("emits one concept per root field under the matching directory", () => {
+    const ir = project(
+      loadedFrom(`
+        type User { id: ID! }
+        type Query { user(id: ID!): User, users: [User!]! }
+        type Mutation { createUser(name: String!): User }
+        type Subscription { userChanged: User }
+      `),
+    );
+
+    const user = conceptAt(ir.concepts, "queries/user.md") as OperationNode;
+    expect(user.kind).toBe("query");
+    expect(user.args.map((arg) => arg.name)).toEqual(["id"]);
+    expect(user.type).toEqual({ wrappers: [], name: "User", path: "types/objects/User.md" });
+
+    expect(conceptAt(ir.concepts, "queries/users.md").kind).toBe("query");
+    expect(conceptAt(ir.concepts, "mutations/createUser.md").kind).toBe("mutation");
+    expect(conceptAt(ir.concepts, "subscriptions/userChanged.md").kind).toBe("subscription");
+  });
+
+  it("does not emit root operation types as object concepts", () => {
+    const ir = project(loadedFrom("type Query { hello: String }"));
+
+    expect(ir.concepts.some((concept) => concept.path === "types/objects/Query.md")).toBe(false);
+    // Strengthened: the brief's assertion above only rules out that one specific path.
+    // Assert Query is absent as ANY object concept (by kind+name), so a bug that emitted
+    // it under some other path (e.g. due to a broken pathFor) would still be caught.
+    expect(
+      ir.concepts.some((concept) => concept.kind === "object" && concept.name === "Query"),
+    ).toBe(false);
+  });
+
+  it("honours non-default root type names", () => {
+    const ir = project(
+      loadedFrom(`
+        schema { query: RootQuery }
+        type RootQuery { hello: String }
+      `),
+    );
+
+    expect(conceptAt(ir.concepts, "queries/hello.md").kind).toBe("query");
+    expect(ir.concepts.some((concept) => concept.path === "types/objects/RootQuery.md")).toBe(
+      false,
+    );
+  });
+
+  it("links a reference to a root type at the operation directory index", () => {
+    const ir = project(
+      loadedFrom(`
+        type Query { hello: String, self: Query }
+      `),
+    );
+    const self = conceptAt(ir.concepts, "queries/self.md") as OperationNode;
+
+    expect(self.type).toEqual({ wrappers: [], name: "Query", path: "queries/index.md" });
+  });
+
+  it("preserves wrappers on a wrapped reference to a root type", () => {
+    // Strengthens the previous test: without this, an implementation could special-case
+    // only the bare (unwrapped) named-type lookup and still pass, e.g. by checking
+    // `type.name === root name` before unwrapping list/nonNull wrappers. Wrapping the
+    // self-reference forces the redirect to run on the unwrapped named type while still
+    // reporting the wrappers collected along the way, exactly like the non-root path.
+    const ir = project(
+      loadedFrom(`
+        type Query { self: Query!, selves: [Query!]! }
+      `),
+    );
+    const self = conceptAt(ir.concepts, "queries/self.md") as OperationNode;
+    const selves = conceptAt(ir.concepts, "queries/selves.md") as OperationNode;
+
+    expect(self.type).toEqual({ wrappers: ["nonNull"], name: "Query", path: "queries/index.md" });
+    expect(selves.type).toEqual({
+      wrappers: ["nonNull", "list", "nonNull"],
+      name: "Query",
+      path: "queries/index.md",
+    });
+  });
+
+  it("surfaces operation deprecation", () => {
+    const ir = project(loadedFrom('type Query { old: String @deprecated(reason: "gone") }'));
+    const old = conceptAt(ir.concepts, "queries/old.md") as OperationNode;
+
+    expect(old.deprecation).toEqual({ reason: "gone" });
   });
 });

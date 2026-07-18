@@ -31,12 +31,19 @@ import type {
   InputValueNode,
   InterfaceTypeNode,
   ObjectTypeNode,
+  OperationNode,
   ScalarTypeNode,
   SchemaIr,
   TypeRef,
   UnionTypeNode,
 } from "./ir.js";
-import { type ConceptKind, type ElementName, elementId, resolvePaths } from "./naming.js";
+import {
+  type ConceptKind,
+  DIRECTORY_BY_KIND,
+  type ElementName,
+  elementId,
+  resolvePaths,
+} from "./naming.js";
 
 function byName<T extends { name: string }>(items: readonly T[]): T[] {
   return [...items].sort((left, right) =>
@@ -66,7 +73,11 @@ function printDefaultValue(input: GraphQLArgument | GraphQLInputField): string |
   return ast === null || ast === undefined ? null : print(ast);
 }
 
-function toTypeRef(type: GraphQLType, pathFor: (element: ElementName) => string): TypeRef {
+function toTypeRef(
+  type: GraphQLType,
+  pathFor: (element: ElementName) => string,
+  rootDirectoryByTypeName: ReadonlyMap<string, string>,
+): TypeRef {
   const wrappers: ("nonNull" | "list")[] = [];
   let current: GraphQLType = type;
   while (isNonNullType(current) || isListType(current)) {
@@ -74,6 +85,12 @@ function toTypeRef(type: GraphQLType, pathFor: (element: ElementName) => string)
     current = current.ofType;
   }
   const named = current as GraphQLNamedType;
+
+  const rootDirectory = rootDirectoryByTypeName.get(named.name);
+  if (rootDirectory !== undefined) {
+    return { wrappers, name: named.name, path: `${rootDirectory}/index.md` };
+  }
+
   const kind = kindOfNamedType(named);
   if (kind === null) {
     throw new Error(`unsupported named type ${named.name}`);
@@ -81,11 +98,15 @@ function toTypeRef(type: GraphQLType, pathFor: (element: ElementName) => string)
   return { wrappers, name: named.name, path: pathFor({ kind, name: named.name }) };
 }
 
-function argNode(arg: GraphQLArgument, pathFor: (element: ElementName) => string): InputValueNode {
+function argNode(
+  arg: GraphQLArgument,
+  pathFor: (element: ElementName) => string,
+  rootDirectoryByTypeName: ReadonlyMap<string, string>,
+): InputValueNode {
   return {
     name: arg.name,
     description: arg.description ?? null,
-    type: toTypeRef(arg.type, pathFor),
+    type: toTypeRef(arg.type, pathFor, rootDirectoryByTypeName),
     defaultValue: printDefaultValue(arg),
     deprecation: deprecationOf(arg.deprecationReason),
     appliedDirectives: [],
@@ -95,11 +116,12 @@ function argNode(arg: GraphQLArgument, pathFor: (element: ElementName) => string
 function inputFieldNode(
   field: GraphQLInputField,
   pathFor: (element: ElementName) => string,
+  rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): InputValueNode {
   return {
     name: field.name,
     description: field.description ?? null,
-    type: toTypeRef(field.type, pathFor),
+    type: toTypeRef(field.type, pathFor, rootDirectoryByTypeName),
     defaultValue: printDefaultValue(field),
     deprecation: deprecationOf(field.deprecationReason),
     appliedDirectives: [],
@@ -109,12 +131,13 @@ function inputFieldNode(
 function fieldNode(
   field: GraphQLField<unknown, unknown>,
   pathFor: (element: ElementName) => string,
+  rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): FieldNode {
   return {
     name: field.name,
     description: field.description ?? null,
-    type: toTypeRef(field.type, pathFor),
-    args: byName(field.args).map((arg) => argNode(arg, pathFor)),
+    type: toTypeRef(field.type, pathFor, rootDirectoryByTypeName),
+    args: byName(field.args).map((arg) => argNode(arg, pathFor, rootDirectoryByTypeName)),
     deprecation: deprecationOf(field.deprecationReason),
     appliedDirectives: [],
   };
@@ -123,8 +146,23 @@ function fieldNode(
 export function project(loaded: LoadedSchema): SchemaIr {
   const { schema } = loaded;
 
+  const rootDirectoryByTypeName = new Map<string, string>();
+  const roots: {
+    readonly kind: OperationNode["kind"];
+    readonly type: GraphQLObjectType | null | undefined;
+  }[] = [
+    { kind: "query", type: schema.getQueryType() },
+    { kind: "mutation", type: schema.getMutationType() },
+    { kind: "subscription", type: schema.getSubscriptionType() },
+  ];
+  for (const root of roots) {
+    if (root.type) {
+      rootDirectoryByTypeName.set(root.type.name, DIRECTORY_BY_KIND[root.kind]);
+    }
+  }
+
   const namedTypes = Object.values(schema.getTypeMap()).filter(
-    (type) => !type.name.startsWith("__"),
+    (type) => !type.name.startsWith("__") && !rootDirectoryByTypeName.has(type.name),
   );
 
   const elements: ElementName[] = [];
@@ -132,6 +170,14 @@ export function project(loaded: LoadedSchema): SchemaIr {
     const kind = kindOfNamedType(type);
     if (kind !== null) {
       elements.push({ kind, name: type.name });
+    }
+  }
+  for (const root of roots) {
+    if (!root.type) {
+      continue;
+    }
+    for (const field of Object.values(root.type.getFields())) {
+      elements.push({ kind: root.kind, name: field.name });
     }
   }
 
@@ -169,7 +215,14 @@ export function project(loaded: LoadedSchema): SchemaIr {
     } else if (isEnumType(type)) {
       concepts.push(enumConcept(type, pathFor({ kind: "enum", name: type.name })));
     } else if (isObjectType(type)) {
-      concepts.push(objectConcept(type, pathFor({ kind: "object", name: type.name }), pathFor));
+      concepts.push(
+        objectConcept(
+          type,
+          pathFor({ kind: "object", name: type.name }),
+          pathFor,
+          rootDirectoryByTypeName,
+        ),
+      );
     } else if (isInterfaceType(type)) {
       concepts.push(
         interfaceConcept(
@@ -177,12 +230,45 @@ export function project(loaded: LoadedSchema): SchemaIr {
           pathFor({ kind: "interface", name: type.name }),
           pathFor,
           implementorsByInterface.get(type.name) ?? [],
+          rootDirectoryByTypeName,
         ),
       );
     } else if (isUnionType(type)) {
-      concepts.push(unionConcept(type, pathFor({ kind: "union", name: type.name }), pathFor));
+      concepts.push(
+        unionConcept(
+          type,
+          pathFor({ kind: "union", name: type.name }),
+          pathFor,
+          rootDirectoryByTypeName,
+        ),
+      );
     } else if (isInputObjectType(type)) {
-      concepts.push(inputConcept(type, pathFor({ kind: "input", name: type.name }), pathFor));
+      concepts.push(
+        inputConcept(
+          type,
+          pathFor({ kind: "input", name: type.name }),
+          pathFor,
+          rootDirectoryByTypeName,
+        ),
+      );
+    }
+  }
+
+  for (const root of roots) {
+    if (!root.type) {
+      continue;
+    }
+    for (const field of Object.values(root.type.getFields())) {
+      concepts.push({
+        kind: root.kind,
+        name: field.name,
+        path: pathFor({ kind: root.kind, name: field.name }),
+        description: field.description ?? null,
+        appliedDirectives: [],
+        args: byName(field.args).map((arg) => argNode(arg, pathFor, rootDirectoryByTypeName)),
+        type: toTypeRef(field.type, pathFor, rootDirectoryByTypeName),
+        deprecation: deprecationOf(field.deprecationReason),
+      });
     }
   }
 
@@ -223,6 +309,7 @@ function objectConcept(
   type: GraphQLObjectType,
   path: string,
   pathFor: (element: ElementName) => string,
+  rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): ObjectTypeNode {
   return {
     kind: "object",
@@ -230,8 +317,12 @@ function objectConcept(
     path,
     description: type.description ?? null,
     appliedDirectives: [],
-    fields: byName(Object.values(type.getFields())).map((field) => fieldNode(field, pathFor)),
-    interfaces: byName(type.getInterfaces()).map((each) => toTypeRef(each, pathFor)),
+    fields: byName(Object.values(type.getFields())).map((field) =>
+      fieldNode(field, pathFor, rootDirectoryByTypeName),
+    ),
+    interfaces: byName(type.getInterfaces()).map((each) =>
+      toTypeRef(each, pathFor, rootDirectoryByTypeName),
+    ),
   };
 }
 
@@ -240,6 +331,7 @@ function interfaceConcept(
   path: string,
   pathFor: (element: ElementName) => string,
   implementors: readonly ElementName[],
+  rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): InterfaceTypeNode {
   return {
     kind: "interface",
@@ -247,8 +339,12 @@ function interfaceConcept(
     path,
     description: type.description ?? null,
     appliedDirectives: [],
-    fields: byName(Object.values(type.getFields())).map((field) => fieldNode(field, pathFor)),
-    interfaces: byName(type.getInterfaces()).map((each) => toTypeRef(each, pathFor)),
+    fields: byName(Object.values(type.getFields())).map((field) =>
+      fieldNode(field, pathFor, rootDirectoryByTypeName),
+    ),
+    interfaces: byName(type.getInterfaces()).map((each) =>
+      toTypeRef(each, pathFor, rootDirectoryByTypeName),
+    ),
     implementedBy: byName([...implementors]).map((implementor) => ({
       wrappers: [],
       name: implementor.name,
@@ -261,6 +357,7 @@ function unionConcept(
   type: GraphQLUnionType,
   path: string,
   pathFor: (element: ElementName) => string,
+  rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): UnionTypeNode {
   return {
     kind: "union",
@@ -268,7 +365,9 @@ function unionConcept(
     path,
     description: type.description ?? null,
     appliedDirectives: [],
-    members: byName(type.getTypes()).map((member) => toTypeRef(member, pathFor)),
+    members: byName(type.getTypes()).map((member) =>
+      toTypeRef(member, pathFor, rootDirectoryByTypeName),
+    ),
   };
 }
 
@@ -276,6 +375,7 @@ function inputConcept(
   type: GraphQLInputObjectType,
   path: string,
   pathFor: (element: ElementName) => string,
+  rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): InputObjectTypeNode {
   return {
     kind: "input",
@@ -283,6 +383,8 @@ function inputConcept(
     path,
     description: type.description ?? null,
     appliedDirectives: [],
-    fields: byName(Object.values(type.getFields())).map((field) => inputFieldNode(field, pathFor)),
+    fields: byName(Object.values(type.getFields())).map((field) =>
+      inputFieldNode(field, pathFor, rootDirectoryByTypeName),
+    ),
   };
 }
