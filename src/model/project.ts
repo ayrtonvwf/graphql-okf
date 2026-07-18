@@ -1,6 +1,8 @@
 import {
+  type ASTNode,
   astFromValue,
   type GraphQLArgument,
+  type GraphQLDirective,
   type GraphQLEnumType,
   type GraphQLField,
   type GraphQLInputField,
@@ -18,13 +20,16 @@ import {
   isNonNullType,
   isObjectType,
   isScalarType,
+  isSpecifiedDirective,
   isSpecifiedScalarType,
   isUnionType,
   print,
 } from "graphql";
 import type { LoadedSchema } from "../source/types.js";
 import type {
+  AppliedDirective,
   ConceptNode,
+  DirectiveDefinitionNode,
   EnumTypeNode,
   FieldNode,
   InputObjectTypeNode,
@@ -53,6 +58,40 @@ function byName<T extends { name: string }>(items: readonly T[]): T[] {
 
 function deprecationOf(reason: string | null | undefined) {
   return reason === null || reason === undefined ? null : { reason };
+}
+
+const MODELED_AS_FIELDS = new Set(["deprecated", "specifiedBy"]);
+
+type HasAstNode = {
+  readonly astNode?: (ASTNode & { readonly directives?: readonly unknown[] }) | null;
+};
+
+function appliedDirectivesOf(
+  holder: HasAstNode,
+  pathFor: (element: ElementName) => string,
+): readonly AppliedDirective[] {
+  const nodes = holder.astNode?.directives;
+  if (!nodes) {
+    return [];
+  }
+  const applied: AppliedDirective[] = [];
+  for (const node of nodes as readonly {
+    name: { value: string };
+    arguments?: readonly { name: { value: string }; value: ASTNode }[];
+  }[]) {
+    const name = node.name.value;
+    if (MODELED_AS_FIELDS.has(name)) {
+      continue;
+    }
+    applied.push({
+      name,
+      path: pathFor({ kind: "directive", name }),
+      args: byName(
+        (node.arguments ?? []).map((arg) => ({ name: arg.name.value, value: print(arg.value) })),
+      ),
+    });
+  }
+  return byName(applied);
 }
 
 function kindOfNamedType(type: GraphQLNamedType): ConceptKind | null {
@@ -109,7 +148,7 @@ function argNode(
     type: toTypeRef(arg.type, pathFor, rootDirectoryByTypeName),
     defaultValue: printDefaultValue(arg),
     deprecation: deprecationOf(arg.deprecationReason),
-    appliedDirectives: [],
+    appliedDirectives: appliedDirectivesOf(arg, pathFor),
   };
 }
 
@@ -124,7 +163,7 @@ function inputFieldNode(
     type: toTypeRef(field.type, pathFor, rootDirectoryByTypeName),
     defaultValue: printDefaultValue(field),
     deprecation: deprecationOf(field.deprecationReason),
-    appliedDirectives: [],
+    appliedDirectives: appliedDirectivesOf(field, pathFor),
   };
 }
 
@@ -139,7 +178,7 @@ function fieldNode(
     type: toTypeRef(field.type, pathFor, rootDirectoryByTypeName),
     args: byName(field.args).map((arg) => argNode(arg, pathFor, rootDirectoryByTypeName)),
     deprecation: deprecationOf(field.deprecationReason),
-    appliedDirectives: [],
+    appliedDirectives: appliedDirectivesOf(field, pathFor),
   };
 }
 
@@ -180,6 +219,9 @@ export function project(loaded: LoadedSchema): SchemaIr {
       elements.push({ kind: root.kind, name: field.name });
     }
   }
+  for (const directive of schema.getDirectives()) {
+    elements.push({ kind: "directive", name: directive.name });
+  }
 
   const paths = resolvePaths(elements);
   const pathFor = (element: ElementName): string => {
@@ -211,9 +253,9 @@ export function project(loaded: LoadedSchema): SchemaIr {
 
   for (const type of namedTypes) {
     if (isScalarType(type)) {
-      concepts.push(scalarConcept(type, pathFor({ kind: "scalar", name: type.name })));
+      concepts.push(scalarConcept(type, pathFor({ kind: "scalar", name: type.name }), pathFor));
     } else if (isEnumType(type)) {
-      concepts.push(enumConcept(type, pathFor({ kind: "enum", name: type.name })));
+      concepts.push(enumConcept(type, pathFor({ kind: "enum", name: type.name }), pathFor));
     } else if (isObjectType(type)) {
       concepts.push(
         objectConcept(
@@ -264,7 +306,7 @@ export function project(loaded: LoadedSchema): SchemaIr {
         name: field.name,
         path: pathFor({ kind: root.kind, name: field.name }),
         description: field.description ?? null,
-        appliedDirectives: [],
+        appliedDirectives: appliedDirectivesOf(field, pathFor),
         args: byName(field.args).map((arg) => argNode(arg, pathFor, rootDirectoryByTypeName)),
         type: toTypeRef(field.type, pathFor, rootDirectoryByTypeName),
         deprecation: deprecationOf(field.deprecationReason),
@@ -272,35 +314,47 @@ export function project(loaded: LoadedSchema): SchemaIr {
     }
   }
 
+  for (const directive of schema.getDirectives()) {
+    concepts.push(directiveConcept(directive, pathFor, rootDirectoryByTypeName));
+  }
+
   concepts.sort((left, right) => (left.path < right.path ? -1 : left.path > right.path ? 1 : 0));
 
   return { resource: loaded.resource, origin: loaded.origin, concepts };
 }
 
-function scalarConcept(type: GraphQLScalarType, path: string): ScalarTypeNode {
+function scalarConcept(
+  type: GraphQLScalarType,
+  path: string,
+  pathFor: (element: ElementName) => string,
+): ScalarTypeNode {
   return {
     kind: "scalar",
     name: type.name,
     path,
     description: type.description ?? null,
-    appliedDirectives: [],
+    appliedDirectives: appliedDirectivesOf(type, pathFor),
     specifiedByUrl: type.specifiedByURL ?? null,
     isBuiltIn: isSpecifiedScalarType(type),
   };
 }
 
-function enumConcept(type: GraphQLEnumType, path: string): EnumTypeNode {
+function enumConcept(
+  type: GraphQLEnumType,
+  path: string,
+  pathFor: (element: ElementName) => string,
+): EnumTypeNode {
   return {
     kind: "enum",
     name: type.name,
     path,
     description: type.description ?? null,
-    appliedDirectives: [],
+    appliedDirectives: appliedDirectivesOf(type, pathFor),
     values: byName(type.getValues()).map((value) => ({
       name: value.name,
       description: value.description ?? null,
       deprecation: deprecationOf(value.deprecationReason),
-      appliedDirectives: [],
+      appliedDirectives: appliedDirectivesOf(value, pathFor),
     })),
   };
 }
@@ -316,7 +370,7 @@ function objectConcept(
     name: type.name,
     path,
     description: type.description ?? null,
-    appliedDirectives: [],
+    appliedDirectives: appliedDirectivesOf(type, pathFor),
     fields: byName(Object.values(type.getFields())).map((field) =>
       fieldNode(field, pathFor, rootDirectoryByTypeName),
     ),
@@ -338,7 +392,7 @@ function interfaceConcept(
     name: type.name,
     path,
     description: type.description ?? null,
-    appliedDirectives: [],
+    appliedDirectives: appliedDirectivesOf(type, pathFor),
     fields: byName(Object.values(type.getFields())).map((field) =>
       fieldNode(field, pathFor, rootDirectoryByTypeName),
     ),
@@ -364,7 +418,7 @@ function unionConcept(
     name: type.name,
     path,
     description: type.description ?? null,
-    appliedDirectives: [],
+    appliedDirectives: appliedDirectivesOf(type, pathFor),
     members: byName(type.getTypes()).map((member) =>
       toTypeRef(member, pathFor, rootDirectoryByTypeName),
     ),
@@ -382,9 +436,27 @@ function inputConcept(
     name: type.name,
     path,
     description: type.description ?? null,
-    appliedDirectives: [],
+    appliedDirectives: appliedDirectivesOf(type, pathFor),
     fields: byName(Object.values(type.getFields())).map((field) =>
       inputFieldNode(field, pathFor, rootDirectoryByTypeName),
     ),
+  };
+}
+
+function directiveConcept(
+  directive: GraphQLDirective,
+  pathFor: (element: ElementName) => string,
+  rootDirectoryByTypeName: ReadonlyMap<string, string>,
+): DirectiveDefinitionNode {
+  return {
+    kind: "directive",
+    name: directive.name,
+    path: pathFor({ kind: "directive", name: directive.name }),
+    description: directive.description ?? null,
+    appliedDirectives: [],
+    locations: [...directive.locations].sort(),
+    args: byName(directive.args).map((arg) => argNode(arg, pathFor, rootDirectoryByTypeName)),
+    isRepeatable: directive.isRepeatable,
+    isBuiltIn: isSpecifiedDirective(directive),
   };
 }

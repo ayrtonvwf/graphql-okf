@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { LoadedSchema } from "../source/types.js";
 import type {
   ConceptNode,
+  DirectiveDefinitionNode,
   EnumTypeNode,
   InputObjectTypeNode,
   InterfaceTypeNode,
@@ -343,5 +344,122 @@ describe("project root operations", () => {
     const old = conceptAt(ir.concepts, "queries/old.md") as OperationNode;
 
     expect(old.deprecation).toEqual({ reason: "gone" });
+  });
+});
+
+describe("project directives", () => {
+  it("emits directive definitions with locations and args", () => {
+    const ir = project(
+      loadedFrom(`
+        """Requires a role."""
+        directive @auth(requires: String! = "USER") repeatable on FIELD_DEFINITION | OBJECT
+        type Query { hello: String }
+      `),
+    );
+    const auth = conceptAt(ir.concepts, "directives/auth.md") as DirectiveDefinitionNode;
+
+    expect(auth.description).toBe("Requires a role.");
+    expect(auth.isRepeatable).toBe(true);
+    expect(auth.isBuiltIn).toBe(false);
+    expect(auth.locations).toEqual(["FIELD_DEFINITION", "OBJECT"]);
+    expect(auth.args[0]?.name).toBe("requires");
+    expect(auth.args[0]?.defaultValue).toBe('"USER"');
+  });
+
+  it("emits built-in directives flagged as such", () => {
+    const ir = project(loadedFrom("type Query { hello: String }"));
+    const deprecated = conceptAt(
+      ir.concepts,
+      "directives/deprecated.md",
+    ) as DirectiveDefinitionNode;
+
+    expect(deprecated.isBuiltIn).toBe(true);
+    // Strengthened: the brief's assertion above only checks isBuiltIn on one directive.
+    // Also assert a custom directive definition is flagged false and that appliedDirectives
+    // is always empty on directive definitions themselves (they can't carry directives),
+    // so a bug that always returns true or that copies applied directives onto the
+    // definition itself would still be caught.
+    expect(deprecated.appliedDirectives).toEqual([]);
+    const skip = conceptAt(ir.concepts, "directives/skip.md") as DirectiveDefinitionNode;
+    expect(skip.isBuiltIn).toBe(true);
+  });
+
+  it("records applied custom directives with printed argument values", () => {
+    const ir = project(
+      loadedFrom(`
+        directive @auth(requires: String!) on FIELD_DEFINITION | OBJECT
+        type User @auth(requires: "ADMIN") { id: ID! @auth(requires: "SELF") }
+        type Query { user: User }
+      `),
+    );
+    const user = conceptAt(ir.concepts, "types/objects/User.md") as ObjectTypeNode;
+
+    expect(user.appliedDirectives).toEqual([
+      { name: "auth", path: "directives/auth.md", args: [{ name: "requires", value: '"ADMIN"' }] },
+    ]);
+    expect(user.fields[0]?.appliedDirectives).toEqual([
+      { name: "auth", path: "directives/auth.md", args: [{ name: "requires", value: '"SELF"' }] },
+    ]);
+  });
+
+  it("excludes @deprecated and @specifiedBy from appliedDirectives", () => {
+    const ir = project(
+      loadedFrom(`
+        scalar DateTime @specifiedBy(url: "https://scalars.test/dt")
+        type User { old: String @deprecated(reason: "gone") }
+        type Query { user: User }
+      `),
+    );
+    const scalar = conceptAt(ir.concepts, "types/scalars/DateTime.md") as ScalarTypeNode;
+    const user = conceptAt(ir.concepts, "types/objects/User.md") as ObjectTypeNode;
+
+    expect(scalar.appliedDirectives).toEqual([]);
+    expect(scalar.specifiedByUrl).toBe("https://scalars.test/dt");
+    expect(user.fields[0]?.appliedDirectives).toEqual([]);
+    expect(user.fields[0]?.deprecation).toEqual({ reason: "gone" });
+  });
+
+  it("excludes @deprecated from appliedDirectives while keeping other applied directives", () => {
+    // Strengthens the previous test: a buggy implementation that always returns an empty
+    // appliedDirectives array (e.g. forgetting to read astNode.directives at all) would
+    // still pass the test above. Applying a second, non-modeled directive alongside
+    // @deprecated proves the filter removes @deprecated specifically rather than
+    // suppressing everything.
+    const ir = project(
+      loadedFrom(`
+        directive @audit on FIELD_DEFINITION
+        type User { old: String @deprecated(reason: "gone") @audit }
+        type Query { user: User }
+      `),
+    );
+    const user = conceptAt(ir.concepts, "types/objects/User.md") as ObjectTypeNode;
+
+    expect(user.fields[0]?.appliedDirectives).toEqual([
+      { name: "audit", path: "directives/audit.md", args: [] },
+    ]);
+  });
+
+  it("sorts applied directives by name", () => {
+    const ir = project(
+      loadedFrom(`
+        directive @zed on OBJECT
+        directive @alpha on OBJECT
+        type User @zed @alpha { id: ID! }
+        type Query { user: User }
+      `),
+    );
+    const user = conceptAt(ir.concepts, "types/objects/User.md") as ObjectTypeNode;
+
+    expect(user.appliedDirectives.map((applied) => applied.name)).toEqual(["alpha", "zed"]);
+    // Strengthened: the brief's assertion above only checks the resulting order, which a
+    // no-op implementation would also produce by accident if applied-directive AST order
+    // happened to match. Also assert the array element identities (not just names) to
+    // pin down the full shape after sorting, and applying in declaration order @zed then
+    // @alpha (the reverse of sorted order) makes the sort load-bearing: an implementation
+    // that merely preserves AST order would fail this.
+    expect(user.appliedDirectives).toEqual([
+      { name: "alpha", path: "directives/alpha.md", args: [] },
+      { name: "zed", path: "directives/zed.md", args: [] },
+    ]);
   });
 });
