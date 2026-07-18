@@ -347,7 +347,10 @@ branches ≥ 85%, statements ≥ 90%) apply unchanged.
 - Collision and reserved-name rules hold, and are proven order-independent.
 - The §5.3 equivalence assertion passes against the kitchen-sink fixture.
 - Projecting the same source twice yields deeply equal IR.
-- Every error code in §6 is reachable and tested.
+- Every error code in §6 is reachable and tested, except `NAME_HASH_COLLISION`,
+  which is a documented defensive guard against a hypothetical future change to
+  the suffix rule — unreachable for any legal GraphQL schema — and is excluded
+  from coverage accordingly.
 - All checks green: `pnpm run coverage`, `pnpm run lint`, `pnpm run typecheck`,
   `pnpm run build`, `pnpm run knip`.
 
