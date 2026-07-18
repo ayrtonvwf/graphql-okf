@@ -82,7 +82,7 @@ graphql-okf/
 ├── biome.json
 ├── tsconfig.json
 ├── vitest.config.ts
-├── tsup.config.ts
+├── tsdown.config.ts
 ├── lefthook.yml
 └── package.json
 ```
@@ -167,7 +167,7 @@ is a deliverable.
 
 | Concern | Choice |
 | --- | --- |
-| Bundler | tsup (or tsdown) |
+| Bundler | tsdown |
 | Output | Dual ESM + CJS, with `.d.ts` declarations |
 | Entry | `src/index.ts` |
 
@@ -175,7 +175,7 @@ is a deliverable.
 
 - `SETUP-6.1` — The build MUST emit ESM and CJS outputs plus type declarations
   for the library entry (`src/index.ts`), and MUST additionally bundle the CLI
-  entry (`src/cli.ts`) to `dist/cli.js` for the `bin`. The CLI is a wrapper over
+  entry (`src/cli.ts`) to `dist/cli.mjs` for the `bin`. The CLI is a wrapper over
   the public API and MUST NOT export new surface (`SETUP-3.1` still holds).
 - `SETUP-6.2` — `package.json` MUST declare correct `exports`, `main`, `module`,
   and `types` fields so both ESM and CJS consumers resolve correctly.
@@ -234,8 +234,15 @@ Required jobs:
   install (`pnpm install --frozen-lockfile`) so a drifting lockfile fails rather
   than silently resolving new versions. Runtime-independent jobs use Node 24; the
   Node version for matrixed jobs is supplied by the matrix (§8.6).
-- `SETUP-8.4` — `main` MUST require at least one approving review and MUST forbid
-  direct pushes; all changes land via PR.
+- `SETUP-8.4` — `main` MUST forbid direct pushes; all changes land via PR, and the
+  §8.2 checks MUST pass before merge. Approving-review count is **0 while the
+  repository has a single contributor** — GitHub does not permit self-approval, so
+  a non-zero requirement would either block all work or be routinely bypassed, and
+  a decorative gate is worse than an honest one. This requirement rises to **at
+  least one approving review** as soon as a second contributor can review. The
+  status checks, not the review, are the enforcement boundary for solo work
+  (§1.2). Admin bypass (`enforce_admins: false`) is retained as an emergency
+  escape hatch.
 - `SETUP-8.5` — CI MUST run on the commits Claude pushes (see §10.4). A PR whose
   checks did not run MUST NOT be mergeable.
 - `SETUP-8.6` — The **test** and **build** jobs MUST run as a matrix across
@@ -417,7 +424,7 @@ M1 setup is complete when all of the following hold:
 - `DOD-S-4` — CI runs all five jobs on PRs and on `main`, with **test** and
   **build** matrixed across Node 24 and Node 26; every expanded check (including
   both engines) is a required status check; `main` forbids direct pushes and
-  requires one review.
+  enforces the review policy in `SETUP-8.4`.
 - `DOD-S-5` — Pre-commit hooks install automatically and run lint + typecheck on
   staged files.
 - `DOD-S-6` — Both agent jobs (`@claude` → Sonnet 5, `@claude-opus` → Opus 4.8)
