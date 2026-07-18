@@ -68,11 +68,17 @@ describe("loadFromEndpoint", () => {
   });
 
   it("reports a non-2xx response as ENDPOINT_HTTP_ERROR including the status", async () => {
-    const fetch = respondWith({}, { status: 503 });
+    const fetch1 = respondWith({}, { status: 503 });
 
-    await expect(loadFromEndpoint("https://api.example.com/graphql", { fetch })).rejects.toThrow(
-      "503",
-    );
+    await expect(
+      loadFromEndpoint("https://api.example.com/graphql", { fetch: fetch1 }),
+    ).rejects.toThrow("503");
+
+    const fetch2 = respondWith({}, { status: 503 });
+
+    await expect(
+      codeOf(loadFromEndpoint("https://api.example.com/graphql", { fetch: fetch2 })),
+    ).resolves.toBe("ENDPOINT_HTTP_ERROR");
   });
 
   it("reports a non-JSON body as ENDPOINT_INVALID_RESPONSE", async () => {
