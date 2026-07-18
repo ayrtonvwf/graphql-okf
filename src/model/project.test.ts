@@ -94,14 +94,22 @@ describe("project object and interface types", () => {
   it("records wrappers outermost-first and links to the named type", () => {
     const ir = project(
       loadedFrom(`
-        type User { tags: [[String!]]! }
+        type User { tags: [[String!]]!, label: [String]! }
         type Query { user: User }
       `),
     );
     const user = conceptAt(ir.concepts, "types/objects/User.md") as ObjectTypeNode;
 
-    expect(user.fields[0]?.type).toEqual({
+    expect(user.fields.find((field) => field.name === "tags")?.type).toEqual({
       wrappers: ["nonNull", "list", "list", "nonNull"],
+      name: "String",
+      path: "types/scalars/String.md",
+    });
+    // [String]! is asymmetric under reversal, unlike [[String!]]! above: this
+    // catches an implementation that records wrappers innermost-first instead
+    // of outermost-first.
+    expect(user.fields.find((field) => field.name === "label")?.type).toEqual({
+      wrappers: ["nonNull", "list"],
       name: "String",
       path: "types/scalars/String.md",
     });
@@ -154,8 +162,8 @@ describe("project object and interface types", () => {
     const ir = project(
       loadedFrom(`
         interface Node { id: ID! }
-        interface Entity implements Node { id: ID! }
         type User implements Node & Entity { id: ID! }
+        interface Entity implements Node { id: ID! }
         type Query { user: User }
       `),
     );
