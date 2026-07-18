@@ -14,13 +14,11 @@ import type {
 } from "./ir.js";
 import { project } from "./project.js";
 
-// biome-ignore lint/suspicious/noExportsInTest: reused by later tasks' tests in this same file
-export function loadedFrom(sdl: string): LoadedSchema {
+function loadedFrom(sdl: string): LoadedSchema {
   return { schema: buildSchema(sdl), resource: "test.graphql", origin: "sdl" };
 }
 
-// biome-ignore lint/suspicious/noExportsInTest: reused by later tasks' tests in this same file
-export function conceptAt(concepts: readonly ConceptNode[], path: string): ConceptNode {
+function conceptAt(concepts: readonly ConceptNode[], path: string): ConceptNode {
   const found = concepts.find((concept) => concept.path === path);
   if (found === undefined) {
     throw new Error(`no concept at ${path}; have ${concepts.map((c) => c.path).join(", ")}`);
