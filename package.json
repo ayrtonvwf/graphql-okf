@@ -16,6 +16,14 @@
   ],
   "license": "MIT",
   "author": "ayrtonvwf",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ayrtonvwf/graphql-okf.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ayrtonvwf/graphql-okf/issues"
+  },
+  "homepage": "https://github.com/ayrtonvwf/graphql-okf#readme",
   "type": "module",
   "packageManager": "pnpm@10.14.0",
   "main": "./dist/index.cjs",
@@ -35,7 +43,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "graphql-okf": "./dist/cli.mjs"
+    "graphql-okf": "dist/cli.mjs"
   },
   "files": [
     "dist",
