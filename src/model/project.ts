@@ -1,13 +1,32 @@
 import {
+  type GraphQLArgument,
   type GraphQLEnumType,
+  type GraphQLField,
+  type GraphQLInterfaceType,
   type GraphQLNamedType,
+  type GraphQLObjectType,
   type GraphQLScalarType,
+  type GraphQLType,
   isEnumType,
+  isInterfaceType,
+  isListType,
+  isNonNullType,
+  isObjectType,
   isScalarType,
   isSpecifiedScalarType,
 } from "graphql";
 import type { LoadedSchema } from "../source/types.js";
-import type { ConceptNode, EnumTypeNode, ScalarTypeNode, SchemaIr } from "./ir.js";
+import type {
+  ConceptNode,
+  EnumTypeNode,
+  FieldNode,
+  InputValueNode,
+  InterfaceTypeNode,
+  ObjectTypeNode,
+  ScalarTypeNode,
+  SchemaIr,
+  TypeRef,
+} from "./ir.js";
 import { type ConceptKind, type ElementName, elementId, resolvePaths } from "./naming.js";
 
 function byName<T extends { name: string }>(items: readonly T[]): T[] {
@@ -23,7 +42,49 @@ function deprecationOf(reason: string | null | undefined) {
 function kindOfNamedType(type: GraphQLNamedType): ConceptKind | null {
   if (isScalarType(type)) return "scalar";
   if (isEnumType(type)) return "enum";
+  if (isObjectType(type)) return "object";
+  if (isInterfaceType(type)) return "interface";
   return null;
+}
+
+function toTypeRef(type: GraphQLType, pathFor: (element: ElementName) => string): TypeRef {
+  const wrappers: ("nonNull" | "list")[] = [];
+  let current: GraphQLType = type;
+  while (isNonNullType(current) || isListType(current)) {
+    wrappers.push(isNonNullType(current) ? "nonNull" : "list");
+    current = current.ofType;
+  }
+  const named = current as GraphQLNamedType;
+  const kind = kindOfNamedType(named);
+  if (kind === null) {
+    throw new Error(`unsupported named type ${named.name}`);
+  }
+  return { wrappers, name: named.name, path: pathFor({ kind, name: named.name }) };
+}
+
+function argNode(arg: GraphQLArgument, pathFor: (element: ElementName) => string): InputValueNode {
+  return {
+    name: arg.name,
+    description: arg.description ?? null,
+    type: toTypeRef(arg.type, pathFor),
+    defaultValue: null,
+    deprecation: deprecationOf(arg.deprecationReason),
+    appliedDirectives: [],
+  };
+}
+
+function fieldNode(
+  field: GraphQLField<unknown, unknown>,
+  pathFor: (element: ElementName) => string,
+): FieldNode {
+  return {
+    name: field.name,
+    description: field.description ?? null,
+    type: toTypeRef(field.type, pathFor),
+    args: byName(field.args).map((arg) => argNode(arg, pathFor)),
+    deprecation: deprecationOf(field.deprecationReason),
+    appliedDirectives: [],
+  };
 }
 
 export function project(loaded: LoadedSchema): SchemaIr {
@@ -50,6 +111,23 @@ export function project(loaded: LoadedSchema): SchemaIr {
     return path;
   };
 
+  const implementorsByInterface = new Map<string, ElementName[]>();
+  for (const type of namedTypes) {
+    if (!isObjectType(type) && !isInterfaceType(type)) {
+      continue;
+    }
+    const kind: ConceptKind = isObjectType(type) ? "object" : "interface";
+    for (const implemented of type.getInterfaces()) {
+      const bucket = implementorsByInterface.get(implemented.name);
+      const entry: ElementName = { kind, name: type.name };
+      if (bucket === undefined) {
+        implementorsByInterface.set(implemented.name, [entry]);
+      } else {
+        bucket.push(entry);
+      }
+    }
+  }
+
   const concepts: ConceptNode[] = [];
 
   for (const type of namedTypes) {
@@ -57,6 +135,17 @@ export function project(loaded: LoadedSchema): SchemaIr {
       concepts.push(scalarConcept(type, pathFor({ kind: "scalar", name: type.name })));
     } else if (isEnumType(type)) {
       concepts.push(enumConcept(type, pathFor({ kind: "enum", name: type.name })));
+    } else if (isObjectType(type)) {
+      concepts.push(objectConcept(type, pathFor({ kind: "object", name: type.name }), pathFor));
+    } else if (isInterfaceType(type)) {
+      concepts.push(
+        interfaceConcept(
+          type,
+          pathFor({ kind: "interface", name: type.name }),
+          pathFor,
+          implementorsByInterface.get(type.name) ?? [],
+        ),
+      );
     }
   }
 
@@ -89,6 +178,44 @@ function enumConcept(type: GraphQLEnumType, path: string): EnumTypeNode {
       description: value.description ?? null,
       deprecation: deprecationOf(value.deprecationReason),
       appliedDirectives: [],
+    })),
+  };
+}
+
+function objectConcept(
+  type: GraphQLObjectType,
+  path: string,
+  pathFor: (element: ElementName) => string,
+): ObjectTypeNode {
+  return {
+    kind: "object",
+    name: type.name,
+    path,
+    description: type.description ?? null,
+    appliedDirectives: [],
+    fields: byName(Object.values(type.getFields())).map((field) => fieldNode(field, pathFor)),
+    interfaces: byName(type.getInterfaces()).map((each) => toTypeRef(each, pathFor)),
+  };
+}
+
+function interfaceConcept(
+  type: GraphQLInterfaceType,
+  path: string,
+  pathFor: (element: ElementName) => string,
+  implementors: readonly ElementName[],
+): InterfaceTypeNode {
+  return {
+    kind: "interface",
+    name: type.name,
+    path,
+    description: type.description ?? null,
+    appliedDirectives: [],
+    fields: byName(Object.values(type.getFields())).map((field) => fieldNode(field, pathFor)),
+    interfaces: byName(type.getInterfaces()).map((each) => toTypeRef(each, pathFor)),
+    implementedBy: byName([...implementors]).map((implementor) => ({
+      wrappers: [],
+      name: implementor.name,
+      path: pathFor(implementor),
     })),
   };
 }
