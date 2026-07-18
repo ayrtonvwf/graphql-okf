@@ -83,5 +83,8 @@
       "esbuild",
       "lefthook"
     ]
+  },
+  "dependencies": {
+    "graphql": "^16.14.2"
   }
 }
