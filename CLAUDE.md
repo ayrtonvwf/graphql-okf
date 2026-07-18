@@ -23,9 +23,10 @@ specs win over this file.
 
 - Node.js **24** (floor; `engines.node` is `>=24`). CI also tests on **26**.
 - TypeScript, `strict: true`, ESM-first. Package manager: **pnpm** (pinned).
-- Test runner: **Vitest** (+ v8 coverage). Lint + format: **Biome** (with a narrow
-  type-aware ESLint layer only where Biome can't express a rule). Dead code:
-  **knip**. Build: **tsup** (dual ESM/CJS + declarations). Git hooks: **lefthook**.
+- Test runner: **Vitest** (+ v8 coverage). Lint + format: **Biome** (no ESLint layer
+  today; `SETUP-5.3` permits a narrow type-aware one if a rule ever needs it). Dead
+  code: **knip**. Build: **tsdown** (dual ESM/CJS + declarations). Git hooks:
+  **lefthook**.
 
 ## Key conventions
 
