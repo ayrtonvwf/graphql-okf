@@ -4,9 +4,11 @@ import type { LoadedSchema } from "../source/types.js";
 import type {
   ConceptNode,
   EnumTypeNode,
+  InputObjectTypeNode,
   InterfaceTypeNode,
   ObjectTypeNode,
   ScalarTypeNode,
+  UnionTypeNode,
 } from "./ir.js";
 import { project } from "./project.js";
 
@@ -174,5 +176,83 @@ describe("project object and interface types", () => {
       "types/interfaces/Entity.md",
       "types/objects/User.md",
     ]);
+  });
+});
+
+describe("project unions, inputs, and default values", () => {
+  it("links a union to each of its members, sorted", () => {
+    const ir = project(
+      loadedFrom(`
+        type Post { id: ID! }
+        type Comment { id: ID! }
+        union Content = Post | Comment
+        type Query { content: Content }
+      `),
+    );
+    const content = conceptAt(ir.concepts, "types/unions/Content.md") as UnionTypeNode;
+
+    expect(content.members).toEqual([
+      { wrappers: [], name: "Comment", path: "types/objects/Comment.md" },
+      { wrappers: [], name: "Post", path: "types/objects/Post.md" },
+    ]);
+  });
+
+  it("projects input object fields with links", () => {
+    const ir = project(
+      loadedFrom(`
+        input OrderInput { sku: String!, quantity: Int }
+        type Query { order(input: OrderInput): String }
+      `),
+    );
+    const input = conceptAt(ir.concepts, "types/inputs/OrderInput.md") as InputObjectTypeNode;
+
+    expect(input.fields.map((field) => field.name)).toEqual(["quantity", "sku"]);
+    expect(input.fields[1]?.type).toEqual({
+      wrappers: ["nonNull"],
+      name: "String",
+      path: "types/scalars/String.md",
+    });
+  });
+
+  it("prints default values as GraphQL literals", () => {
+    const ir = project(
+      loadedFrom(`
+        enum Role { ADMIN VIEWER }
+        input Filter {
+          limit: Int = 10
+          label: String = "all"
+          active: Boolean = true
+          role: Role = VIEWER
+          tags: [String!] = ["a", "b"]
+          missing: String
+        }
+        type Query { search(filter: Filter): String }
+      `),
+    );
+    const filter = conceptAt(ir.concepts, "types/inputs/Filter.md") as InputObjectTypeNode;
+    const defaults = Object.fromEntries(
+      filter.fields.map((field) => [field.name, field.defaultValue]),
+    );
+
+    expect(defaults).toEqual({
+      active: "true",
+      label: '"all"',
+      limit: "10",
+      missing: null,
+      role: "VIEWER",
+      tags: '["a", "b"]',
+    });
+  });
+
+  it("prints default values on field arguments too", () => {
+    const ir = project(
+      loadedFrom(`
+        type Query { search(limit: Int = 25): String }
+        type Wrapper { search(limit: Int = 25): String }
+      `),
+    );
+    const wrapper = conceptAt(ir.concepts, "types/objects/Wrapper.md") as ObjectTypeNode;
+
+    expect(wrapper.fields[0]?.args[0]?.defaultValue).toBe("25");
   });
 });

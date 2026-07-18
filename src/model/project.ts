@@ -1,31 +1,40 @@
 import {
+  astFromValue,
   type GraphQLArgument,
   type GraphQLEnumType,
   type GraphQLField,
+  type GraphQLInputField,
+  type GraphQLInputObjectType,
   type GraphQLInterfaceType,
   type GraphQLNamedType,
   type GraphQLObjectType,
   type GraphQLScalarType,
   type GraphQLType,
+  type GraphQLUnionType,
   isEnumType,
+  isInputObjectType,
   isInterfaceType,
   isListType,
   isNonNullType,
   isObjectType,
   isScalarType,
   isSpecifiedScalarType,
+  isUnionType,
+  print,
 } from "graphql";
 import type { LoadedSchema } from "../source/types.js";
 import type {
   ConceptNode,
   EnumTypeNode,
   FieldNode,
+  InputObjectTypeNode,
   InputValueNode,
   InterfaceTypeNode,
   ObjectTypeNode,
   ScalarTypeNode,
   SchemaIr,
   TypeRef,
+  UnionTypeNode,
 } from "./ir.js";
 import { type ConceptKind, type ElementName, elementId, resolvePaths } from "./naming.js";
 
@@ -44,7 +53,17 @@ function kindOfNamedType(type: GraphQLNamedType): ConceptKind | null {
   if (isEnumType(type)) return "enum";
   if (isObjectType(type)) return "object";
   if (isInterfaceType(type)) return "interface";
+  if (isUnionType(type)) return "union";
+  if (isInputObjectType(type)) return "input";
   return null;
+}
+
+function printDefaultValue(input: GraphQLArgument | GraphQLInputField): string | null {
+  if (input.defaultValue === undefined) {
+    return null;
+  }
+  const ast = astFromValue(input.defaultValue, input.type);
+  return ast === null || ast === undefined ? null : print(ast);
 }
 
 function toTypeRef(type: GraphQLType, pathFor: (element: ElementName) => string): TypeRef {
@@ -67,8 +86,22 @@ function argNode(arg: GraphQLArgument, pathFor: (element: ElementName) => string
     name: arg.name,
     description: arg.description ?? null,
     type: toTypeRef(arg.type, pathFor),
-    defaultValue: null,
+    defaultValue: printDefaultValue(arg),
     deprecation: deprecationOf(arg.deprecationReason),
+    appliedDirectives: [],
+  };
+}
+
+function inputFieldNode(
+  field: GraphQLInputField,
+  pathFor: (element: ElementName) => string,
+): InputValueNode {
+  return {
+    name: field.name,
+    description: field.description ?? null,
+    type: toTypeRef(field.type, pathFor),
+    defaultValue: printDefaultValue(field),
+    deprecation: deprecationOf(field.deprecationReason),
     appliedDirectives: [],
   };
 }
@@ -146,6 +179,10 @@ export function project(loaded: LoadedSchema): SchemaIr {
           implementorsByInterface.get(type.name) ?? [],
         ),
       );
+    } else if (isUnionType(type)) {
+      concepts.push(unionConcept(type, pathFor({ kind: "union", name: type.name }), pathFor));
+    } else if (isInputObjectType(type)) {
+      concepts.push(inputConcept(type, pathFor({ kind: "input", name: type.name }), pathFor));
     }
   }
 
@@ -217,5 +254,35 @@ function interfaceConcept(
       name: implementor.name,
       path: pathFor(implementor),
     })),
+  };
+}
+
+function unionConcept(
+  type: GraphQLUnionType,
+  path: string,
+  pathFor: (element: ElementName) => string,
+): UnionTypeNode {
+  return {
+    kind: "union",
+    name: type.name,
+    path,
+    description: type.description ?? null,
+    appliedDirectives: [],
+    members: byName(type.getTypes()).map((member) => toTypeRef(member, pathFor)),
+  };
+}
+
+function inputConcept(
+  type: GraphQLInputObjectType,
+  path: string,
+  pathFor: (element: ElementName) => string,
+): InputObjectTypeNode {
+  return {
+    kind: "input",
+    name: type.name,
+    path,
+    description: type.description ?? null,
+    appliedDirectives: [],
+    fields: byName(Object.values(type.getFields())).map((field) => inputFieldNode(field, pathFor)),
   };
 }
