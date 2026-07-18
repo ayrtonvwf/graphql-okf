@@ -15,8 +15,7 @@
     "declaration": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
-    "outDir": "dist",
-    "rootDir": "src"
+    "outDir": "dist"
   },
   "include": ["src", "test"]
 }
