@@ -79,6 +79,29 @@ describe("renderObjectBody", () => {
       '  - Argument **`code`**: [`String!`](../scalars/String.md) = `"+1"` — Calling code.',
     );
   });
+
+  it("renders an applied directive's arguments inline", () => {
+    const node: ObjectTypeNode = {
+      ...country,
+      appliedDirectives: [
+        {
+          name: "cacheControl",
+          path: "directives/cacheControl.md",
+          args: [{ name: "maxAge", value: "60" }],
+        },
+      ],
+    };
+    const out = renderObjectBody(node);
+    expect(out).toContain(
+      "Directives: [`@cacheControl`](../../directives/cacheControl.md)(maxAge: 60).",
+    );
+  });
+
+  it("omits the Fields section when a type has no fields", () => {
+    const node: ObjectTypeNode = { ...country, fields: [] };
+    const out = renderObjectBody(node);
+    expect(out).not.toContain("## Fields");
+  });
 });
 
 describe("renderInterfaceBody", () => {
@@ -292,5 +315,67 @@ describe("renderBody dispatcher", () => {
   it("dispatches each kind", () => {
     const concept: ConceptNode = languages;
     expect(renderBody(concept)).toContain("# languages");
+  });
+
+  it("dispatches every other concept kind to its renderer", () => {
+    const union: UnionTypeNode = {
+      kind: "union",
+      name: "SearchResult",
+      path: "types/unions/SearchResult.md",
+      description: null,
+      appliedDirectives: [],
+      members: [],
+    };
+    const enumNode: EnumTypeNode = {
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: null,
+      appliedDirectives: [],
+      values: [],
+    };
+    const input: InputObjectTypeNode = {
+      kind: "input",
+      name: "LanguageFilterInput",
+      path: "types/inputs/LanguageFilterInput.md",
+      description: null,
+      appliedDirectives: [],
+      fields: [],
+    };
+    const scalar: ScalarTypeNode = {
+      kind: "scalar",
+      name: "String",
+      path: "types/scalars/String.md",
+      description: null,
+      appliedDirectives: [],
+      specifiedByUrl: null,
+      isBuiltIn: true,
+    };
+    const mutation: OperationNode = { ...languages, kind: "mutation", name: "addLanguage" };
+    const subscription: OperationNode = {
+      ...languages,
+      kind: "subscription",
+      name: "languageAdded",
+    };
+    const directive: DirectiveDefinitionNode = {
+      kind: "directive",
+      name: "deprecated",
+      path: "directives/deprecated.md",
+      description: null,
+      appliedDirectives: [],
+      locations: [],
+      isRepeatable: false,
+      isBuiltIn: true,
+      args: [],
+    };
+
+    expect(renderBody(country)).toContain("# Country");
+    expect(renderBody(union)).toContain("# SearchResult");
+    expect(renderBody(enumNode)).toContain("# Role");
+    expect(renderBody(input)).toContain("# LanguageFilterInput");
+    expect(renderBody(scalar)).toContain("# String");
+    expect(renderBody(mutation)).toContain("# addLanguage");
+    expect(renderBody(subscription)).toContain("# languageAdded");
+    expect(renderBody(directive)).toContain("# @deprecated");
   });
 });

@@ -18,10 +18,18 @@ describe("renderDirectoryIndex", () => {
     );
   });
 
-  it("omits the summary dash when a summary is empty", () => {
+  it("keeps the summary dash when a directory label has a known summary", () => {
     const out = renderDirectoryIndex("Types", [
       { label: "objects/", link: "objects/index.md", summary: "Object types" },
     ]);
     expect(out).toContain("- [objects/](objects/index.md) — Object types");
+  });
+
+  it("omits the summary dash when a summary is empty", () => {
+    const out = renderDirectoryIndex("Types", [
+      { label: "widgets/", link: "widgets/index.md", summary: "" },
+    ]);
+    expect(out).toContain("- [widgets/](widgets/index.md)");
+    expect(out).not.toContain("—");
   });
 });

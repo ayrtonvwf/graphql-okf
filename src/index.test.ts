@@ -27,4 +27,18 @@ describe("createOkfBundle", () => {
     const rootIndex = await readFile(join(outDir, "index.md"), "utf8");
     expect(rootIndex).toContain("- [types/](types/index.md)");
   });
+
+  it("defaults the timestamp to the current wall-clock time when `now` is omitted", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "okf-e2e-"));
+    const sdlPath = join(workspace, "schema.graphql");
+    const { writeFile } = await import("node:fs/promises");
+    await writeFile(sdlPath, "type Query { hello: String }");
+    const outDir = join(workspace, "bundle");
+
+    await createOkfBundle({ source: { kind: "sdl", path: sdlPath }, outDir });
+
+    const hello = await readFile(join(outDir, "queries/hello.md"), "utf8");
+    const match = hello.match(/^timestamp: (.+)$/m);
+    expect(match?.[1]).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+  });
 });
