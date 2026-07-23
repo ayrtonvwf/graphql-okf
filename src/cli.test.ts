@@ -1,39 +1,76 @@
+import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { main } from "./cli.js";
-import * as api from "./index.js";
+import { main, parseArgs } from "./cli.js";
+import type { GraphqlOkfError } from "./errors.js";
+import * as indexModule from "./index.js";
+
+describe("parseArgs", () => {
+  it("treats an http(s) argument as an endpoint source", () => {
+    expect(parseArgs(["https://api.test/graphql", "--out", "bundle"])).toEqual({
+      source: { kind: "endpoint", url: "https://api.test/graphql" },
+      outDir: "bundle",
+    });
+  });
+
+  it("treats any other argument as an SDL path", () => {
+    expect(parseArgs(["./schema.graphql", "--out", "bundle"])).toEqual({
+      source: { kind: "sdl", path: "./schema.graphql" },
+      outDir: "bundle",
+    });
+  });
+
+  it("rejects a missing --out", () => {
+    const code = (() => {
+      try {
+        parseArgs(["./schema.graphql"]);
+      } catch (error) {
+        return (error as GraphqlOkfError).code;
+      }
+      return "no-error";
+    })();
+    expect(code).toBe("CLI_USAGE");
+  });
+});
 
 describe("main", () => {
   afterEach(() => {
-    vi.restoreAllMocks();
     process.exitCode = undefined;
+    vi.restoreAllMocks();
   });
 
-  it("reports the underlying error and sets a non-zero exit code", () => {
+  it("writes a bundle and leaves exitCode untouched on success", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "okf-cli-"));
+    const sdlPath = join(workspace, "schema.graphql");
+    await writeFile(sdlPath, "type Query { hello: String }");
+    const outDir = join(workspace, "bundle");
+
+    await main([sdlPath, "--out", outDir]);
+
+    expect(process.exitCode).toBeUndefined();
+    const index = await readFile(join(outDir, "index.md"), "utf8");
+    expect(index).toContain("# API interface");
+  });
+
+  it("prints the message and sets exitCode=1 when an Error is thrown", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    main(["."]);
+    await main([]);
 
-    expect(errorSpy).toHaveBeenCalledWith("graphql-okf: not implemented yet (GOAL-M1 in progress)");
     expect(process.exitCode).toBe(1);
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Usage: graphql-okf <sdl-path-or-endpoint-url> --out <dir>",
+    );
   });
 
-  it("defaults the output directory when none is given", () => {
+  it("stringifies a non-Error failure and sets exitCode=1", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(indexModule, "createOkfBundle").mockRejectedValueOnce("boom");
 
-    main([]);
+    await main(["./schema.graphql", "--out", "bundle"]);
 
-    expect(errorSpy).toHaveBeenCalled();
-  });
-
-  it("stringifies a non-Error throw", () => {
-    vi.spyOn(api, "createOkfBundle").mockImplementation(() => {
-      throw "boom";
-    });
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-    main(["."]);
-
+    expect(process.exitCode).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith("boom");
-    expect(process.exitCode).toBe(1);
   });
 });

@@ -1,14 +1,20 @@
+import { buildBundle } from "./emit/bundle.js";
+import { writeBundle } from "./emit/write.js";
 import type { SchemaIr } from "./model/ir.js";
 import { project } from "./model/project.js";
 import { loadSchema } from "./source/index.js";
 import type { SourceSpec } from "./source/types.js";
 
-export interface OkfBundleOptions {
+export interface CreateOkfBundleOptions {
+  readonly source: SourceSpec;
   readonly outDir: string;
+  readonly now?: string;
 }
 
-export function createOkfBundle(_options: OkfBundleOptions): never {
-  throw new Error("graphql-okf: not implemented yet (GOAL-M1 in progress)");
+export async function createOkfBundle(options: CreateOkfBundleOptions): Promise<void> {
+  const ir = await readSchema(options.source);
+  const timestamp = options.now ?? new Date().toISOString();
+  await writeBundle(buildBundle(ir, timestamp), options.outDir);
 }
 
 export type { GraphqlOkfErrorCode } from "./errors.js";
