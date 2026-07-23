@@ -1,12 +1,15 @@
 import type {
   AppliedDirective,
+  ConceptNode,
   Deprecation,
+  DirectiveDefinitionNode,
   EnumTypeNode,
   FieldNode,
   InputObjectTypeNode,
   InputValueNode,
   InterfaceTypeNode,
   ObjectTypeNode,
+  OperationNode,
   ScalarTypeNode,
   TypeRef,
   UnionTypeNode,
@@ -180,6 +183,75 @@ export function renderScalarBody(node: ScalarTypeNode): string {
     note,
     "",
   ].join("\n");
+}
+
+function deprecatedBlock(deprecation: Deprecation | null): string[] {
+  if (deprecation === null) {
+    return [];
+  }
+  return deprecation.reason === null
+    ? ["", "**Deprecated**"]
+    : ["", `**Deprecated: ${deprecation.reason}**`];
+}
+
+function argumentsSection(args: readonly InputValueNode[], fromPath: string): string[] {
+  if (args.length === 0) {
+    return [];
+  }
+  return ["", "## Arguments", "", ...args.map((value) => bulletForInputValue(value, fromPath))];
+}
+
+export function renderOperationBody(node: OperationNode): string {
+  return [
+    `# ${node.name}`,
+    ...descriptionLine(node.description),
+    ...deprecatedBlock(node.deprecation),
+    ...directivesLine(node.appliedDirectives, node.path),
+    "",
+    `**Returns** ${typeLink(node.path, node.type)}`,
+    ...argumentsSection(node.args, node.path),
+    "",
+  ].join("\n");
+}
+
+export function renderDirectiveBody(node: DirectiveDefinitionNode): string {
+  const locations =
+    node.locations.length === 0
+      ? []
+      : ["", `Locations: ${node.locations.map((location) => `\`${location}\``).join(", ")}.`];
+  const repeatable = node.isRepeatable ? ["", "Repeatable."] : [];
+  return [
+    `# @${node.name}`,
+    ...descriptionLine(node.description),
+    ...directivesLine(node.appliedDirectives, node.path),
+    ...locations,
+    ...repeatable,
+    ...argumentsSection(node.args, node.path),
+    "",
+  ].join("\n");
+}
+
+export function renderBody(concept: ConceptNode): string {
+  switch (concept.kind) {
+    case "object":
+      return renderObjectBody(concept);
+    case "interface":
+      return renderInterfaceBody(concept);
+    case "union":
+      return renderUnionBody(concept);
+    case "enum":
+      return renderEnumBody(concept);
+    case "input":
+      return renderInputBody(concept);
+    case "scalar":
+      return renderScalarBody(concept);
+    case "query":
+    case "mutation":
+    case "subscription":
+      return renderOperationBody(concept);
+    case "directive":
+      return renderDirectiveBody(concept);
+  }
 }
 
 export {

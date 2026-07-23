@@ -1,18 +1,24 @@
 import { describe, expect, it } from "vitest";
 import type {
+  ConceptNode,
+  DirectiveDefinitionNode,
   EnumTypeNode,
   InputObjectTypeNode,
   InterfaceTypeNode,
   ObjectTypeNode,
+  OperationNode,
   ScalarTypeNode,
   TypeRef,
   UnionTypeNode,
 } from "../../model/ir.js";
 import {
+  renderBody,
+  renderDirectiveBody,
   renderEnumBody,
   renderInputBody,
   renderInterfaceBody,
   renderObjectBody,
+  renderOperationBody,
   renderScalarBody,
   renderUnionBody,
 } from "./body.js";
@@ -203,5 +209,88 @@ describe("renderScalarBody", () => {
       isBuiltIn: true,
     };
     expect(renderScalarBody(node)).toContain("Built-in GraphQL scalar.");
+  });
+});
+
+const languages: OperationNode = {
+  kind: "query",
+  name: "languages",
+  path: "queries/languages.md",
+  description: "Returns every language.",
+  appliedDirectives: [],
+  args: [
+    {
+      name: "filter",
+      description: "Narrows results.",
+      type: {
+        name: "LanguageFilterInput",
+        path: "types/inputs/LanguageFilterInput.md",
+        wrappers: [],
+      },
+      defaultValue: null,
+      deprecation: null,
+      appliedDirectives: [],
+    },
+  ],
+  type: {
+    name: "Language",
+    path: "types/objects/Language.md",
+    wrappers: ["nonNull", "list", "nonNull"],
+  },
+  deprecation: null,
+};
+
+describe("renderOperationBody", () => {
+  it("renders returns and arguments with links resolving across directories", () => {
+    const out = renderOperationBody(languages);
+    expect(out).toContain("# languages");
+    expect(out).toContain("**Returns** [`[Language!]!`](../types/objects/Language.md)");
+    expect(out).toContain("## Arguments");
+    expect(out).toContain(
+      "- **`filter`**: [`LanguageFilterInput`](../types/inputs/LanguageFilterInput.md) — Narrows results.",
+    );
+  });
+
+  it("surfaces operation-level deprecation", () => {
+    const out = renderOperationBody({ ...languages, deprecation: { reason: "use list" } });
+    expect(out).toContain("**Deprecated: use list**");
+  });
+});
+
+describe("renderDirectiveBody", () => {
+  it("renders an @-prefixed heading, locations, and arguments", () => {
+    const node: DirectiveDefinitionNode = {
+      kind: "directive",
+      name: "deprecated",
+      path: "directives/deprecated.md",
+      description: "Marks an element as no longer supported.",
+      appliedDirectives: [],
+      locations: ["ARGUMENT_DEFINITION", "ENUM_VALUE", "FIELD_DEFINITION"],
+      isRepeatable: false,
+      isBuiltIn: true,
+      args: [
+        {
+          name: "reason",
+          description: "Why.",
+          type: { name: "String", path: "types/scalars/String.md", wrappers: [] },
+          defaultValue: '"No longer supported"',
+          deprecation: null,
+          appliedDirectives: [],
+        },
+      ],
+    };
+    const out = renderDirectiveBody(node);
+    expect(out).toContain("# @deprecated");
+    expect(out).toContain("Locations: `ARGUMENT_DEFINITION`, `ENUM_VALUE`, `FIELD_DEFINITION`.");
+    expect(out).toContain(
+      '- **`reason`**: [`String`](../types/scalars/String.md) = `"No longer supported"` — Why.',
+    );
+  });
+});
+
+describe("renderBody dispatcher", () => {
+  it("dispatches each kind", () => {
+    const concept: ConceptNode = languages;
+    expect(renderBody(concept)).toContain("# languages");
   });
 });
