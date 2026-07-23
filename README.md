@@ -3,28 +3,33 @@
 Generate and maintain an [Open Knowledge Format (OKF)][okf] bundle from a GraphQL
 API's schema.
 
-> **Status: pre-alpha.** This is an early work in progress. The published package
-> is a `0.0.0` placeholder under the `next` tag — nothing is usable yet. This
-> README describes the intended project so the vision is committed before the
-> build exists. Expect everything below to be aspirational until the milestones
-> land.
+> **Status: pre-alpha, but generation works.** The published package is still a
+> `0.0.0` placeholder under the `next` tag. One-shot bundle generation — from an
+> SDL file or a live introspection endpoint, via a library call or the CLI — is
+> implemented and tested end to end (see [Usage](#usage) and
+> [Examples](#examples) below). Reconciling an existing bundle against an
+> evolved schema (keeping it up to date across re-runs) is not implemented yet;
+> see [Status & roadmap](#status--roadmap).
 
-## What it will do
+## What it does
 
 `graphql-okf` reads a GraphQL API's public interface — from an SDL file or a live
 introspection endpoint — and produces a conformant OKF bundle describing it: a
 directory of cross-linked Markdown files with YAML frontmatter that any human or
 AI agent can read without special tooling.
 
-Crucially, it doesn't just generate once. It **keeps the bundle up to date**:
-re-running against an evolved schema reconciles the existing bundle — adding new
-concepts, updating changed ones, marking removed ones, preserving any
+Eventually it won't just generate once. It will **keep the bundle up to date**:
+re-running against an evolved schema will reconcile the existing bundle — adding
+new concepts, updating changed ones, marking removed ones, preserving any
 human-authored notes, and recording the change in a log — so the bundle stays a
-faithful, versioned map of the interface over time.
+faithful, versioned map of the interface over time. Today, generation is
+one-shot: `graphql-okf` refuses to write into a non-empty output directory
+rather than overwrite or merge, and reconciliation is planned but not yet built.
 
 Milestone 1 is **fully deterministic**: the bundle is a mechanical function of the
 schema, with no LLM involved at runtime, so the same source always produces the
-same output.
+same output (aside from the generation timestamp recorded in each file's
+frontmatter).
 
 The first beneficiary is anyone integrating against the API who wants an accurate,
 agent-readable map of what it exposes and how its types relate.
@@ -93,14 +98,83 @@ so a bundle ships in any git repo, renders on GitHub, and is read (and written) 
 agents without an SDK. GraphQL's introspectable, strongly-typed schema maps
 naturally onto that model, and no GraphQL-to-OKF converter exists yet.
 
+## Usage
+
+### CLI
+
+```sh
+graphql-okf <sdl-path-or-endpoint-url> --out <dir>
+```
+
+The source is detected automatically: an `http://`/`https://` argument is
+queried live via introspection; anything else is read as a local SDL file
+path. `--out` must be a directory that doesn't exist yet or is empty —
+`graphql-okf` writes a fresh bundle and never overwrites existing files.
+
+```sh
+# From a live endpoint (introspection)
+graphql-okf https://countries.trevorblades.com/graphql --out okf/countries-api
+
+# From a local SDL file
+graphql-okf ./schema.graphql --out okf/my-api
+```
+
+### Library
+
+```ts
+import { createOkfBundle } from "graphql-okf";
+
+await createOkfBundle({
+  source: { kind: "endpoint", url: "https://countries.trevorblades.com/graphql" },
+  // or: { kind: "sdl", path: "./schema.graphql" }
+  outDir: "okf/countries-api",
+});
+```
+
+## Examples
+
+Two bundles generated with the current build are checked into this repo /
+documented here:
+
+- [`okf/countries-api/`](okf/countries-api/) — the full generated bundle for
+  the small, public [Countries GraphQL API][countries-api], committed as a
+  real, browsable example. Start at
+  [`okf/countries-api/index.md`](okf/countries-api/index.md).
+- `okf/gitlab-api/` — generated from GitLab's public GraphQL API
+  (`https://gitlab.com/api/graphql`). At ~5,000 files and ~21 MB, it's too
+  large to check into this repo, so it's gitignored here; reproduce it
+  locally with:
+
+  ```sh
+  graphql-okf https://gitlab.com/api/graphql --out okf/gitlab-api
+  ```
+
+Both were generated with the exact CLI invocations shown in [Usage](#usage)
+above, against each API's live introspection endpoint.
+
 ## Status & roadmap
 
-Nothing here is usable yet. Follow the milestones above; M1 is being built first.
-Installation, usage, and API docs will be added to this README as they become
-real.
+M1 ("frontend-only utility", see [Milestones](#milestones)) is split into four
+sub-projects; the first two are done, the other two are not started:
+
+- ✅ **Concept model & naming scheme** — projects a GraphQL schema into an
+  in-memory IR with the deterministic file path for every concept baked in.
+- ✅ **Emitter** — turns that IR into the OKF bundle on disk (what's
+  documented in [Usage](#usage) above): per-concept Markdown files with
+  frontmatter, cross-links, and directory indexes, plus the CLI.
+- ⬜ **Reconciler** — re-running against an evolved schema updates an
+  existing bundle in place (add/update/remove concepts, preserve
+  human-authored edits, record a change log) instead of only writing into an
+  empty directory.
+- ⬜ **Delivery surface** — the rest of the CLI/library surface: request
+  headers for authenticated introspection, config files, `--force`/overwrite
+  semantics, archiving previous bundle versions.
+
+Follow the [milestones](#milestones) above for what comes after M1.
 
 ## License
 
 [MIT](LICENSE) © ayrtonvwf
 
 [okf]: https://github.com/GoogleCloudPlatform/knowledge-catalog
+[countries-api]: https://github.com/trevorblades/countries
