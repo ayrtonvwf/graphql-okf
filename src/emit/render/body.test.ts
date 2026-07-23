@@ -1,6 +1,21 @@
 import { describe, expect, it } from "vitest";
-import type { InterfaceTypeNode, ObjectTypeNode, TypeRef } from "../../model/ir.js";
-import { renderInterfaceBody, renderObjectBody } from "./body.js";
+import type {
+  EnumTypeNode,
+  InputObjectTypeNode,
+  InterfaceTypeNode,
+  ObjectTypeNode,
+  ScalarTypeNode,
+  TypeRef,
+  UnionTypeNode,
+} from "../../model/ir.js";
+import {
+  renderEnumBody,
+  renderInputBody,
+  renderInterfaceBody,
+  renderObjectBody,
+  renderScalarBody,
+  renderUnionBody,
+} from "./body.js";
 
 const scalarRef = (name: string, wrappers: TypeRef["wrappers"] = []): TypeRef => ({
   name,
@@ -85,5 +100,108 @@ describe("renderInterfaceBody", () => {
     expect(out).toContain("# Node");
     expect(out).toContain("Implemented by [`Country`](../objects/Country.md).");
     expect(out).toContain("- **`id`** — [`ID!`](../scalars/ID.md)");
+  });
+});
+
+describe("renderUnionBody", () => {
+  it("lists member types as links", () => {
+    const node: UnionTypeNode = {
+      kind: "union",
+      name: "SearchResult",
+      path: "types/unions/SearchResult.md",
+      description: null,
+      appliedDirectives: [],
+      members: [
+        { name: "Country", path: "types/objects/Country.md", wrappers: [] },
+        { name: "Continent", path: "types/objects/Continent.md", wrappers: [] },
+      ],
+    };
+    const out = renderUnionBody(node);
+    expect(out).toContain("## Members");
+    expect(out).toContain("- [`Country`](../objects/Country.md)");
+    expect(out).toContain("- [`Continent`](../objects/Continent.md)");
+  });
+});
+
+describe("renderEnumBody", () => {
+  it("lists values with descriptions and deprecation", () => {
+    const node: EnumTypeNode = {
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: "Access level.",
+      appliedDirectives: [],
+      values: [
+        { name: "ADMIN", description: null, deprecation: null, appliedDirectives: [] },
+        { name: "OWNER", description: "Full access.", deprecation: null, appliedDirectives: [] },
+        {
+          name: "VIEWER",
+          description: null,
+          deprecation: { reason: "use READER" },
+          appliedDirectives: [],
+        },
+      ],
+    };
+    const out = renderEnumBody(node);
+    expect(out).toContain("## Values");
+    expect(out).toContain("- **`ADMIN`**");
+    expect(out).toContain("- **`OWNER`** — Full access.");
+    expect(out).toContain("- **`VIEWER`** (deprecated: use READER)");
+  });
+});
+
+describe("renderInputBody", () => {
+  it("lists input fields with defaults", () => {
+    const node: InputObjectTypeNode = {
+      kind: "input",
+      name: "LanguageFilterInput",
+      path: "types/inputs/LanguageFilterInput.md",
+      description: null,
+      appliedDirectives: [],
+      fields: [
+        {
+          name: "limit",
+          description: null,
+          type: { name: "Int", path: "types/scalars/Int.md", wrappers: [] },
+          defaultValue: "10",
+          deprecation: null,
+          appliedDirectives: [],
+        },
+      ],
+    };
+    const out = renderInputBody(node);
+    expect(out).toContain("## Fields");
+    expect(out).toContain("- **`limit`**: [`Int`](../scalars/Int.md) = `10`");
+  });
+});
+
+describe("renderScalarBody", () => {
+  it("notes a custom scalar and its specifiedBy url", () => {
+    const node: ScalarTypeNode = {
+      kind: "scalar",
+      name: "DateTime",
+      path: "types/scalars/DateTime.md",
+      description: "An ISO-8601 timestamp.",
+      appliedDirectives: [],
+      specifiedByUrl: "https://scalars.test/datetime",
+      isBuiltIn: false,
+    };
+    const out = renderScalarBody(node);
+    expect(out).toContain("# DateTime");
+    expect(out).toContain("An ISO-8601 timestamp.");
+    expect(out).toContain("Custom scalar. Specified by <https://scalars.test/datetime>.");
+  });
+
+  it("notes a built-in scalar", () => {
+    const node: ScalarTypeNode = {
+      kind: "scalar",
+      name: "String",
+      path: "types/scalars/String.md",
+      description: null,
+      appliedDirectives: [],
+      specifiedByUrl: null,
+      isBuiltIn: true,
+    };
+    expect(renderScalarBody(node)).toContain("Built-in GraphQL scalar.");
   });
 });

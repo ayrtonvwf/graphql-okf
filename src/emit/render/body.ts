@@ -1,11 +1,15 @@
 import type {
   AppliedDirective,
   Deprecation,
+  EnumTypeNode,
   FieldNode,
+  InputObjectTypeNode,
   InputValueNode,
   InterfaceTypeNode,
   ObjectTypeNode,
+  ScalarTypeNode,
   TypeRef,
+  UnionTypeNode,
 } from "../../model/ir.js";
 import { relLink, typeLink } from "./links.js";
 
@@ -106,6 +110,74 @@ export function renderInterfaceBody(node: InterfaceTypeNode): string {
     ...implementsLine(node.interfaces, node.path),
     ...implementedBy,
     ...fieldsSection(node.fields, node.path),
+    "",
+  ].join("\n");
+}
+
+export function renderUnionBody(node: UnionTypeNode): string {
+  const members =
+    node.members.length === 0
+      ? []
+      : ["", "## Members", "", ...node.members.map((ref) => `- ${typeLink(node.path, ref)}`)];
+  return [
+    `# ${node.name}`,
+    ...descriptionLine(node.description),
+    ...directivesLine(node.appliedDirectives, node.path),
+    ...members,
+    "",
+  ].join("\n");
+}
+
+export function renderEnumBody(node: EnumTypeNode): string {
+  const values =
+    node.values.length === 0
+      ? []
+      : [
+          "",
+          "## Values",
+          "",
+          ...node.values.map(
+            (value) =>
+              `- **\`${value.name}\`**${descSuffix(value.description)}${deprecatedSuffix(
+                value.deprecation,
+              )}`,
+          ),
+        ];
+  return [
+    `# ${node.name}`,
+    ...descriptionLine(node.description),
+    ...directivesLine(node.appliedDirectives, node.path),
+    ...values,
+    "",
+  ].join("\n");
+}
+
+export function renderInputBody(node: InputObjectTypeNode): string {
+  const fields =
+    node.fields.length === 0
+      ? []
+      : ["", "## Fields", "", ...node.fields.map((value) => bulletForInputValue(value, node.path))];
+  return [
+    `# ${node.name}`,
+    ...descriptionLine(node.description),
+    ...directivesLine(node.appliedDirectives, node.path),
+    ...fields,
+    "",
+  ].join("\n");
+}
+
+export function renderScalarBody(node: ScalarTypeNode): string {
+  const note = node.isBuiltIn
+    ? "Built-in GraphQL scalar."
+    : node.specifiedByUrl === null
+      ? "Custom scalar."
+      : `Custom scalar. Specified by <${node.specifiedByUrl}>.`;
+  return [
+    `# ${node.name}`,
+    ...descriptionLine(node.description),
+    ...directivesLine(node.appliedDirectives, node.path),
+    "",
+    note,
     "",
   ].join("\n");
 }
