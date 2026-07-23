@@ -1,0 +1,72 @@
+directive @auth(requires: Role! = VIEWER) repeatable on OBJECT | FIELD_DEFINITION
+
+"An ISO-8601 timestamp."
+scalar DateTime @specifiedBy(url: "https://scalars.test/datetime")
+
+"Access level."
+enum Role {
+  "Full control."
+  OWNER
+  ADMIN
+  VIEWER @deprecated(reason: "use READER")
+}
+
+interface Node {
+  id: ID!
+}
+
+interface Entity implements Node {
+  id: ID!
+  createdAt: DateTime!
+}
+
+"A person."
+type User implements Node & Entity @auth(requires: ADMIN) {
+  id: ID!
+  createdAt: DateTime!
+  email: String! @auth(requires: OWNER)
+  nickname: String @deprecated
+  tags: [[String!]]!
+  role: Role!
+}
+
+type Post implements Node {
+  id: ID!
+  author: User!
+}
+
+union Content = User | Post
+
+input Filter {
+  limit: Int = 10
+  label: String = "all"
+  active: Boolean = true
+  role: Role = VIEWER
+  tags: [String!] = ["a", "b"]
+  missing: String
+}
+
+"A type whose name shadows the reserved index.md."
+type index {
+  value: String
+}
+
+type User_case {
+  value: String
+}
+
+schema {
+  query: RootQuery
+  mutation: RootMutation
+}
+
+type RootQuery {
+  node(id: ID!): Node
+  content(filter: Filter): [Content!]!
+  me: User
+}
+
+type RootMutation {
+  createUser(email: String!, role: Role = VIEWER): User!
+  deleteUser(id: ID!): Boolean @deprecated(reason: "use archiveUser")
+}
