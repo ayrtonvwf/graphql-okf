@@ -253,12 +253,3 @@ export function renderBody(concept: ConceptNode): string {
       return renderDirectiveBody(concept);
   }
 }
-
-export {
-  bulletForInputValue,
-  defaultSuffix,
-  deprecatedSuffix,
-  descriptionLine,
-  descSuffix,
-  directivesLine,
-};

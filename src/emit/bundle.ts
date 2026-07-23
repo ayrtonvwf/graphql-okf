@@ -79,14 +79,6 @@ export function buildBundle(ir: SchemaIr, timestamp: string): ReadonlyMap<string
       filesByDir.set(dir, []);
     }
     filesByDir.get(dir)?.push(concept);
-    // Also register the dir as a child of the root when it is top-level.
-    const parent = posix.dirname(dir);
-    if (parent === "." || parent === "") {
-      if (!childDirs.has(".")) {
-        childDirs.set(".", new Set());
-      }
-      childDirs.get(".")?.add(dir);
-    }
   }
 
   // One index.md per directory.
