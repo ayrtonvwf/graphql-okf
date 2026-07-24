@@ -1,5 +1,6 @@
 import { buildSchema } from "graphql";
 import { describe, expect, it } from "vitest";
+import type { SchemaIr } from "../model/ir.js";
 import { project } from "../model/project.js";
 import type { LoadedSchema } from "../source/types.js";
 import { buildBundle } from "./bundle.js";
@@ -8,14 +9,26 @@ import { assembleFile, EMPTY_HUMAN } from "./render/seam.js";
 
 const TS = "2026-07-23T12:00:00.000Z";
 
-function bundleFrom(sdl: string): ReadonlyMap<string, FileParts> {
+function irFrom(sdl: string): SchemaIr {
   const loaded: LoadedSchema = {
     schema: buildSchema(sdl),
     resource: "test.graphql",
     origin: "sdl",
   };
-  return buildBundle(project(loaded), TS);
+  return project(loaded);
 }
+
+function bundleFrom(sdl: string): ReadonlyMap<string, FileParts> {
+  return buildBundle(irFrom(sdl), TS);
+}
+
+const irWithOneObject = irFrom(`
+  "An ISO country."
+  type Country { code: ID! }
+  type Query { countries: [Country!]! }
+`);
+
+const irWithNoInputs = irFrom("type Query { hello: String }");
 
 function assembled(bundle: ReadonlyMap<string, FileParts>, path: string): string {
   const parts = bundle.get(path);
@@ -84,5 +97,35 @@ describe("buildBundle", () => {
         expect(bundle.has(resolved), `${fromPath} -> ${target} (${resolved})`).toBe(true);
       }
     }
+  });
+});
+
+describe("buildBundle with tombstones", () => {
+  it("lists a tombstoned concept in its directory index, marked removed", () => {
+    const bundle = buildBundle(irWithOneObject, "2026-07-24T00:00:00.000Z", [
+      { path: "types/objects/LegacyOrder.md", title: "LegacyOrder" },
+    ]);
+
+    const index = bundle.get("types/objects/index.md");
+    expect(index?.generated).toContain("- [LegacyOrder](LegacyOrder.md) — (removed)");
+  });
+
+  it("keeps a directory index alive when only tombstones remain in it", () => {
+    const bundle = buildBundle(irWithNoInputs, "2026-07-24T00:00:00.000Z", [
+      { path: "types/inputs/OldInput.md", title: "OldInput" },
+    ]);
+
+    expect(bundle.get("types/inputs/index.md")?.generated).toContain(
+      "- [OldInput](OldInput.md) — (removed)",
+    );
+    expect(bundle.get("types/index.md")?.generated).toContain("- [inputs/](inputs/index.md)");
+  });
+
+  it("does not write a concept file for a tombstone", () => {
+    const bundle = buildBundle(irWithOneObject, "2026-07-24T00:00:00.000Z", [
+      { path: "types/objects/LegacyOrder.md", title: "LegacyOrder" },
+    ]);
+
+    expect(bundle.has("types/objects/LegacyOrder.md")).toBe(false);
   });
 });

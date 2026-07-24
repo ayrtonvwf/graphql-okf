@@ -44,7 +44,16 @@ function sortByLabel(entries: IndexEntry[]): IndexEntry[] {
   );
 }
 
-export function buildBundle(ir: SchemaIr, timestamp: string): ReadonlyMap<string, FileParts> {
+export interface TombstoneEntry {
+  readonly path: string;
+  readonly title: string;
+}
+
+export function buildBundle(
+  ir: SchemaIr,
+  timestamp: string,
+  tombstones: readonly TombstoneEntry[] = [],
+): ReadonlyMap<string, FileParts> {
   const bundle = new Map<string, FileParts>();
 
   // Concept files.
@@ -82,6 +91,18 @@ export function buildBundle(ir: SchemaIr, timestamp: string): ReadonlyMap<string
     filesByDir.get(dir)?.push(concept);
   }
 
+  const tombstonesByDir = new Map<string, TombstoneEntry[]>();
+  for (const tombstone of tombstones) {
+    const dir = posix.dirname(tombstone.path);
+    ensureDir(dir);
+    const bucket = tombstonesByDir.get(dir);
+    if (bucket === undefined) {
+      tombstonesByDir.set(dir, [tombstone]);
+    } else {
+      bucket.push(tombstone);
+    }
+  }
+
   // One index.md per directory.
   for (const dir of allDirs) {
     const entries: IndexEntry[] = [];
@@ -101,6 +122,14 @@ export function buildBundle(ir: SchemaIr, timestamp: string): ReadonlyMap<string
         label: concept.name,
         link: posix.basename(concept.path),
         summary,
+      });
+    }
+
+    for (const tombstone of tombstonesByDir.get(dir) ?? []) {
+      entries.push({
+        label: tombstone.title,
+        link: posix.basename(tombstone.path),
+        summary: "(removed)",
       });
     }
 
