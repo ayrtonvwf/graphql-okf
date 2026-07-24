@@ -17,8 +17,11 @@ export async function readExistingBundle(outDir: string): Promise<ReadonlyMap<st
   const paths: string[] = [];
   try {
     await collect(outDir, "", paths);
-  } catch {
-    return new Map();
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return new Map();
+    }
+    throw error;
   }
   paths.sort();
 
@@ -32,7 +35,10 @@ export async function readExistingBundle(outDir: string): Promise<ReadonlyMap<st
 export async function isEmptyOrMissing(outDir: string): Promise<boolean> {
   try {
     return (await readdir(outDir)).length === 0;
-  } catch {
-    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return true;
+    }
+    throw error;
   }
 }

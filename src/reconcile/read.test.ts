@@ -34,6 +34,14 @@ describe("readExistingBundle", () => {
 
     expect([...(await readExistingBundle(dir)).keys()]).toEqual(["index.md"]);
   });
+
+  it("propagates non-ENOENT errors instead of treating them as an empty bundle", async () => {
+    const dir = await workspace();
+    const filePath = join(dir, "not-a-directory");
+    await writeFile(filePath, "i am a file, not a directory\n");
+
+    await expect(readExistingBundle(filePath)).rejects.toMatchObject({ code: "ENOTDIR" });
+  });
 });
 
 describe("isEmptyOrMissing", () => {
@@ -50,5 +58,13 @@ describe("isEmptyOrMissing", () => {
     await writeFile(join(dir, "index.md"), "root\n");
 
     expect(await isEmptyOrMissing(dir)).toBe(false);
+  });
+
+  it("propagates non-ENOENT errors instead of treating them as missing", async () => {
+    const dir = await workspace();
+    const filePath = join(dir, "not-a-directory");
+    await writeFile(filePath, "i am a file, not a directory\n");
+
+    await expect(isEmptyOrMissing(filePath)).rejects.toMatchObject({ code: "ENOTDIR" });
   });
 });
