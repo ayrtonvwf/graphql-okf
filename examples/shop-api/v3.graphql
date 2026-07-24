@@ -1,0 +1,248 @@
+"""
+Access levels a caller can hold.
+
+Used by the `@auth` directive to gate fields.
+"""
+enum Role {
+  "Anyone, including unauthenticated callers."
+  GUEST
+  "A signed-in shopper."
+  CUSTOMER
+  "A member of shop staff."
+  STAFF
+}
+
+"Restricts a field or type to callers holding at least the given role."
+directive @auth(requires: Role! = CUSTOMER) on OBJECT | FIELD_DEFINITION
+
+"Attaches a free-form classification label. May be applied more than once."
+directive @tag(name: String!) repeatable on OBJECT | FIELD_DEFINITION
+
+"An ISO-8601 instant, e.g. `2026-01-15T09:00:00Z`."
+scalar DateTime @specifiedBy(url: "https://scalars.graphql.org/andimarek/date-time")
+
+"An RFC 5322 email address."
+scalar EmailAddress
+
+"An ISO-4217 currency code."
+enum Currency {
+  BRL
+  EUR
+  USD
+}
+
+"The lifecycle stage of an order."
+enum OrderStatus {
+  "Created but not yet paid."
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  "Paid, then fully refunded."
+  REFUNDED
+}
+
+"Anything addressable by a globally unique identifier."
+interface Node {
+  "The globally unique identifier."
+  id: ID!
+}
+
+"Anything that records when it was created and last modified."
+interface Timestamped {
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+"""
+Anything a customer can put in an order.
+
+Implementors are guaranteed to expose a price in the shop's base currency.
+"""
+interface Purchasable implements Node {
+  id: ID!
+  "The price, including the currency it is denominated in."
+  price: Money!
+}
+
+"An amount of money in a specific currency."
+type Money {
+  "The amount in the smallest unit of the currency, e.g. cents."
+  amountCents: Int!
+  currency: Currency!
+}
+
+"A customer's written opinion of a product."
+type Review implements Node & Timestamped {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  product: Product!
+  author: Customer!
+  "A rating from 1 to 5 inclusive."
+  rating: Int!
+  body: String
+}
+
+"A postal address."
+type Address {
+  line1: String!
+  line2: String
+  city: String!
+  postalCode: String!
+  "An ISO-3166-1 alpha-2 country code."
+  country: String!
+}
+
+"An item offered for sale."
+type Product implements Node & Purchasable & Timestamped @tag(name: "catalog") @tag(name: "public") {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  "The customer-facing name."
+  name: String!
+  """
+  A long-form description.
+
+  May contain Markdown, including **bold** text and [links](https://example.test).
+  """
+  description: String
+  price: Money!
+  "Reviews left by customers, newest first."
+  reviews: [Review!]!
+  "Free-form merchandising labels."
+  labels: [String!]!
+  "Whether the product can currently be ordered."
+  inStock: Boolean!
+  "The internal SKU. Not stable across catalog migrations."
+  sku: String @deprecated
+}
+
+"""
+A person who can place orders.
+
+A customer is created on first sign-in and is never hard-deleted.
+"""
+type Customer implements Node & Timestamped {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  email: EmailAddress! @auth(requires: STAFF)
+  displayName: String!
+  "Where orders are shipped by default."
+  defaultAddress: Address
+}
+
+"One line of an order: a product and how many of it were bought."
+type OrderLine {
+  product: Product!
+  quantity: Int!
+  "The price of a single unit at the time the order was placed."
+  unitPriceCents: Int!
+}
+
+"A payment card."
+type CreditCard {
+  brand: String!
+  "The last four digits of the card number."
+  last4: String!
+  expiryMonth: Int!
+  expiryYear: Int!
+}
+
+"A linked PayPal account."
+type PayPalAccount {
+  email: EmailAddress!
+}
+
+"How an order was paid for."
+union PaymentMethod = CreditCard | PayPalAccount
+
+"A customer's purchase."
+type Order implements Node & Timestamped @auth(requires: CUSTOMER) {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  customer: Customer!
+  status: OrderStatus!
+  lines: [OrderLine!]!
+  "The order total, including the currency it is denominated in."
+  total: Money!
+  currency: Currency!
+  paidWith: PaymentMethod
+  shipTo: Address!
+}
+
+"Narrows a product listing. Every field is optional; omitted fields do not filter."
+input ProductFilter {
+  "Case-insensitive substring match against the product name."
+  nameContains: String = ""
+  minPriceCents: Int = 0
+  maxPriceCents: Int
+  inStockOnly: Boolean = false
+  "Only products carrying all of these labels."
+  labels: [String!] = []
+  "Only products a caller of this role may see."
+  visibleTo: Role = GUEST
+}
+
+"A postal address supplied by a client."
+input AddressInput {
+  line1: String!
+  line2: String
+  city: String!
+  postalCode: String!
+  country: String!
+}
+
+"""
+Exactly one payment instrument.
+
+Supply exactly one field; supplying zero or more than one is an error.
+"""
+input PaymentInput @oneOf {
+  creditCardToken: String
+  payPalToken: String
+  giftCardCode: String
+}
+
+"Everything needed to turn a basket into an order."
+input PlaceOrderInput {
+  productIds: [ID!]!
+  shipTo: AddressInput!
+  payWith: PaymentInput!
+}
+
+type Query {
+  "Looks up any node by its globally unique identifier."
+  node(id: ID!): Node
+  "Looks up a single product."
+  product(id: ID!): Product
+  "Lists products, most recently created first."
+  products(filter: ProductFilter, "Maximum number of products to return." first: Int = 20): [Product!]!
+  "Looks up a single order."
+  order(id: ID!): Order @auth(requires: CUSTOMER)
+  "The currently authenticated customer, if any."
+  me: Customer
+}
+
+type Mutation {
+  "Places an order for the given products."
+  placeOrder(input: PlaceOrderInput!): Order! @auth(requires: CUSTOMER)
+  "Cancels an order that has not yet shipped."
+  cancelOrder(id: ID!, reason: String): Order! @auth(requires: CUSTOMER)
+  "Adds a review to a product."
+  addReview(productId: ID!, rating: Int!, body: String): Review! @auth(requires: CUSTOMER)
+  "Replaces a customer's default shipping address."
+  updateDefaultAddress(customerId: ID!, address: AddressInput!): Customer!
+}
+
+type Subscription {
+  "Emits the order each time its status changes."
+  orderStatusChanged(orderId: ID!): Order! @auth(requires: CUSTOMER)
+  "Emits a product each time its price changes."
+  productPriceChanged: Product!
+  "Emits each new review as it is posted."
+  reviewPosted(productId: ID!): Review!
+}
