@@ -1,44 +1,95 @@
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { createOkfBundle } from "./index.js";
+import type { GraphqlOkfError } from "./errors.js";
+import { syncOkfBundle } from "./index.js";
 
-describe("createOkfBundle", () => {
-  it("writes an OKF bundle from an SDL file into a fresh directory", async () => {
-    const workspace = await mkdtemp(join(tmpdir(), "okf-e2e-"));
-    const sdlPath = join(workspace, "schema.graphql");
-    const { writeFile } = await import("node:fs/promises");
-    await writeFile(
-      sdlPath,
-      '"An ISO country." type Country { code: ID! } type Query { countries: [Country!]! }',
-    );
-    const outDir = join(workspace, "bundle");
+const SDL = '"An ISO country." type Country { code: ID! } type Query { countries: [Country!]! }';
 
-    await createOkfBundle({
+async function workspaceWithSdl(sdl: string = SDL): Promise<{ sdlPath: string; outDir: string }> {
+  const workspace = await mkdtemp(join(tmpdir(), "okf-e2e-"));
+  const sdlPath = join(workspace, "schema.graphql");
+  await writeFile(sdlPath, sdl);
+  return { sdlPath, outDir: join(workspace, "bundle") };
+}
+
+describe("syncOkfBundle", () => {
+  it("creates a bundle in a fresh directory and reports what it added", async () => {
+    const { sdlPath, outDir } = await workspaceWithSdl();
+
+    const result = await syncOkfBundle({
       source: { kind: "sdl", path: sdlPath },
       outDir,
-      now: "2026-07-23T12:00:00.000Z",
+      now: "2026-07-24T09:00:00.000Z",
     });
 
-    const country = await readFile(join(outDir, "types/objects/Country.md"), "utf8");
-    expect(country).toContain("type: object");
-    expect(country).toContain("# Country");
-    const rootIndex = await readFile(join(outDir, "index.md"), "utf8");
-    expect(rootIndex).toContain("- [types/](types/index.md)");
+    expect(result.created).toBe(true);
+    expect(result.added).toContain("types/objects/Country.md");
+    expect(result.changed).toEqual([]);
+    expect(result.removed).toEqual([]);
+    expect(await readFile(join(outDir, "types/objects/Country.md"), "utf8")).toContain(
+      "type: object",
+    );
+  });
+
+  it("writes an initial log.md listing every concept as added", async () => {
+    const { sdlPath, outDir } = await workspaceWithSdl();
+
+    await syncOkfBundle({
+      source: { kind: "sdl", path: sdlPath },
+      outDir,
+      now: "2026-07-24T09:00:00.000Z",
+    });
+
+    const log = await readFile(join(outDir, "log.md"), "utf8");
+    expect(log).toContain("## 2026-07-24T09:00:00.000Z");
+    expect(log).toContain("**Added**");
+    expect(log).toContain("- [`Country`](types/objects/Country.md)");
+  });
+
+  it("refuses a non-empty directory that is not a bundle", async () => {
+    const { sdlPath, outDir } = await workspaceWithSdl();
+    await mkdir(outDir, { recursive: true });
+    await writeFile(join(outDir, "notes.txt"), "not a bundle\n");
+
+    let code = "no-error";
+    try {
+      await syncOkfBundle({ source: { kind: "sdl", path: sdlPath }, outDir });
+    } catch (error) {
+      code = (error as GraphqlOkfError).code;
+    }
+
+    expect(code).toBe("NOT_A_BUNDLE");
+  });
+
+  it("reports created: false when reconciling an existing bundle", async () => {
+    const { sdlPath, outDir } = await workspaceWithSdl();
+    await syncOkfBundle({
+      source: { kind: "sdl", path: sdlPath },
+      outDir,
+      now: "2026-07-24T09:00:00.000Z",
+    });
+
+    const result = await syncOkfBundle({
+      source: { kind: "sdl", path: sdlPath },
+      outDir,
+      now: "2026-08-01T00:00:00.000Z",
+    });
+
+    expect(result.created).toBe(false);
+    expect(result.added).toEqual([]);
+    expect(result.unchanged).toBeGreaterThan(0);
   });
 
   it("defaults the timestamp to the current wall-clock time when `now` is omitted", async () => {
-    const workspace = await mkdtemp(join(tmpdir(), "okf-e2e-"));
-    const sdlPath = join(workspace, "schema.graphql");
-    const { writeFile } = await import("node:fs/promises");
-    await writeFile(sdlPath, "type Query { hello: String }");
-    const outDir = join(workspace, "bundle");
+    const { sdlPath, outDir } = await workspaceWithSdl("type Query { hello: String }");
 
-    await createOkfBundle({ source: { kind: "sdl", path: sdlPath }, outDir });
+    await syncOkfBundle({ source: { kind: "sdl", path: sdlPath }, outDir });
 
     const hello = await readFile(join(outDir, "queries/hello.md"), "utf8");
-    const match = hello.match(/^timestamp: (.+)$/m);
-    expect(match?.[1]).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    expect(hello.match(/^timestamp: (.+)$/m)?.[1]).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+    );
   });
 });
