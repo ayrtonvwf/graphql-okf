@@ -1,8 +1,9 @@
 import { posix } from "node:path";
 import type { ConceptNode, SchemaIr } from "../model/ir.js";
 import type { ConceptKind } from "../model/naming.js";
-import { renderConcept } from "./render/concept.js";
+import { renderConceptParts } from "./render/concept.js";
 import { type IndexEntry, renderDirectoryIndex } from "./render/directory-index.js";
+import type { FileParts } from "./render/seam.js";
 
 const KIND_SUMMARY: Record<ConceptKind, string> = {
   object: "Object type.",
@@ -43,12 +44,12 @@ function sortByLabel(entries: IndexEntry[]): IndexEntry[] {
   );
 }
 
-export function buildBundle(ir: SchemaIr, timestamp: string): ReadonlyMap<string, string> {
-  const bundle = new Map<string, string>();
+export function buildBundle(ir: SchemaIr, timestamp: string): ReadonlyMap<string, FileParts> {
+  const bundle = new Map<string, FileParts>();
 
   // Concept files.
   for (const concept of ir.concepts) {
-    bundle.set(concept.path, renderConcept(concept, ir.resource, timestamp));
+    bundle.set(concept.path, renderConceptParts(concept, ir.resource, timestamp));
   }
 
   // Build the directory tree from concept paths. "." is the root.

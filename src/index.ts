@@ -1,4 +1,5 @@
 import { buildBundle } from "./emit/bundle.js";
+import { assembleFile, EMPTY_HUMAN } from "./emit/render/seam.js";
 import { writeBundle } from "./emit/write.js";
 import type { SchemaIr } from "./model/ir.js";
 import { project } from "./model/project.js";
@@ -14,7 +15,12 @@ export interface CreateOkfBundleOptions {
 export async function createOkfBundle(options: CreateOkfBundleOptions): Promise<void> {
   const ir = await readSchema(options.source);
   const timestamp = options.now ?? new Date().toISOString();
-  await writeBundle(buildBundle(ir, timestamp), options.outDir);
+  const parts = buildBundle(ir, timestamp);
+  const files = new Map<string, string>();
+  for (const [path, part] of parts) {
+    files.set(path, assembleFile(part, EMPTY_HUMAN));
+  }
+  await writeBundle(files, options.outDir);
 }
 
 export type { GraphqlOkfErrorCode } from "./errors.js";

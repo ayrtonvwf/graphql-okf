@@ -3,16 +3,26 @@ import { describe, expect, it } from "vitest";
 import { project } from "../model/project.js";
 import type { LoadedSchema } from "../source/types.js";
 import { buildBundle } from "./bundle.js";
+import type { FileParts } from "./render/seam.js";
+import { assembleFile, EMPTY_HUMAN } from "./render/seam.js";
 
 const TS = "2026-07-23T12:00:00.000Z";
 
-function bundleFrom(sdl: string): ReadonlyMap<string, string> {
+function bundleFrom(sdl: string): ReadonlyMap<string, FileParts> {
   const loaded: LoadedSchema = {
     schema: buildSchema(sdl),
     resource: "test.graphql",
     origin: "sdl",
   };
   return buildBundle(project(loaded), TS);
+}
+
+function assembled(bundle: ReadonlyMap<string, FileParts>, path: string): string {
+  const parts = bundle.get(path);
+  if (!parts) {
+    throw new Error(`bundle has no entry for ${path}`);
+  }
+  return assembleFile(parts, EMPTY_HUMAN);
 }
 
 describe("buildBundle", () => {
@@ -33,15 +43,17 @@ describe("buildBundle", () => {
 
   it("lists child directories in a grouping index and concepts in a leaf index", () => {
     const bundle = bundleFrom("type Query { hello: String }");
-    expect(bundle.get("index.md")).toContain("- [types/](types/index.md)");
-    expect(bundle.get("index.md")).toContain("- [queries/](queries/index.md)");
-    expect(bundle.get("types/index.md")).toContain("- [scalars/](scalars/index.md)");
-    expect(bundle.get("types/scalars/index.md")).toContain("- [String](String.md)");
+    expect(assembled(bundle, "index.md")).toContain("- [types/](types/index.md)");
+    expect(assembled(bundle, "index.md")).toContain("- [queries/](queries/index.md)");
+    expect(assembled(bundle, "types/index.md")).toContain("- [scalars/](scalars/index.md)");
+    expect(assembled(bundle, "types/scalars/index.md")).toContain("- [String](String.md)");
   });
 
   it("uses a structural fallback summary when a concept has no description", () => {
     const bundle = bundleFrom("type Query { hello: String }");
-    expect(bundle.get("queries/index.md")).toContain("- [hello](hello.md) — Query operation.");
+    expect(assembled(bundle, "queries/index.md")).toContain(
+      "- [hello](hello.md) — Query operation.",
+    );
   });
 
   it("is deterministic: same input and timestamp yields identical output", () => {
@@ -57,7 +69,8 @@ describe("buildBundle", () => {
       type Query { countries: [Country!]! }
     `);
     const linkPattern = /\]\(([^)]+)\)/g;
-    for (const [fromPath, contents] of bundle) {
+    for (const [fromPath, parts] of bundle) {
+      const contents = assembleFile(parts, EMPTY_HUMAN);
       for (const match of contents.matchAll(linkPattern)) {
         const target = match[1] ?? "";
         if (
