@@ -66,7 +66,7 @@ describe("main", () => {
 
   it("stringifies a non-Error failure and sets exitCode=1", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    vi.spyOn(indexModule, "createOkfBundle").mockRejectedValueOnce("boom");
+    vi.spyOn(indexModule, "syncOkfBundle").mockRejectedValueOnce("boom");
 
     await main(["./schema.graphql", "--out", "bundle"]);
 

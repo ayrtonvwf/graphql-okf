@@ -1,7 +1,8 @@
 // src/emit/render/concept.test.ts
 import { describe, expect, it } from "vitest";
 import type { ScalarTypeNode } from "../../model/ir.js";
-import { GENERATED_END, GENERATED_START, renderConcept } from "./concept.js";
+import { renderConcept } from "./concept.js";
+import { GENERATED_END, GENERATED_START } from "./seam.js";
 
 const scalar: ScalarTypeNode = {
   kind: "scalar",

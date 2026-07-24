@@ -8,8 +8,9 @@ export type GraphqlOkfErrorCode =
   | "ENDPOINT_INVALID_RESPONSE"
   | "INTROSPECTION_DISABLED"
   | "NAME_HASH_COLLISION"
-  | "OUTPUT_NOT_EMPTY"
-  | "CLI_USAGE";
+  | "NOT_A_BUNDLE"
+  | "CLI_USAGE"
+  | "MALFORMED_CONCEPT";
 
 export class GraphqlOkfError extends Error {
   readonly code: GraphqlOkfErrorCode;

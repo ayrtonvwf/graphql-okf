@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { GraphqlOkfError } from "./errors.js";
-import { createOkfBundle } from "./index.js";
+import { syncOkfBundle } from "./index.js";
 import type { SourceSpec } from "./source/types.js";
 
 export function parseArgs(argv: readonly string[]): { source: SourceSpec; outDir: string } {
@@ -31,7 +31,7 @@ export function parseArgs(argv: readonly string[]): { source: SourceSpec; outDir
 export async function main(argv: readonly string[]): Promise<void> {
   try {
     const { source, outDir } = parseArgs(argv);
-    await createOkfBundle({ source, outDir });
+    await syncOkfBundle({ source, outDir });
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;

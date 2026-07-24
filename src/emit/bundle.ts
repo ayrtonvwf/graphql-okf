@@ -1,8 +1,9 @@
 import { posix } from "node:path";
 import type { ConceptNode, SchemaIr } from "../model/ir.js";
 import type { ConceptKind } from "../model/naming.js";
-import { renderConcept } from "./render/concept.js";
+import { renderConceptParts } from "./render/concept.js";
 import { type IndexEntry, renderDirectoryIndex } from "./render/directory-index.js";
+import type { FileParts } from "./render/seam.js";
 
 const KIND_SUMMARY: Record<ConceptKind, string> = {
   object: "Object type.",
@@ -43,12 +44,21 @@ function sortByLabel(entries: IndexEntry[]): IndexEntry[] {
   );
 }
 
-export function buildBundle(ir: SchemaIr, timestamp: string): ReadonlyMap<string, string> {
-  const bundle = new Map<string, string>();
+export interface TombstoneEntry {
+  readonly path: string;
+  readonly title: string;
+}
+
+export function buildBundle(
+  ir: SchemaIr,
+  timestamp: string,
+  tombstones: readonly TombstoneEntry[] = [],
+): ReadonlyMap<string, FileParts> {
+  const bundle = new Map<string, FileParts>();
 
   // Concept files.
   for (const concept of ir.concepts) {
-    bundle.set(concept.path, renderConcept(concept, ir.resource, timestamp));
+    bundle.set(concept.path, renderConceptParts(concept, ir.resource, timestamp));
   }
 
   // Build the directory tree from concept paths. "." is the root.
@@ -81,6 +91,18 @@ export function buildBundle(ir: SchemaIr, timestamp: string): ReadonlyMap<string
     filesByDir.get(dir)?.push(concept);
   }
 
+  const tombstonesByDir = new Map<string, TombstoneEntry[]>();
+  for (const tombstone of tombstones) {
+    const dir = posix.dirname(tombstone.path);
+    ensureDir(dir);
+    const bucket = tombstonesByDir.get(dir);
+    if (bucket === undefined) {
+      tombstonesByDir.set(dir, [tombstone]);
+    } else {
+      bucket.push(tombstone);
+    }
+  }
+
   // One index.md per directory.
   for (const dir of allDirs) {
     const entries: IndexEntry[] = [];
@@ -100,6 +122,14 @@ export function buildBundle(ir: SchemaIr, timestamp: string): ReadonlyMap<string
         label: concept.name,
         link: posix.basename(concept.path),
         summary,
+      });
+    }
+
+    for (const tombstone of tombstonesByDir.get(dir) ?? []) {
+      entries.push({
+        label: tombstone.title,
+        link: posix.basename(tombstone.path),
+        summary: "(removed)",
       });
     }
 

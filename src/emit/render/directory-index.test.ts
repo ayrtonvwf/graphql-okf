@@ -1,35 +1,39 @@
 import { describe, expect, it } from "vitest";
 import { renderDirectoryIndex } from "./directory-index.js";
+import { assembleFile, EMPTY_HUMAN } from "./seam.js";
 
 describe("renderDirectoryIndex", () => {
-  it("renders a title and one bullet per entry", () => {
-    const out = renderDirectoryIndex("Object types", [
+  it("puts the title in the preamble and the bullets in the generated region", () => {
+    const parts = renderDirectoryIndex("Object types", [
       { label: "Country", link: "Country.md", summary: "An ISO country." },
       { label: "Language", link: "Language.md", summary: "A spoken language." },
     ]);
-    expect(out).toBe(
-      [
-        "# Object types",
-        "",
-        "- [Country](Country.md) — An ISO country.",
-        "- [Language](Language.md) — A spoken language.",
-        "",
-      ].join("\n"),
+
+    expect(parts.preamble).toBe("# Object types\n\n");
+    expect(parts.generated).toBe(
+      "\n- [Country](Country.md) — An ISO country.\n- [Language](Language.md) — A spoken language.\n",
     );
   });
 
-  it("keeps the summary dash when a directory label has a known summary", () => {
-    const out = renderDirectoryIndex("Types", [
+  it("assembles into a file whose human region is preserved on re-runs", () => {
+    const parts = renderDirectoryIndex("Types", [
       { label: "objects/", link: "objects/index.md", summary: "Object types" },
     ]);
-    expect(out).toContain("- [objects/](objects/index.md) — Object types");
+
+    const file = assembleFile(parts, EMPTY_HUMAN);
+
+    expect(file).toContain("# Types");
+    expect(file).toContain("- [objects/](objects/index.md) — Object types");
+    expect(file).toContain("<!-- graphql-okf:generated:end -->");
+    expect(file.trimEnd().endsWith("-->")).toBe(true);
   });
 
   it("omits the summary dash when a summary is empty", () => {
-    const out = renderDirectoryIndex("Types", [
+    const parts = renderDirectoryIndex("Types", [
       { label: "widgets/", link: "widgets/index.md", summary: "" },
     ]);
-    expect(out).toContain("- [widgets/](widgets/index.md)");
-    expect(out).not.toContain("—");
+
+    expect(parts.generated).toContain("- [widgets/](widgets/index.md)");
+    expect(parts.generated).not.toContain("—");
   });
 });
