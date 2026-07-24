@@ -1,8 +1,9 @@
-import { mkdtemp, readFile } from "node:fs/promises";
+import { appendFile, mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { syncOkfBundle } from "../src/index.js";
+import { readTree, writeTree } from "./support/bundle-tree.js";
 
 const V1 = new URL("../examples/shop-api/v1.graphql", import.meta.url).pathname;
 const V2 = new URL("../examples/shop-api/v2.graphql", import.meta.url).pathname;
@@ -105,5 +106,60 @@ describe("reconciling v2 to v3", () => {
     const giftCard = await readFile(join(outDir, "types/objects/GiftCard.md"), "utf8");
     expect(giftCard).toContain("status: removed");
     expect(giftCard).toContain(`removedAt: ${T3}`);
+  });
+});
+
+const COMMITTED = new URL("../okf/shop-api", import.meta.url).pathname;
+
+const HUMAN_SECTION =
+  "\n## Ownership\n\nOwned by the Catalog team. Ping #catalog before changing pricing fields.\n";
+
+/**
+ * Runs the full v1 -> v2 -> v3 sequence with pinned timestamps, injecting a
+ * human-authored section after v1. The injection is deliberate: it is what makes
+ * GOAL-8.3 (human edits survive regeneration) verifiable by opening the committed
+ * bundle rather than by trusting a test name.
+ */
+async function buildExampleBundle(): Promise<Map<string, string>> {
+  const outDir = join(await mkdtemp(join(tmpdir(), "okf-shop-golden-")), "bundle");
+
+  await syncOkfBundle({ source: { kind: "sdl", path: V1 }, outDir, now: T1, resource: RESOURCE });
+  await appendFile(join(outDir, "types/objects/Product.md"), HUMAN_SECTION);
+  await syncOkfBundle({ source: { kind: "sdl", path: V2 }, outDir, now: T2, resource: RESOURCE });
+  await syncOkfBundle({ source: { kind: "sdl", path: V3 }, outDir, now: T3, resource: RESOURCE });
+
+  return readTree(outDir);
+}
+
+describe("the committed example bundle", () => {
+  it("matches okf/shop-api byte-for-byte", async () => {
+    const built = await buildExampleBundle();
+
+    if (process.env.UPDATE_EXAMPLE === "1") {
+      await writeTree(COMMITTED, built);
+      return;
+    }
+
+    expect(await readTree(COMMITTED)).toEqual(built);
+  });
+
+  it("carries three dated log entries and the surviving human section", async () => {
+    const built = await buildExampleBundle();
+
+    const log = built.get("log.md") ?? "";
+    expect(log).toContain(`## ${T1}`);
+    expect(log).toContain(`## ${T2}`);
+    expect(log).toContain(`## ${T3}`);
+    expect(built.get("types/objects/Product.md")).toContain("Ping #catalog");
+  });
+
+  it("records no absolute filesystem path anywhere in the bundle", async () => {
+    const built = await buildExampleBundle();
+
+    const offenders = [...built.entries()]
+      .filter(([, contents]) => contents.includes("/private/") || contents.includes("/home/"))
+      .map(([path]) => path);
+
+    expect(offenders).toEqual([]);
   });
 });
