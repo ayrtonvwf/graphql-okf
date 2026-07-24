@@ -342,9 +342,16 @@ Dispatch on the output directory:
 
 | `outDir` | Behavior |
 |---|---|
-| missing or empty | create — B's existing path, `created: true` |
+| missing or empty | create — reconcile against an empty bundle, `created: true` |
 | contains a root `index.md` | reconcile |
 | non-empty, no root `index.md` | `GraphqlOkfError("NOT_A_BUNDLE", …)` |
+
+**Create is not a separate path.** Reconciling against an empty `existing` map
+yields a plan of nothing but creates, which is exactly a fresh bundle. B's
+`writeBundle` and its `OUTPUT_NOT_EMPTY` error are therefore deleted rather than
+kept alongside `applyPlan` — one code path, exercised by every run, instead of a
+create path that only ever runs once per bundle and rots. A first run logs every
+concept under **Added**, so `log.md` exists and is honest from run one.
 
 One verb rather than two because `GOAL-9.1` asks for "creates or updates", and
 because the caller that most needs this — a scheduled CI job (`GOAL-9.5`) —
