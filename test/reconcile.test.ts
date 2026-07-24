@@ -1,4 +1,4 @@
-import { mkdtemp, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -6,28 +6,13 @@ import { readSchema, syncOkfBundle } from "../src/index.js";
 import { applyPlan } from "../src/reconcile/apply.js";
 import { reconcile } from "../src/reconcile/plan.js";
 import { readExistingBundle } from "../src/reconcile/read.js";
+import { readTree as snapshot } from "./support/bundle-tree.js";
 
 const BASE = new URL("./fixtures/kitchen-sink.graphql", import.meta.url).pathname;
 const EVOLVED = new URL("./fixtures/kitchen-sink-evolved.graphql", import.meta.url).pathname;
 
 const T1 = "2026-07-01T10:00:00.000Z";
 const T2 = "2026-07-24T09:00:00.000Z";
-
-async function snapshot(dir: string): Promise<Map<string, string>> {
-  const files = new Map<string, string>();
-  const walk = async (relative: string): Promise<void> => {
-    for (const entry of await readdir(join(dir, relative), { withFileTypes: true })) {
-      const child = relative === "" ? entry.name : `${relative}/${entry.name}`;
-      if (entry.isDirectory()) {
-        await walk(child);
-      } else {
-        files.set(child, await readFile(join(dir, child), "utf8"));
-      }
-    }
-  };
-  await walk("");
-  return files;
-}
 
 async function freshBundle(sdl: string): Promise<string> {
   const outDir = join(await mkdtemp(join(tmpdir(), "okf-recon-")), "bundle");
