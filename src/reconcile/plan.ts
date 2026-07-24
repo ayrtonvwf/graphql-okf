@@ -1,8 +1,9 @@
-import { buildBundle } from "../emit/bundle.js";
+import { buildBundle, type TombstoneEntry } from "../emit/bundle.js";
 import { assembleFile, EMPTY_HUMAN, type FileParts } from "../emit/render/seam.js";
 import type { SchemaIr } from "../model/ir.js";
 import { mergeFrontmatter, withoutTimestamp } from "./frontmatter.js";
 import { type SplitFile, splitFile } from "./parse.js";
+import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
 
 export interface ConceptChange {
   readonly name: string;
@@ -62,6 +63,21 @@ export function reconcile(
 ): BundlePlan {
   const owned = ownedFiles(existing);
 
+  const irPaths = new Set(ir.concepts.map((concept) => concept.path));
+  const tombstones: TombstoneEntry[] = [];
+  const newlyRemoved: { change: ConceptChange; split: SplitFile }[] = [];
+
+  for (const [path, split] of owned) {
+    if (isIndexPath(path) || irPaths.has(path)) {
+      continue;
+    }
+    const title = titleOf(split, path);
+    tombstones.push({ path, title });
+    if (!isTombstoned(split)) {
+      newlyRemoved.push({ change: { name: title, path }, split });
+    }
+  }
+
   const actions: FileAction[] = [];
   const added: ConceptChange[] = [];
   const changed: ConceptChange[] = [];
@@ -70,7 +86,7 @@ export function reconcile(
 
   const names = new Map(ir.concepts.map((concept) => [concept.path, concept.name]));
 
-  for (const [path, rendered] of buildBundle(ir, timestamp)) {
+  for (const [path, rendered] of buildBundle(ir, timestamp, tombstones)) {
     const current = owned.get(path);
     const index = isIndexPath(path);
 
@@ -104,8 +120,22 @@ export function reconcile(
       contents: assembleFile(merged, current.human),
     });
     if (!index) {
-      changed.push({ name: names.get(path) ?? path, path });
+      const change: ConceptChange = { name: names.get(path) ?? path, path };
+      if (isTombstoned(current)) {
+        added.push(change);
+      } else {
+        changed.push(change);
+      }
     }
+  }
+
+  for (const { change, split } of newlyRemoved) {
+    actions.push({
+      kind: "tombstone",
+      path: change.path,
+      contents: assembleFile(renderTombstone(split, timestamp), split.human),
+    });
+    removed.push(change);
   }
 
   return { actions, added, changed, removed, unchanged };

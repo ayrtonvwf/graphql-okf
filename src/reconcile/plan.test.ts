@@ -122,3 +122,66 @@ describe("reconcile", () => {
     expect(plan.changed).toEqual([]);
   });
 });
+
+const emptyIr: SchemaIr = { resource: "schema.graphql", origin: "sdl", concepts: [] };
+
+describe("reconcile removals", () => {
+  it("tombstones a concept the schema no longer contains", () => {
+    const disk = bundleOnDisk(ir, T1);
+
+    const plan = reconcile(emptyIr, disk, T2);
+    const action = plan.actions.find((entry) => entry.path === "types/objects/Country.md");
+
+    expect(plan.removed.map((change) => change.name)).toEqual(["Country"]);
+    expect(action?.kind).toBe("tombstone");
+    expect(action?.contents).toContain("status: removed");
+    expect(action?.contents).toContain(`removedAt: ${T2}`);
+    expect(action?.contents).toContain("## Last known definition");
+  });
+
+  it("keeps the tombstoned file at its original path so inbound links resolve", () => {
+    const plan = reconcile(emptyIr, bundleOnDisk(ir, T1), T2);
+
+    expect(plan.actions.map((action) => action.path)).toContain("types/objects/Country.md");
+  });
+
+  it("preserves the human region of a concept it tombstones", () => {
+    const disk = bundleOnDisk(ir, T1);
+    const path = "types/objects/Country.md";
+    disk.set(path, `${disk.get(path) ?? ""}\nStill referenced by the billing service.\n`);
+
+    const plan = reconcile(emptyIr, disk, T2);
+    const action = plan.actions.find((entry) => entry.path === path);
+
+    expect(action?.contents).toContain("Still referenced by the billing service.");
+  });
+
+  it("never re-tombstones: a second run against the same schema is a no-op", () => {
+    const disk = bundleOnDisk(ir, T1);
+    const first = reconcile(emptyIr, disk, T2);
+    for (const action of first.actions) {
+      disk.set(action.path, action.contents);
+    }
+
+    const second = reconcile(emptyIr, disk, "2026-08-01T00:00:00.000Z");
+
+    expect(second.actions).toEqual([]);
+    expect(second.removed).toEqual([]);
+  });
+
+  it("restores a concept that comes back, logging it as added", () => {
+    const disk = bundleOnDisk(ir, T1);
+    for (const action of reconcile(emptyIr, disk, T2).actions) {
+      disk.set(action.path, action.contents);
+    }
+
+    const plan = reconcile(ir, disk, "2026-08-01T00:00:00.000Z");
+    const action = plan.actions.find((entry) => entry.path === "types/objects/Country.md");
+
+    expect(plan.added.map((change) => change.name)).toEqual(["Country"]);
+    expect(plan.changed).toEqual([]);
+    expect(action?.contents).not.toContain("status: removed");
+    expect(action?.contents).not.toContain("removedAt:");
+    expect(action?.contents).not.toContain("Last known definition");
+  });
+});
