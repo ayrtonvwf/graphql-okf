@@ -3,13 +3,13 @@
 Generate and maintain an [Open Knowledge Format (OKF)][okf] bundle from a GraphQL
 API's schema.
 
-> **Status: pre-alpha, but generation works.** The published package is still a
-> `0.0.0` placeholder under the `next` tag. One-shot bundle generation — from an
-> SDL file or a live introspection endpoint, via a library call or the CLI — is
+> **Status: pre-alpha, but generation and updates work.** The published package
+> is still a `0.0.0` placeholder under the `next` tag. Bundle generation — from
+> an SDL file or a live introspection endpoint, via a library call or the CLI —
+> and reconciling an existing bundle against an evolved schema are both
 > implemented and tested end to end (see [Usage](#usage) and
-> [Examples](#examples) below). Reconciling an existing bundle against an
-> evolved schema (keeping it up to date across re-runs) is not implemented yet;
-> see [Status & roadmap](#status--roadmap).
+> [Examples](#examples) below). See [Status & roadmap](#status--roadmap) for
+> what's left.
 
 ## What it does
 
@@ -18,13 +18,12 @@ introspection endpoint — and produces a conformant OKF bundle describing it: a
 directory of cross-linked Markdown files with YAML frontmatter that any human or
 AI agent can read without special tooling.
 
-Eventually it won't just generate once. It will **keep the bundle up to date**:
-re-running against an evolved schema will reconcile the existing bundle — adding
-new concepts, updating changed ones, marking removed ones, preserving any
-human-authored notes, and recording the change in a log — so the bundle stays a
-faithful, versioned map of the interface over time. Today, generation is
-one-shot: `graphql-okf` refuses to write into a non-empty output directory
-rather than overwrite or merge, and reconciliation is planned but not yet built.
+It doesn't just generate once — it **keeps the bundle up to date**: re-running
+against an evolved schema reconciles the existing bundle — adding new
+concepts, updating changed ones, marking removed ones, preserving any
+human-authored notes, and recording the change in a log — so the bundle stays
+a faithful, versioned map of the interface over time. See
+[Updating a bundle](#updating-a-bundle) for the details.
 
 Milestone 1 is **fully deterministic**: the bundle is a mechanical function of the
 schema, with no LLM involved at runtime, so the same source always produces the
@@ -108,8 +107,11 @@ graphql-okf <sdl-path-or-endpoint-url> --out <dir>
 
 The source is detected automatically: an `http://`/`https://` argument is
 queried live via introspection; anything else is read as a local SDL file
-path. `--out` must be a directory that doesn't exist yet or is empty —
-`graphql-okf` writes a fresh bundle and never overwrites existing files.
+path. `--out` is a directory: if it doesn't exist yet or is empty,
+`graphql-okf` writes a fresh bundle; if it already holds a bundle
+`graphql-okf` generated, running the same command again **reconciles** it
+against the current schema instead of overwriting it — see
+[Updating a bundle](#updating-a-bundle).
 
 ```sh
 # From a live endpoint (introspection)
@@ -117,19 +119,54 @@ graphql-okf https://countries.trevorblades.com/graphql --out okf/countries-api
 
 # From a local SDL file
 graphql-okf ./schema.graphql --out okf/my-api
+
+# Re-run the exact same command any time the schema changes — it updates
+# the existing bundle in place.
+graphql-okf https://countries.trevorblades.com/graphql --out okf/countries-api
 ```
 
 ### Library
 
 ```ts
-import { createOkfBundle } from "graphql-okf";
+import { syncOkfBundle } from "graphql-okf";
 
-await createOkfBundle({
+await syncOkfBundle({
   source: { kind: "endpoint", url: "https://countries.trevorblades.com/graphql" },
   // or: { kind: "sdl", path: "./schema.graphql" }
   outDir: "okf/countries-api",
 });
 ```
+
+`syncOkfBundle` is the single entry point for both creating and updating a
+bundle: it creates one from scratch when `outDir` is missing or empty, and
+reconciles an existing one otherwise.
+
+## Updating a bundle
+
+A bundle produced by `graphql-okf` is **safe to re-run against**. Point the
+same CLI invocation (or `syncOkfBundle` call) at an evolved schema and the
+existing bundle is reconciled in place rather than overwritten:
+
+- **Human edits below the marker are preserved.** Each concept file has a
+  generated region bounded by `graphql-okf:generated:start` /
+  `graphql-okf:generated:end` markers. Anything you write **below** the
+  `graphql-okf:generated:end` marker is left untouched across re-runs.
+  Edits made **inside** the generated region are not preserved — that region
+  is a mechanical function of the schema and is rewritten on every run.
+- **Removed elements are tombstoned, not deleted.** If a type, field, or
+  operation disappears from the schema, its file is kept and marked
+  `status: removed` in its frontmatter (with a `removedAt` timestamp and a
+  note in the body) rather than being deleted. If the element reappears in a
+  later schema, the tombstone is cleared and the file is restored.
+- **Every change is logged.** `log.md` at the root of the bundle records
+  every concept added, changed, or removed on each run, so the bundle's
+  history is auditable without relying on git blame.
+- **Unknown frontmatter keys are preserved.** Any YAML frontmatter key that
+  isn't one `graphql-okf` itself writes (for example, a human-added `owner:`
+  or `status: draft` note) survives reconciliation unchanged.
+- Re-running against an **unchanged** schema is a no-op: byte-identical
+  files, no `log.md` entry — this is the determinism guarantee M1 requires
+  (see [`GOAL-M1.md`](docs/northstar-specs/GOAL-M1.md)).
 
 ## Examples
 
@@ -155,17 +192,17 @@ above, against each API's live introspection endpoint.
 ## Status & roadmap
 
 M1 ("frontend-only utility", see [Milestones](#milestones)) is split into four
-sub-projects; the first two are done, the other two are not started:
+sub-projects; the first three are done, the last is not started:
 
 - ✅ **Concept model & naming scheme** — projects a GraphQL schema into an
   in-memory IR with the deterministic file path for every concept baked in.
 - ✅ **Emitter** — turns that IR into the OKF bundle on disk (what's
   documented in [Usage](#usage) above): per-concept Markdown files with
   frontmatter, cross-links, and directory indexes, plus the CLI.
-- ⬜ **Reconciler** — re-running against an evolved schema updates an
+- ✅ **Reconciler** — re-running against an evolved schema updates an
   existing bundle in place (add/update/remove concepts, preserve
   human-authored edits, record a change log) instead of only writing into an
-  empty directory.
+  empty directory. See [Updating a bundle](#updating-a-bundle).
 - ⬜ **Delivery surface** — the rest of the CLI/library surface: request
   headers for authenticated introspection, config files, `--force`/overwrite
   semantics, archiving previous bundle versions.
