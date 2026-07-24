@@ -77,7 +77,10 @@ type Address {
 }
 
 "An item offered for sale."
-type Product implements Node & Purchasable & Timestamped @tag(name: "catalog") @tag(name: "public") {
+type Product implements Node & Purchasable & Timestamped
+  @tag(name: "catalog")
+  @tag(name: "public")
+{
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime

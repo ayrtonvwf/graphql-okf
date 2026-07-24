@@ -96,7 +96,10 @@ type Address {
 }
 
 "An item offered for sale."
-type Product implements Node & Purchasable & Timestamped @tag(name: "catalog") @tag(name: "public") {
+type Product implements Node & Purchasable & Timestamped
+  @tag(name: "catalog")
+  @tag(name: "public")
+{
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime
@@ -220,7 +223,11 @@ type Query {
   "Looks up a single product."
   product(id: ID!): Product
   "Lists products, most recently created first."
-  products(filter: ProductFilter, "Maximum number of products to return." first: Int = 20): [Product!]!
+  products(
+    filter: ProductFilter
+    "Maximum number of products to return."
+    first: Int = 20
+  ): [Product!]!
   "Looks up a single order."
   order(id: ID!): Order @auth(requires: CUSTOMER)
   "The currently authenticated customer, if any."
