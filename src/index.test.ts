@@ -93,3 +93,35 @@ describe("syncOkfBundle", () => {
     );
   });
 });
+
+describe("the resource option", () => {
+  it("overrides the resource recorded in concept frontmatter", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "okf-resource-"));
+    const sdlPath = join(workspace, "schema.graphql");
+    await writeFile(sdlPath, "type Query { hello: String }");
+    const outDir = join(workspace, "bundle");
+
+    await syncOkfBundle({
+      source: { kind: "sdl", path: sdlPath },
+      outDir,
+      resource: "https://shop.example/graphql",
+    });
+
+    const concept = await readFile(join(outDir, "queries/hello.md"), "utf8");
+    expect(concept).toContain('resource: "https://shop.example/graphql"');
+    expect(concept).not.toContain(workspace);
+  });
+
+  it("falls back to the source path when omitted", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "okf-resource-"));
+    const sdlPath = join(workspace, "schema.graphql");
+    await writeFile(sdlPath, "type Query { hello: String }");
+    const outDir = join(workspace, "bundle");
+
+    await syncOkfBundle({ source: { kind: "sdl", path: sdlPath }, outDir });
+
+    expect(await readFile(join(outDir, "queries/hello.md"), "utf8")).toContain(
+      `resource: "${sdlPath}"`,
+    );
+  });
+});

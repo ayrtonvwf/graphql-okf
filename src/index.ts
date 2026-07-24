@@ -11,6 +11,7 @@ export interface SyncOkfBundleOptions {
   readonly source: SourceSpec;
   readonly outDir: string;
   readonly now?: string;
+  readonly resource?: string;
 }
 
 export interface SyncResult {
@@ -32,7 +33,8 @@ export async function syncOkfBundle(options: SyncOkfBundleOptions): Promise<Sync
     );
   }
 
-  const ir = await readSchema(options.source);
+  const loaded = await readSchema(options.source);
+  const ir = options.resource === undefined ? loaded : { ...loaded, resource: options.resource };
   const timestamp = options.now ?? new Date().toISOString();
   const plan = reconcile(ir, existing, timestamp);
   await applyPlan(plan, options.outDir, timestamp);
