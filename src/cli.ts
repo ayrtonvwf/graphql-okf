@@ -3,35 +3,49 @@ import { GraphqlOkfError } from "./errors.js";
 import { syncOkfBundle } from "./index.js";
 import type { SourceSpec } from "./source/types.js";
 
-export function parseArgs(argv: readonly string[]): { source: SourceSpec; outDir: string } {
+export function parseArgs(argv: readonly string[]): {
+  source: SourceSpec;
+  outDir: string;
+  now?: string;
+  resource?: string;
+} {
   const positionals: string[] = [];
-  let outDir: string | undefined;
+  const options = new Map<string, string | undefined>();
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-    if (arg !== undefined && arg === "--out") {
-      outDir = argv[i + 1];
+    if (arg === undefined) continue;
+    if (arg === "--out" || arg === "--now" || arg === "--resource") {
+      options.set(arg, argv[i + 1]);
       i += 1;
-    } else if (arg !== undefined) {
+    } else {
       positionals.push(arg);
     }
   }
   const source = positionals[0];
-  if (source === undefined || outDir === undefined) {
+  const outDir = options.get("--out");
+  const now = options.get("--now");
+  const resource = options.get("--resource");
+  if (
+    source === undefined ||
+    outDir === undefined ||
+    (options.has("--now") && now === undefined) ||
+    (options.has("--resource") && resource === undefined)
+  ) {
     throw new GraphqlOkfError(
       "CLI_USAGE",
-      "Usage: graphql-okf <sdl-path-or-endpoint-url> --out <dir>",
+      "Usage: graphql-okf <sdl-path-or-endpoint-url> --out <dir> [--now <iso-8601>] [--resource <url-or-id>]",
     );
   }
   const spec: SourceSpec = /^https?:\/\//.test(source)
     ? { kind: "endpoint", url: source }
     : { kind: "sdl", path: source };
-  return { source: spec, outDir };
+  return { source: spec, outDir, now, resource };
 }
 
 export async function main(argv: readonly string[]): Promise<void> {
   try {
-    const { source, outDir } = parseArgs(argv);
-    await syncOkfBundle({ source, outDir });
+    const { source, outDir, now, resource } = parseArgs(argv);
+    await syncOkfBundle({ source, outDir, now, resource });
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;

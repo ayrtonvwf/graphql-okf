@@ -11,6 +11,7 @@ export interface SyncOkfBundleOptions {
   readonly source: SourceSpec;
   readonly outDir: string;
   readonly now?: string;
+  readonly resource?: string;
 }
 
 export interface SyncResult {
@@ -32,8 +33,9 @@ export async function syncOkfBundle(options: SyncOkfBundleOptions): Promise<Sync
     );
   }
 
-  const ir = await readSchema(options.source);
-  const timestamp = options.now ?? new Date().toISOString();
+  const loaded = await readSchema(options.source);
+  const ir = options.resource === undefined ? loaded : { ...loaded, resource: options.resource };
+  const timestamp = normalizeTimestamp(options.now);
   const plan = reconcile(ir, existing, timestamp);
   await applyPlan(plan, options.outDir, timestamp);
 
@@ -68,6 +70,18 @@ export type {
 } from "./model/ir.js";
 export type { ConceptKind } from "./model/naming.js";
 export type { FetchLike, LoadedSchema, SourceSpec } from "./source/types.js";
+
+function normalizeTimestamp(now: string | undefined): string {
+  if (now === undefined) return new Date().toISOString();
+  const parsed = new Date(now);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new GraphqlOkfError(
+      "INVALID_TIMESTAMP",
+      `"${now}" is not a valid ISO-8601 timestamp. Pass something like 2026-01-15T09:00:00.000Z.`,
+    );
+  }
+  return parsed.toISOString();
+}
 
 export async function readSchema(spec: SourceSpec): Promise<SchemaIr> {
   return project(await loadSchema(spec));
