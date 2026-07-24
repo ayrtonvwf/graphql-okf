@@ -52,8 +52,8 @@ examples/shop-api/v2.graphql      new — additions, deprecation cycle begins
 examples/shop-api/v3.graphql      new — deprecated members removed
 okf/shop-api/                     new — committed bundle, end state after v1 → v2 → v3
 test/example-bundle.test.ts       new — regenerates and asserts the committed bundle
-src/cli.ts                        changed — accepts --now
-src/index.ts                      changed — validates and normalizes `now`
+src/cli.ts                        changed — accepts --now and --resource
+src/index.ts                      changed — validates/normalizes `now`, adds `resource`
 README.md                         changed — documents the example and --now
 ```
 
@@ -157,27 +157,68 @@ and it must be deliberate rather than incidental.
 | human edit preserved | §6 |
 | `log.md` gains one entry per change run | three entries total |
 
+These SDLs were written and run against the built tool before this spec was
+finalized. The observed reconcile results, which the implementation must
+reproduce:
+
+| Run | added | changed | removed | unchanged |
+|---|---|---|---|---|
+| v1 | 43 | 0 | 0 | 0 |
+| v2 | 4 | 8 | 1 (`queries/searchProducts.md`) | 34 |
+| v3 | 0 | 5 | 1 (`types/objects/GiftCard.md`) | 40 |
+
 Restoration of a tombstoned concept is already covered by
 `test/reconcile.test.ts:158` against the kitchen-sink pair and is not duplicated
 here.
 
 ---
 
-## 5. The `--now` CLI flag
+## 5. Options: `now` and `resource`
+
+### 5.1 Why `resource` must be overridable
+
+Validated against the built tool before planning: `ir.resource` is the source path
+exactly as supplied, and it is written into every concept's frontmatter. Two
+consequences make the committed bundle impossible as originally specified.
+
+**It is machine-specific.** Generating from `examples/shop-api/v1.graphql` records
+whatever absolute path the caller passed, so a bundle committed from one machine
+can never match a run on another. The golden test of §6 would fail in CI for
+reasons unrelated to the emitter.
+
+**It makes every version bump rewrite everything.** Feeding the identical schema
+under a different filename reports **43 changed concepts out of 43** — the path is
+part of the rendered output, so `v1.graphql` → `v2.graphql` marks the whole bundle
+changed. `log.md` would list all 43 concepts on every run, destroying precisely the
+demonstration this work exists to produce.
+
+The underlying problem is that one field carries two different ideas: where the SDL
+happens to sit on disk, and what the API *is*. They coincide for an endpoint URL
+and diverge for a file. `GOAL-5.2` requires `resource` to point at the source of
+truth, and for a versioned example that is the API, not a temp path.
+
+**Resolution.** `syncOkfBundle` gains `resource?: string`, which overrides
+`ir.resource` when supplied and otherwise keeps today's behavior. The shop bundle
+is generated with `resource: "https://shop.example/graphql"`, constant across all
+three runs. This is independently useful to anyone committing a bundle generated
+from a local SDL, which is the documented workflow.
+
+### 5.2 The `--now` and `--resource` CLI flags
 
 `syncOkfBundle` accepts `now` (`src/index.ts:13`) but the CLI parses only `--out`
 (`src/cli.ts:11`), so a deterministic run is unreachable from the command line.
 Regenerating a bundle with pinned timestamps, and the reproducible scheduled runs
 `GOAL-9.5` asks for, both need it.
 
-**Parsing.** `parseArgs` gains `--now <iso-8601>` and returns
-`{ source, outDir, now?: string }`. Usage becomes:
+**Parsing.** `parseArgs` gains `--now <iso-8601>` and `--resource <string>`,
+returning `{ source, outDir, now?: string, resource?: string }`. Usage becomes:
 
 ```
-Usage: graphql-okf <sdl-path-or-endpoint-url> --out <dir> [--now <iso-8601>]
+Usage: graphql-okf <sdl-path-or-endpoint-url> --out <dir> [--now <iso-8601>] [--resource <url-or-id>]
 ```
 
-A `--now` with no following value is a usage error, consistent with `--out`.
+A `--now` or `--resource` with no following value is a usage error, consistent
+with `--out`.
 
 **Validation.** Validation and normalization live in `syncOkfBundle`, not in the
 CLI. A value `Date.parse` cannot read raises a `GraphqlOkfError`; an accepted value
@@ -196,7 +237,9 @@ string are unaffected.
 `test/example-bundle.test.ts` is the single gate. It:
 
 1. creates a temp directory and runs `syncOkfBundle` against `v1.graphql` with
-   `now` pinned to `2026-01-15T09:00:00.000Z`;
+   `now` pinned to `2026-01-15T09:00:00.000Z` and
+   `resource: "https://shop.example/graphql"` — every run uses that same
+   `resource`, per §5.1;
 2. appends a human-authored `## Ownership` section to
    `types/objects/Product.md`;
 3. runs `v2.graphql` with `now` pinned to `2026-03-02T09:00:00.000Z`;
@@ -265,8 +308,10 @@ as the live-introspection example. The CLI section documents `--now`.
   `types/objects/Product.md`.
 - `DONE-4` — `test/example-bundle.test.ts` passes on Node 24 and 26; running it
   twice without `UPDATE_EXAMPLE` is a no-op.
-- `DONE-5` — `graphql-okf <sdl> --out <dir> --now <iso>` produces the pinned
-  timestamps; an unparseable `--now` fails with a clear `GraphqlOkfError`.
+- `DONE-5` — `graphql-okf <sdl> --out <dir> --now <iso> --resource <id>` produces
+  the pinned timestamps and the given `resource`; an unparseable `--now` fails with
+  a clear `GraphqlOkfError`.
+- `DONE-8` — no file in `okf/shop-api/` contains an absolute filesystem path.
 - `DONE-6` — `pnpm run coverage`, `lint`, `typecheck`, `build` and `knip` all pass,
   with coverage still above the enforced thresholds.
 - `DONE-7` — README documents both examples and `--now`.
