@@ -2,7 +2,10 @@ import { mkdtemp, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { syncOkfBundle } from "../src/index.js";
+import { readSchema, syncOkfBundle } from "../src/index.js";
+import { applyPlan } from "../src/reconcile/apply.js";
+import { reconcile } from "../src/reconcile/plan.js";
+import { readExistingBundle } from "../src/reconcile/read.js";
 
 const BASE = new URL("./fixtures/kitchen-sink.graphql", import.meta.url).pathname;
 const EVOLVED = new URL("./fixtures/kitchen-sink-evolved.graphql", import.meta.url).pathname;
@@ -166,5 +169,44 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
     const restored = await readFile(join(outDir, "types/objects/User_case.md"), "utf8");
     expect(restored).not.toContain("status: removed");
     expect(restored).not.toContain("Last known definition");
+  });
+});
+
+describe("an interrupted run (GOAL-8.5)", () => {
+  it("converges on the next run to the same bytes an uninterrupted run produces", async () => {
+    const interrupted = await freshBundle(BASE);
+    const clean = await freshBundle(BASE);
+
+    // Uninterrupted: the reference result.
+    await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir: clean, now: T2 });
+
+    // Interrupted: apply only the first half of the very same plan.
+    const ir = await readSchema({ kind: "sdl", path: EVOLVED });
+    const existing = await readExistingBundle(interrupted);
+    const plan = reconcile(ir, existing, T2);
+    const half = Math.floor(plan.actions.length / 2);
+    expect(half).toBeGreaterThan(0);
+    await applyPlan({ ...plan, actions: plan.actions.slice(0, half) }, interrupted, T2);
+
+    // The next run finishes the job.
+    await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir: interrupted, now: T2 });
+
+    const recovered = await snapshot(interrupted);
+    const reference = await snapshot(clean);
+    recovered.delete("log.md");
+    reference.delete("log.md");
+    expect(recovered).toEqual(reference);
+  });
+
+  it("leaves no temp files behind after recovery", async () => {
+    const outDir = await freshBundle(BASE);
+    const ir = await readSchema({ kind: "sdl", path: EVOLVED });
+    const plan = reconcile(ir, await readExistingBundle(outDir), T2);
+    await applyPlan({ ...plan, actions: plan.actions.slice(0, 2) }, outDir, T2);
+
+    await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir, now: T2 });
+
+    const files = await snapshot(outDir);
+    expect([...files.keys()].filter((path) => path.includes("graphql-okf-tmp"))).toEqual([]);
   });
 });
