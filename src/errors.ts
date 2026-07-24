@@ -9,7 +9,8 @@ export type GraphqlOkfErrorCode =
   | "INTROSPECTION_DISABLED"
   | "NAME_HASH_COLLISION"
   | "OUTPUT_NOT_EMPTY"
-  | "CLI_USAGE";
+  | "CLI_USAGE"
+  | "MALFORMED_CONCEPT";
 
 export class GraphqlOkfError extends Error {
   readonly code: GraphqlOkfErrorCode;
