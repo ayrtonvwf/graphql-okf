@@ -125,3 +125,39 @@ describe("the resource option", () => {
     );
   });
 });
+
+describe("the now option", () => {
+  it("rejects a value that is not a parseable timestamp", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "okf-now-"));
+    const sdlPath = join(workspace, "schema.graphql");
+    await writeFile(sdlPath, "type Query { hello: String }");
+
+    const code = await syncOkfBundle({
+      source: { kind: "sdl", path: sdlPath },
+      outDir: join(workspace, "bundle"),
+      now: "yesterday",
+    }).then(
+      () => "no-error",
+      (error: GraphqlOkfError) => error.code,
+    );
+
+    expect(code).toBe("INVALID_TIMESTAMP");
+  });
+
+  it("normalizes an accepted value to a canonical ISO-8601 string", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "okf-now-"));
+    const sdlPath = join(workspace, "schema.graphql");
+    await writeFile(sdlPath, "type Query { hello: String }");
+    const outDir = join(workspace, "bundle");
+
+    await syncOkfBundle({
+      source: { kind: "sdl", path: sdlPath },
+      outDir,
+      now: "2026-01-15T09:00:00Z",
+    });
+
+    expect(await readFile(join(outDir, "queries/hello.md"), "utf8")).toContain(
+      "timestamp: 2026-01-15T09:00:00.000Z",
+    );
+  });
+});

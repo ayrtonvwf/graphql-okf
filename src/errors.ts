@@ -10,6 +10,7 @@ export type GraphqlOkfErrorCode =
   | "NAME_HASH_COLLISION"
   | "NOT_A_BUNDLE"
   | "CLI_USAGE"
+  | "INVALID_TIMESTAMP"
   | "MALFORMED_CONCEPT";
 
 export class GraphqlOkfError extends Error {

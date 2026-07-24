@@ -32,6 +32,37 @@ describe("parseArgs", () => {
     })();
     expect(code).toBe("CLI_USAGE");
   });
+
+  it("parses --now and --resource", () => {
+    expect(
+      parseArgs([
+        "./schema.graphql",
+        "--out",
+        "bundle",
+        "--now",
+        "2026-01-15T09:00:00.000Z",
+        "--resource",
+        "https://shop.example/graphql",
+      ]),
+    ).toEqual({
+      source: { kind: "sdl", path: "./schema.graphql" },
+      outDir: "bundle",
+      now: "2026-01-15T09:00:00.000Z",
+      resource: "https://shop.example/graphql",
+    });
+  });
+
+  it("rejects a --now with no value", () => {
+    const code = (() => {
+      try {
+        parseArgs(["./schema.graphql", "--out", "bundle", "--now"]);
+      } catch (error) {
+        return (error as GraphqlOkfError).code;
+      }
+      return "no-error";
+    })();
+    expect(code).toBe("CLI_USAGE");
+  });
 });
 
 describe("main", () => {
@@ -60,7 +91,7 @@ describe("main", () => {
 
     expect(process.exitCode).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith(
-      "Usage: graphql-okf <sdl-path-or-endpoint-url> --out <dir>",
+      "Usage: graphql-okf <sdl-path-or-endpoint-url> --out <dir> [--now <iso-8601>] [--resource <url-or-id>]",
     );
   });
 
@@ -72,5 +103,18 @@ describe("main", () => {
 
     expect(process.exitCode).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith("boom");
+  });
+
+  it("forwards --now to the bundle it writes", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "okf-cli-now-"));
+    const sdlPath = join(workspace, "schema.graphql");
+    await writeFile(sdlPath, "type Query { hello: String }");
+    const outDir = join(workspace, "bundle");
+
+    await main([sdlPath, "--out", outDir, "--now", "2026-01-15T09:00:00.000Z"]);
+
+    expect(await readFile(join(outDir, "queries/hello.md"), "utf8")).toContain(
+      "timestamp: 2026-01-15T09:00:00.000Z",
+    );
   });
 });
