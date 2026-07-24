@@ -218,7 +218,7 @@ invocation shown in [CLI usage](#cli).
 ## Status & roadmap
 
 M1 ("frontend-only utility", see [Milestones](#milestones)) is split into four
-sub-projects; the first three are done, the last is not started:
+sub-projects; the first three are done, the last is in progress:
 
 - ✅ **Concept model & naming scheme** — projects a GraphQL schema into an
   in-memory IR with the deterministic file path for every concept baked in.
@@ -229,9 +229,12 @@ sub-projects; the first three are done, the last is not started:
   existing bundle in place (add/update/remove concepts, preserve
   human-authored edits, record a change log) instead of only writing into an
   empty directory. See [Updating a bundle](#updating-a-bundle).
-- ⬜ **Delivery surface** — the rest of the CLI/library surface: request
-  headers for authenticated introspection, config files, `--force`/overwrite
-  semantics, archiving previous bundle versions.
+- 🚧 **Delivery surface** — the rest of the CLI/library surface. The
+  reproducibility flags (`--now`, `--resource`, see [CLI usage](#cli)) are
+  done; still outstanding are request headers for authenticated
+  introspection, config files, and running as a scheduled/CI job that opens a
+  diff when the upstream schema changes. Archive/tarball output is *not*
+  planned — it's an explicit non-goal (`NG-7`).
 
 Follow the [milestones](#milestones) above for what comes after M1.
 
