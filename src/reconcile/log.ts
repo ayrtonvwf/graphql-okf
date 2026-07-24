@@ -23,5 +23,6 @@ export function renderLogEntry(plan: BundlePlan, timestamp: string): string {
     ...group("Added", plan.added),
     ...group("Changed", plan.changed),
     ...group("Removed", plan.removed),
+    "",
   ].join("\n");
 }

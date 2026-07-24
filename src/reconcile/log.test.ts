@@ -34,6 +34,7 @@ describe("renderLogEntry", () => {
         "",
         "- [`LegacyOrder`](types/objects/LegacyOrder.md)",
         "",
+        "",
       ].join("\n"),
     );
   });
@@ -44,6 +45,17 @@ describe("renderLogEntry", () => {
     expect(entry).toContain("**Added**");
     expect(entry).not.toContain("**Changed**");
     expect(entry).not.toContain("**Removed**");
+  });
+
+  it("separates two consecutive entries with a blank line when appended back-to-back", () => {
+    const first = renderLogEntry(plan, T);
+    const second = renderLogEntry(plan, "2026-08-01T00:00:00.000Z");
+
+    const combined = first + second;
+
+    expect(combined).toContain(
+      "- [`LegacyOrder`](types/objects/LegacyOrder.md)\n\n## 2026-08-01T00:00:00.000Z",
+    );
   });
 });
 
