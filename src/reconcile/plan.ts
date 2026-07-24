@@ -10,7 +10,7 @@ export interface ConceptChange {
   readonly path: string;
 }
 
-export interface FileAction {
+interface FileAction {
   readonly kind: "create" | "update" | "tombstone" | "index";
   readonly path: string;
   readonly contents: string;
@@ -24,7 +24,7 @@ export interface BundlePlan {
   readonly unchanged: number;
 }
 
-export function isIndexPath(path: string): boolean {
+function isIndexPath(path: string): boolean {
   return path === "index.md" || path.endsWith("/index.md");
 }
 

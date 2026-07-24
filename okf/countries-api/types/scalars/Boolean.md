@@ -4,7 +4,7 @@ title: "Boolean"
 description: "The `Boolean` scalar type represents `true` or `false`."
 resource: "https://countries.trevorblades.com/graphql"
 tags: [graphql, scalar]
-timestamp: 2026-07-23T10:57:36.557Z
+timestamp: 2026-07-24T13:14:12.015Z
 ---
 
 <!-- graphql-okf:generated:start -->

@@ -4,7 +4,7 @@ title: "String"
 description: "The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text."
 resource: "https://countries.trevorblades.com/graphql"
 tags: [graphql, scalar]
-timestamp: 2026-07-23T10:57:36.557Z
+timestamp: 2026-07-24T13:14:12.015Z
 ---
 
 <!-- graphql-okf:generated:start -->
