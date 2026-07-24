@@ -1,26 +1,19 @@
 import type { ConceptNode } from "../../model/ir.js";
 import { renderBody } from "./body.js";
 import { renderFrontmatter } from "./frontmatter.js";
+import { assembleFile, EMPTY_HUMAN, type FileParts, GENERATED_HINT } from "./seam.js";
 
-export const GENERATED_START = "<!-- graphql-okf:generated:start -->";
-export const GENERATED_END = "<!-- graphql-okf:generated:end -->";
-
-const GENERATED_HINT =
-  "<!-- Regenerated on each run. Do not edit inside this block; edits below the end marker are preserved. -->";
-const HUMAN_HINT =
-  "<!-- Human-authored content below this line is preserved across regenerations. -->";
+export function renderConceptParts(
+  concept: ConceptNode,
+  resource: string,
+  timestamp: string,
+): FileParts {
+  return {
+    preamble: `${renderFrontmatter(concept, resource, timestamp)}\n`,
+    generated: `\n${GENERATED_HINT}\n\n${renderBody(concept).trimEnd()}\n\n`,
+  };
+}
 
 export function renderConcept(concept: ConceptNode, resource: string, timestamp: string): string {
-  return [
-    renderFrontmatter(concept, resource, timestamp),
-    GENERATED_START,
-    GENERATED_HINT,
-    "",
-    renderBody(concept).trimEnd(),
-    "",
-    GENERATED_END,
-    "",
-    HUMAN_HINT,
-    "",
-  ].join("\n");
+  return assembleFile(renderConceptParts(concept, resource, timestamp), EMPTY_HUMAN);
 }
