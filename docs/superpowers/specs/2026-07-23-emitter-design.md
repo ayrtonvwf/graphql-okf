@@ -24,7 +24,7 @@ rewrite.
 
 B ships one convenience: a **minimal CLI** (`graphql-okf <source> --out <dir>`) so
 the emitter is runnable end-to-end today. Full flag design — headers, config file,
-archive output, overwrite/force semantics — is sub-project D.
+overwrite/force semantics — is sub-project D.
 
 ### 1.1 Decomposition recap
 
@@ -287,7 +287,7 @@ graphql-okf <sdl-path-or-endpoint-url> --out <dir>
 Source kind is inferred: an argument that parses as an `http(s)` URL is an
 `endpoint` spec; otherwise it is an `sdl` path. Errors print `error.message` only
 (never a stack), as the existing `cli.ts` already does. Everything else — headers,
-`--sdl`/`--endpoint` explicit selectors, config file, archive output, force/overwrite
+`--sdl`/`--endpoint` explicit selectors, config file, force/overwrite
 — is deferred to sub-project D and explicitly out of scope here.
 
 ---
@@ -347,9 +347,9 @@ statements >= 90%) apply unchanged.
   existing timestamps, add/change detection, tombstoning removed concepts,
   human-edit merge-back, and `log.md`. B is create-only and re-writes a fresh tree.
 - **Full delivery surface (§9, sub-project D):** request headers on the CLI,
-  explicit source selectors, config file, archive (tarball/zip) output, force/
-  overwrite semantics beyond a plain refuse-if-non-empty, and the scheduled/CI
-  recipe.
-- The M1 non-goals `NG-1`..`NG-6` apply in full — in particular `NG-6`: no runtime
+  explicit source selectors, config file, force/overwrite semantics beyond a
+  plain refuse-if-non-empty, and the scheduled/CI recipe. (Archive output is a
+  non-goal — `NG-7`.)
+- The M1 non-goals `NG-1`..`NG-7` apply in full — in particular `NG-6`: no runtime
   LLM calls, and every byte of output except the injected `timestamp` a pure
   function of the schema.
