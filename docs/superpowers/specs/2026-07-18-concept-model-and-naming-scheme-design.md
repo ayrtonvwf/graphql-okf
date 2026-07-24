@@ -17,7 +17,7 @@ sub-projects, each with its own spec → plan → implementation cycle:
 | **A** | **Concept model + naming scheme** | §3, §4 | SDL/introspection → normalized IR with resolved paths. **This document.** |
 | B | Emitter | §5, §6, §7 | IR → bundle on disk: frontmatter, body prose, cross-links, per-directory `index.md`. |
 | C | Reconciler | §8 | Idempotency, add/change/tombstone, human-edit preservation, `log.md`, crash safety. |
-| D | Delivery surface | §9 | CLI flags, config file, archive output, CI recipe. |
+| D | Delivery surface | §9 | CLI flags, config file, CI recipe. |
 
 This ordering is mandated by the goal spec itself: §4 states the naming scheme
 "MUST be settled and documented before the emitter is built."
@@ -357,7 +357,7 @@ branches ≥ 85%, statements ≥ 90%) apply unchanged.
 ## 9. Explicitly out of scope
 
 No file writing, Markdown rendering, frontmatter, `index.md`, `log.md`,
-reconciliation, tombstoning, human-edit preservation, CLI flags, config files, or
-archive output. Those belong to sub-projects B, C, and D. The M1 non-goals `NG-1`
-through `NG-6` apply in full — in particular `NG-6`: no runtime LLM calls, and
+reconciliation, tombstoning, human-edit preservation, CLI flags, or config files.
+Those belong to sub-projects B, C, and D. The M1 non-goals `NG-1`
+through `NG-7` apply in full — in particular `NG-6`: no runtime LLM calls, and
 every byte of output a pure function of the schema.

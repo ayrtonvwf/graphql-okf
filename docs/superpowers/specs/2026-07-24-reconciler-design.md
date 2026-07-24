@@ -362,7 +362,7 @@ The returned `SyncResult` is what a CI job needs to decide whether to open a PR,
 and what the tests assert against without re-reading the tree.
 
 The CLI keeps its current shape and calls the new verb. New flags (`--force`,
-archive output, headers, config file) remain sub-project D.
+headers, config file) remain sub-project D.
 
 ### 8.1 New error codes
 
@@ -417,7 +417,7 @@ branches ≥ 85%, statements ≥ 90%.
 
 ## 11. Explicitly out of scope
 
-- **Delivery surface (§9, sub-project D):** `--force`/overwrite, archive output,
+- **Delivery surface (§9, sub-project D):** `--force`/overwrite,
   CLI request headers, config file, scheduled-job wiring.
 - **Semantic diffing:** the reconciler compares rendered text, not schema ASTs. A
   cosmetic schema edit that changes rendered output counts as a change; that is

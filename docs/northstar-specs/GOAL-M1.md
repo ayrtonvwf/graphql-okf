@@ -213,10 +213,8 @@ M1 ships as both a library and a CLI; both are consumers of the same core.
   entry point) that accepts a source plus options and creates or updates a bundle.
 - `GOAL-9.2` — graphql-okf MUST expose a CLI that performs the same create/update
   operation, with flags for source selection (SDL path vs. endpoint), headers,
-  output location, and output form.
-- `GOAL-9.3` — graphql-okf MUST support emitting the bundle as a directory (for a
-  git repo) and SHOULD support a single archive (tarball/zip) form, both being
-  valid OKF distribution shapes.
+  and output location. The bundle is always emitted as a directory (for a git
+  repo); archive output is a non-goal (`NG-7`).
 - `GOAL-9.4` — Configuration SHOULD be expressible via a config file in addition
   to CLI flags, so repeated runs (e.g. in automation) are declarative.
 - `GOAL-9.5` — graphql-okf SHOULD be runnable as a scheduled/CI job that
@@ -251,6 +249,8 @@ following. These are named here so they are not smuggled in:
   non-paraphrased doc-strings), `GOAL-4.2` (byte-identical paths), and `GOAL-8.1`
   (idempotent no-op re-runs) — all of which non-deterministic generation would
   violate. AI is used to *build* graphql-okf (see `SETUP.md`), not to run it.
+- `NG-7` — No archive (tarball/zip) output form. The bundle is emitted as a
+  directory only; packaging it for distribution is left to existing tooling.
 
 ---
 
@@ -270,7 +270,7 @@ M1's functional goal is met when all of the following hold:
   marks-removed the affected concepts; appends an ISO-8601 `log.md` entry; and
   preserves human-authored content — all demonstrated against fixture schemas.
 - `DOD-G-5` — Both the library API and the CLI perform create and update, with
-  directory output working and archive output at least available.
+  directory output working.
 - `DOD-G-6` — SDL-sourced and introspection-sourced bundles of the same schema
   are equivalent per `GOAL-3.4`.
 - `DOD-G-7` — The concept model and naming scheme are documented in the repo as
