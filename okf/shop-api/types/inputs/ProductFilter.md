@@ -1,10 +1,10 @@
 ---
-type: input
+type: "input"
 title: "ProductFilter"
 description: "Narrows a product listing. Every field is optional; omitted fields do not filter."
 resource: "https://shop.example/graphql"
-tags: [graphql, input]
-timestamp: 2026-01-15T09:00:00.000Z
+tags: ["graphql", "input"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

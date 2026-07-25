@@ -1,10 +1,10 @@
 ---
-type: mutation
+type: "mutation"
 title: "cancelOrder"
 description: "Cancels an order that has not yet shipped."
 resource: "https://shop.example/graphql"
-tags: [graphql, mutation]
-timestamp: 2026-01-15T09:00:00.000Z
+tags: ["graphql", "mutation"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

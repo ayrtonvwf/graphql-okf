@@ -29,7 +29,7 @@ describe("syncOkfBundle", () => {
     expect(result.changed).toEqual([]);
     expect(result.removed).toEqual([]);
     expect(await readFile(join(outDir, "types/objects/Country.md"), "utf8")).toContain(
-      "type: object",
+      'type: "object"',
     );
   });
 
@@ -88,7 +88,7 @@ describe("syncOkfBundle", () => {
     await syncOkfBundle({ source: { kind: "sdl", path: sdlPath }, outDir });
 
     const hello = await readFile(join(outDir, "queries/hello.md"), "utf8");
-    expect(hello.match(/^timestamp: (.+)$/m)?.[1]).toMatch(
+    expect(hello.match(/^timestamp: "(.+)"$/m)?.[1]).toMatch(
       /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
     );
   });
@@ -157,7 +157,7 @@ describe("the now option", () => {
     });
 
     expect(await readFile(join(outDir, "queries/hello.md"), "utf8")).toContain(
-      "timestamp: 2026-01-15T09:00:00.000Z",
+      'timestamp: "2026-01-15T09:00:00.000Z"',
     );
   });
 });

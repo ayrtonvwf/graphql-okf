@@ -1,10 +1,10 @@
 ---
-type: union
+type: "union"
 title: "PaymentMethod"
 description: "How an order was paid for."
 resource: "https://shop.example/graphql"
-tags: [graphql, union]
-timestamp: 2026-05-20T09:00:00.000Z
+tags: ["graphql", "union"]
+timestamp: "2026-05-20T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

@@ -1,10 +1,10 @@
 ---
-type: object
+type: "object"
 title: "OrderLine"
 description: "One line of an order: a product and how many of it were bought."
 resource: "https://shop.example/graphql"
-tags: [graphql, object]
-timestamp: 2026-01-15T09:00:00.000Z
+tags: ["graphql", "object"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

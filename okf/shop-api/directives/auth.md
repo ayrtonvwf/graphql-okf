@@ -1,10 +1,10 @@
 ---
-type: directive
+type: "directive"
 title: "auth"
 description: "Restricts a field or type to callers holding at least the given role."
 resource: "https://shop.example/graphql"
-tags: [graphql, directive]
-timestamp: 2026-01-15T09:00:00.000Z
+tags: ["graphql", "directive"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

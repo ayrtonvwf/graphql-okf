@@ -104,8 +104,8 @@ describe("reconciling v2 to v3", () => {
     await syncOkfBundle({ source: { kind: "sdl", path: V3 }, outDir, now: T3, resource: RESOURCE });
 
     const giftCard = await readFile(join(outDir, "types/objects/GiftCard.md"), "utf8");
-    expect(giftCard).toContain("status: removed");
-    expect(giftCard).toContain(`removedAt: ${T3}`);
+    expect(giftCard).toContain('status: "removed"');
+    expect(giftCard).toContain(`removedAt: ${JSON.stringify(T3)}`);
   });
 });
 

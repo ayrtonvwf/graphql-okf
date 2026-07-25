@@ -57,7 +57,7 @@ describe("reconcile", () => {
     const plan = reconcile(ir, disk, T2);
 
     expect(plan.actions).toEqual([]);
-    expect(disk.get("types/objects/Country.md")).toContain(`timestamp: ${T1}`);
+    expect(disk.get("types/objects/Country.md")).toContain(`timestamp: ${JSON.stringify(T1)}`);
   });
 
   it("updates a concept whose rendered content changed, stamping the new time", () => {
@@ -72,7 +72,7 @@ describe("reconcile", () => {
 
     expect(plan.changed.map((change) => change.name)).toEqual(["Country"]);
     expect(action?.kind).toBe("update");
-    expect(action?.contents).toContain(`timestamp: ${T2}`);
+    expect(action?.contents).toContain(`timestamp: ${JSON.stringify(T2)}`);
     expect(action?.contents).toContain("A sovereign state.");
   });
 
@@ -134,8 +134,8 @@ describe("reconcile removals", () => {
 
     expect(plan.removed.map((change) => change.name)).toEqual(["Country"]);
     expect(action?.kind).toBe("tombstone");
-    expect(action?.contents).toContain("status: removed");
-    expect(action?.contents).toContain(`removedAt: ${T2}`);
+    expect(action?.contents).toContain('status: "removed"');
+    expect(action?.contents).toContain(`removedAt: ${JSON.stringify(T2)}`);
     expect(action?.contents).toContain("## Last known definition");
   });
 

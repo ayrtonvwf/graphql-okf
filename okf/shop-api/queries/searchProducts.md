@@ -1,12 +1,12 @@
 ---
-type: query
+type: "query"
 title: "searchProducts"
 description: "Full-text search across the catalog."
 resource: "https://shop.example/graphql"
-tags: [graphql, query]
-timestamp: 2026-01-15T09:00:00.000Z
-status: removed
-removedAt: 2026-03-02T09:00:00.000Z
+tags: ["graphql", "query"]
+timestamp: "2026-01-15T09:00:00.000Z"
+status: "removed"
+removedAt: "2026-03-02T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

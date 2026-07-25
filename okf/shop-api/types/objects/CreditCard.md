@@ -1,10 +1,10 @@
 ---
-type: object
+type: "object"
 title: "CreditCard"
 description: "A payment card."
 resource: "https://shop.example/graphql"
-tags: [graphql, object]
-timestamp: 2026-01-15T09:00:00.000Z
+tags: ["graphql", "object"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

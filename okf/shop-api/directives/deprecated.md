@@ -1,10 +1,10 @@
 ---
-type: directive
+type: "directive"
 title: "deprecated"
 description: "Marks an element of a GraphQL schema as no longer supported."
 resource: "https://shop.example/graphql"
-tags: [graphql, directive]
-timestamp: 2026-01-15T09:00:00.000Z
+tags: ["graphql", "directive"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

@@ -1,10 +1,10 @@
 ---
-type: input
+type: "input"
 title: "PlaceOrderInput"
 description: "Everything needed to turn a basket into an order."
 resource: "https://shop.example/graphql"
-tags: [graphql, input]
-timestamp: 2026-01-15T09:00:00.000Z
+tags: ["graphql", "input"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

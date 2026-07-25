@@ -1,12 +1,12 @@
 ---
-type: object
+type: "object"
 title: "GiftCard"
 description: "A prepaid gift card redeemed against an order."
 resource: "https://shop.example/graphql"
-tags: [graphql, object]
-timestamp: 2026-01-15T09:00:00.000Z
-status: removed
-removedAt: 2026-05-20T09:00:00.000Z
+tags: ["graphql", "object"]
+timestamp: "2026-01-15T09:00:00.000Z"
+status: "removed"
+removedAt: "2026-05-20T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

@@ -1,10 +1,10 @@
 ---
-type: directive
+type: "directive"
 title: "tag"
 description: "Attaches a free-form classification label. May be applied more than once."
 resource: "https://shop.example/graphql"
-tags: [graphql, directive]
-timestamp: 2026-01-15T09:00:00.000Z
+tags: ["graphql", "directive"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

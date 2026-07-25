@@ -1,10 +1,10 @@
 ---
-type: enum
+type: "enum"
 title: "OrderStatus"
 description: "The lifecycle stage of an order."
 resource: "https://shop.example/graphql"
-tags: [graphql, enum]
-timestamp: 2026-05-20T09:00:00.000Z
+tags: ["graphql", "enum"]
+timestamp: "2026-05-20T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

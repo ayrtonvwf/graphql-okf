@@ -1,10 +1,10 @@
 ---
-type: scalar
+type: "scalar"
 title: "Boolean"
 description: "The `Boolean` scalar type represents `true` or `false`."
 resource: "https://shop.example/graphql"
-tags: [graphql, scalar]
-timestamp: 2026-01-15T09:00:00.000Z
+tags: ["graphql", "scalar"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

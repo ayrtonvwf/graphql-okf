@@ -9,6 +9,21 @@ function split(text: string) {
   return result;
 }
 
+const existingConcept = [
+  "---",
+  'type: "object"',
+  'title: "Country"',
+  'timestamp: "2026-01-01T00:00:00.000Z"',
+  "---",
+  "",
+  "<!-- graphql-okf:generated:start -->",
+  "",
+  "# Country",
+  "",
+  "<!-- graphql-okf:generated:end -->",
+  "",
+].join("\n");
+
 const live = split(
   `---\ntype: object\ntitle: "LegacyOrder"\nresource: "x"\ntags: [graphql, object]\ntimestamp: 2026-07-01T10:00:00.000Z\n---\n\n<!-- graphql-okf:generated:start -->\n${GENERATED_HINT}\n\n# LegacyOrder\n\n## Fields\n\n- **\`id\`**: \`ID!\`\n\n<!-- graphql-okf:generated:end -->\n\nour notes\n`,
 );
@@ -44,9 +59,18 @@ describe("renderTombstone", () => {
   const parts = renderTombstone(live, "2026-07-24T09:00:00.000Z");
 
   it("adds status and removedAt without disturbing the original timestamp", () => {
-    expect(parts.preamble).toContain("status: removed");
-    expect(parts.preamble).toContain("removedAt: 2026-07-24T09:00:00.000Z");
+    expect(parts.preamble).toContain('status: "removed"');
+    expect(parts.preamble).toContain('removedAt: "2026-07-24T09:00:00.000Z"');
     expect(parts.preamble).toContain("timestamp: 2026-07-01T10:00:00.000Z");
+  });
+
+  it("quotes removedAt so YAML 1.1 consumers see a string", () => {
+    const split = splitFile(existingConcept, "types/objects/Country.md");
+    if (split === null) throw new Error("fixture must be an owned file");
+
+    const parts = renderTombstone(split, "2026-08-01T00:00:00.000Z");
+
+    expect(parts.preamble).toContain('removedAt: "2026-08-01T00:00:00.000Z"');
   });
 
   it("states the removal and retains the last known definition", () => {

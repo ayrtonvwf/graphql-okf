@@ -1,10 +1,10 @@
 ---
-type: enum
+type: "enum"
 title: "Currency"
 description: "An ISO-4217 currency code."
 resource: "https://shop.example/graphql"
-tags: [graphql, enum]
-timestamp: 2026-01-15T09:00:00.000Z
+tags: ["graphql", "enum"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

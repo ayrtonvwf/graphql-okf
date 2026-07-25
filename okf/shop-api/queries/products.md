@@ -1,10 +1,10 @@
 ---
-type: query
+type: "query"
 title: "products"
 description: "Lists products, most recently created first."
 resource: "https://shop.example/graphql"
-tags: [graphql, query]
-timestamp: 2026-03-02T09:00:00.000Z
+tags: ["graphql", "query"]
+timestamp: "2026-03-02T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

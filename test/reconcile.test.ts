@@ -93,7 +93,7 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
     await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir, now: T2 });
 
     const after = await readFile(target, "utf8");
-    expect(after).toContain("status: removed");
+    expect(after).toContain('status: "removed"');
     expect(after).toContain("Billing team.");
   });
 

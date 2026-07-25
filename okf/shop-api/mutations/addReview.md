@@ -1,10 +1,10 @@
 ---
-type: mutation
+type: "mutation"
 title: "addReview"
 description: "Adds a review to a product."
 resource: "https://shop.example/graphql"
-tags: [graphql, mutation]
-timestamp: 2026-03-02T09:00:00.000Z
+tags: ["graphql", "mutation"]
+timestamp: "2026-03-02T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

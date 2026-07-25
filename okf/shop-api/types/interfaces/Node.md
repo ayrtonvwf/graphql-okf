@@ -1,10 +1,10 @@
 ---
-type: interface
+type: "interface"
 title: "Node"
 description: "Anything addressable by a globally unique identifier."
 resource: "https://shop.example/graphql"
-tags: [graphql, interface]
-timestamp: 2026-03-02T09:00:00.000Z
+tags: ["graphql", "interface"]
+timestamp: "2026-03-02T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

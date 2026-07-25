@@ -1,10 +1,10 @@
 ---
-type: mutation
+type: "mutation"
 title: "placeOrder"
 description: "Places an order for the given products."
 resource: "https://shop.example/graphql"
-tags: [graphql, mutation]
-timestamp: 2026-01-15T09:00:00.000Z
+tags: ["graphql", "mutation"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

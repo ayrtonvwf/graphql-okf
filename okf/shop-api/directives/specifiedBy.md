@@ -1,10 +1,10 @@
 ---
-type: directive
+type: "directive"
 title: "specifiedBy"
 description: "Exposes a URL that specifies the behavior of this scalar."
 resource: "https://shop.example/graphql"
-tags: [graphql, directive]
-timestamp: 2026-01-15T09:00:00.000Z
+tags: ["graphql", "directive"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
