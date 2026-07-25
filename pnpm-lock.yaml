@@ -11,6 +11,9 @@ importers:
       graphql:
         specifier: ^16.11.0
         version: 16.14.2
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.0
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.5.3
