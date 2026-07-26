@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { GraphqlOkfError } from "./errors.js";
 import { syncOkfBundle } from "./index.js";
+import { readExistingBundle } from "./reconcile/read.js";
 
 const SDL = '"An ISO country." type Country { code: ID! } type Query { countries: [Country!]! }';
 
@@ -82,6 +83,34 @@ describe("syncOkfBundle", () => {
     expect(result.created).toBe(false);
     expect(result.added).toEqual([]);
     expect(result.unchanged).toBeGreaterThan(0);
+  });
+
+  it("is a byte-identical no-op when re-run against an unchanged schema", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "okf-idempotence-"));
+    const out = join(workspace, "bundle");
+
+    await syncOkfBundle({
+      source: { kind: "sdl", path: "examples/shop-api/v1.graphql" },
+      outDir: out,
+      now: "2026-07-25T00:00:00.000Z",
+      resource: "https://shop.example/graphql",
+    });
+    const first = await readExistingBundle(out);
+    const firstLog = await readFile(join(out, "log.md"), "utf8");
+
+    const second = await syncOkfBundle({
+      source: { kind: "sdl", path: "examples/shop-api/v1.graphql" },
+      outDir: out,
+      now: "2026-07-26T00:00:00.000Z",
+      resource: "https://shop.example/graphql",
+    });
+
+    expect(second.added).toEqual([]);
+    expect(second.changed).toEqual([]);
+    expect(second.removed).toEqual([]);
+    expect(second.indexes).toBe(0);
+    expect(await readExistingBundle(out)).toEqual(first);
+    expect(await readFile(join(out, "log.md"), "utf8")).toBe(firstLog);
   });
 
   it("defaults the timestamp to the current wall-clock time when `now` is omitted", async () => {
