@@ -22,6 +22,12 @@ export interface BundlePlan {
   readonly changed: readonly ConceptChange[];
   readonly removed: readonly ConceptChange[];
   readonly unchanged: number;
+  /**
+   * Index files this run writes. Indexes change whenever their concepts do, so
+   * they are not listed in log.md — but they must be reported, or a rewrite of
+   * the root index (which carries okf_version) is invisible.
+   */
+  readonly indexes: number;
 }
 
 function isIndexPath(path: string): boolean {
@@ -83,6 +89,7 @@ export function reconcile(
   const changed: ConceptChange[] = [];
   const removed: ConceptChange[] = [];
   let unchanged = 0;
+  let indexes = 0;
 
   const names = new Map(ir.concepts.map((concept) => [concept.path, concept.name]));
 
@@ -96,7 +103,9 @@ export function reconcile(
         path,
         contents: assembleFile(rendered, EMPTY_HUMAN),
       });
-      if (!index) {
+      if (index) {
+        indexes += 1;
+      } else {
         added.push({ name: names.get(path) ?? path, path });
       }
       continue;
@@ -119,7 +128,9 @@ export function reconcile(
       path,
       contents: assembleFile(merged, current.human),
     });
-    if (!index) {
+    if (index) {
+      indexes += 1;
+    } else {
       const change: ConceptChange = { name: names.get(path) ?? path, path };
       if (isTombstoned(current)) {
         added.push(change);
@@ -138,5 +149,5 @@ export function reconcile(
     removed.push(change);
   }
 
-  return { actions, added, changed, removed, unchanged };
+  return { actions, added, changed, removed, unchanged, indexes };
 }

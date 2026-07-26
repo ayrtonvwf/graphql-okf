@@ -174,6 +174,22 @@ describe("reconcile", () => {
     expect(rewritten.contents).toContain('resource: "schema-v2.graphql"');
     expect(rewritten.contents).toContain('okf_version: "0.1"');
   });
+
+  it("counts index writes so they are never silent", () => {
+    const plan = reconcile(ir, new Map(), "2026-07-25T00:00:00.000Z");
+
+    expect(plan.indexes).toBe(plan.actions.filter((action) => action.kind === "index").length);
+    expect(plan.indexes).toBeGreaterThan(0);
+  });
+
+  it("reports zero index writes on an unchanged re-run", () => {
+    const first = reconcile(ir, new Map(), "2026-07-25T00:00:00.000Z");
+    const existing = new Map(first.actions.map((action) => [action.path, action.contents]));
+
+    const second = reconcile(ir, existing, "2026-07-25T00:00:00.000Z");
+
+    expect(second.indexes).toBe(0);
+  });
 });
 
 const emptyIr: SchemaIr = { resource: "schema.graphql", origin: "sdl", concepts: [] };

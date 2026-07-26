@@ -13,6 +13,7 @@ const plan: BundlePlan = {
   changed: [{ name: "User", path: "types/objects/User.md" }],
   removed: [{ name: "LegacyOrder", path: "types/objects/LegacyOrder.md" }],
   unchanged: 12,
+  indexes: 0,
 };
 
 describe("renderLogEntry", () => {
@@ -67,6 +68,7 @@ describe("hasLoggableChanges", () => {
       changed: [],
       removed: [],
       unchanged: 3,
+      indexes: 1,
     };
 
     expect(hasLoggableChanges(indexOnly)).toBe(false);

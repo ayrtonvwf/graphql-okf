@@ -13,6 +13,7 @@ const empty: BundlePlan = {
   changed: [],
   removed: [],
   unchanged: 4,
+  indexes: 0,
 };
 
 async function workspace(): Promise<string> {
