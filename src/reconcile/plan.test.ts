@@ -205,7 +205,7 @@ describe("reconcile removals", () => {
     expect(action?.kind).toBe("tombstone");
     expect(action?.contents).toContain('status: "removed"');
     expect(action?.contents).toContain(`removedAt: ${JSON.stringify(T2)}`);
-    expect(action?.contents).toContain("## Last known definition");
+    expect(action?.contents).toContain("# Last known definition");
   });
 
   it("keeps the tombstoned file at its original path so inbound links resolve", () => {

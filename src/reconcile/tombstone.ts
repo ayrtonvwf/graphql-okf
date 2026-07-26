@@ -37,7 +37,7 @@ export function renderTombstone(split: SplitFile, removedAt: string): FileParts 
     "",
     `> **Removed.** This element is no longer present in the schema as of ${day}.`,
     "",
-    "## Last known definition",
+    "# Last known definition",
     "",
     lastKnownBody(split.parts.generated),
     "",

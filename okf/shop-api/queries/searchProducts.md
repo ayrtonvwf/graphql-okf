@@ -12,7 +12,7 @@ removedAt: "2026-03-02T09:00:00.000Z"
 <!-- graphql-okf:generated:start -->
 > **Removed.** This element is no longer present in the schema as of 2026-03-02.
 
-## Last known definition
+# Last known definition
 
 # searchProducts
 

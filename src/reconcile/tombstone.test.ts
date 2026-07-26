@@ -76,11 +76,23 @@ describe("renderTombstone", () => {
   it("states the removal and retains the last known definition", () => {
     expect(parts.generated).toContain("> **Removed.** This element is no longer present");
     expect(parts.generated).toContain("as of 2026-07-24");
-    expect(parts.generated).toContain("## Last known definition");
+    expect(parts.generated).toContain("# Last known definition");
     expect(parts.generated).toContain("- **`id`**: `ID!`");
   });
 
   it("drops the regenerate-me hint, which no longer applies", () => {
     expect(parts.generated).not.toContain(GENERATED_HINT);
+  });
+
+  it("does not nest the preserved H1 under a lower-level heading", () => {
+    const split = splitFile(existingConcept, "types/objects/Country.md");
+    if (split === null) throw new Error("fixture must be an owned file");
+
+    const parts = renderTombstone(split, "2026-08-01T00:00:00.000Z");
+
+    expect(parts.generated).toContain("# Last known definition");
+    expect(parts.generated).not.toContain("## Last known definition");
+    // The preserved body keeps its own H1, untouched.
+    expect(parts.generated).toContain("# Country");
   });
 });
