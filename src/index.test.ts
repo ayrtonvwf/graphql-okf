@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { GraphqlOkfError } from "./errors.js";
 import { syncOkfBundle } from "./index.js";
@@ -121,7 +122,7 @@ describe("the resource option", () => {
     await syncOkfBundle({ source: { kind: "sdl", path: sdlPath }, outDir });
 
     expect(await readFile(join(outDir, "queries/hello.md"), "utf8")).toContain(
-      `resource: "${sdlPath}#Query.hello"`,
+      `resource: "${pathToFileURL(resolve(sdlPath)).href}#Query.hello"`,
     );
   });
 });

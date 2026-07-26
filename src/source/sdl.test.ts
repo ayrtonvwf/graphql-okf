@@ -1,6 +1,7 @@
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { GraphqlOkfError } from "../errors.js";
 import { loadFromSdl } from "./sdl.js";
@@ -28,8 +29,17 @@ describe("loadFromSdl", () => {
     const loaded = await loadFromSdl(path);
 
     expect(loaded.origin).toBe("sdl");
-    expect(loaded.resource).toBe(path);
+    expect(loaded.resource).toBe(pathToFileURL(resolve(path)).href);
     expect(loaded.schema.getQueryType()?.name).toBe("Query");
+  });
+
+  it("records the resource as an absolute file: URL", async () => {
+    const path = await writeSdl("type Query { ok: Boolean }");
+
+    const loaded = await loadFromSdl(path);
+
+    expect(loaded.resource).toBe(pathToFileURL(resolve(path)).href);
+    expect(loaded.resource.startsWith("file://")).toBe(true);
   });
 
   it("reports a missing file as SOURCE_NOT_FOUND", async () => {

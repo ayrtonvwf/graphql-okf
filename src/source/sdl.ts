@@ -1,4 +1,6 @@
 import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { buildSchema, validateSchema } from "graphql";
 import { GraphqlOkfError } from "../errors.js";
 import type { LoadedSchema } from "./types.js";
@@ -37,5 +39,5 @@ export async function loadFromSdl(filePath: string): Promise<LoadedSchema> {
     );
   }
 
-  return { schema, resource: filePath, origin: "sdl" };
+  return { schema, resource: pathToFileURL(resolve(filePath)).href, origin: "sdl" };
 }
