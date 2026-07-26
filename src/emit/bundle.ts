@@ -8,7 +8,7 @@ import { conceptResource } from "./render/resource.js";
 import type { FileParts } from "./render/seam.js";
 
 /** The OKF version this producer targets, declared on the bundle-root index (§11). */
-export const OKF_VERSION = "0.1";
+const OKF_VERSION = "0.1";
 
 const KIND_SUMMARY: Record<ConceptKind, string> = {
   object: "Object type.",
