@@ -16,9 +16,11 @@ Marks an element of a GraphQL schema as no longer supported.
 
 Locations: `ARGUMENT_DEFINITION`, `DIRECTIVE_DEFINITION`, `ENUM_VALUE`, `FIELD_DEFINITION`, `INPUT_FIELD_DEFINITION`.
 
-## Arguments
+# Schema
 
-- **`reason`**: [`String`](../types/scalars/String.md) = `"No longer supported"` — Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax, as specified by [CommonMark](https://commonmark.org/).
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `reason` | [`String`](../types/scalars/String.md) | `"No longer supported"` | Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax, as specified by [CommonMark](https://commonmark.org/). |
 
 <!-- graphql-okf:generated:end -->
 

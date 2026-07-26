@@ -16,10 +16,12 @@ Replaces a customer's default shipping address.
 
 **Returns** [`Customer!`](../types/objects/Customer.md)
 
-## Arguments
+# Schema
 
-- **`address`**: [`AddressInput!`](../types/inputs/AddressInput.md)
-- **`customerId`**: [`ID!`](../types/scalars/ID.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `address` | [`AddressInput!`](../types/inputs/AddressInput.md) |  |  |
+| `customerId` | [`ID!`](../types/scalars/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

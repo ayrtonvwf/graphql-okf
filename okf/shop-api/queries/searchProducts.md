@@ -22,10 +22,12 @@ Full-text search across the catalog.
 
 **Returns** [`[Product!]!`](../types/objects/Product.md)
 
-## Arguments
+# Schema
 
-- **`fuzzy`**: [`Boolean`](../types/scalars/Boolean.md) = `false` — Ignored since the search backend migration. (deprecated: The backend always matches fuzzily.)
-- **`query`**: [`String!`](../types/scalars/String.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `fuzzy` | [`Boolean`](../types/scalars/Boolean.md) | `false` | Ignored since the search backend migration. (deprecated: The backend always matches fuzzily.) |
+| `query` | [`String!`](../types/scalars/String.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

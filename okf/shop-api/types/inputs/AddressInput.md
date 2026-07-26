@@ -14,13 +14,15 @@ timestamp: "2026-01-15T09:00:00.000Z"
 
 A postal address supplied by a client.
 
-## Fields
+# Schema
 
-- **`city`**: [`String!`](../scalars/String.md)
-- **`country`**: [`String!`](../scalars/String.md)
-- **`line1`**: [`String!`](../scalars/String.md)
-- **`line2`**: [`String`](../scalars/String.md)
-- **`postalCode`**: [`String!`](../scalars/String.md)
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `city` | [`String!`](../scalars/String.md) |  |  |
+| `country` | [`String!`](../scalars/String.md) |  |  |
+| `line1` | [`String!`](../scalars/String.md) |  |  |
+| `line2` | [`String`](../scalars/String.md) |  |  |
+| `postalCode` | [`String!`](../scalars/String.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

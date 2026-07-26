@@ -14,10 +14,12 @@ timestamp: "2026-05-20T09:00:00.000Z"
 
 How an order was paid for.
 
-## Members
+# Schema
 
-- [`CreditCard`](../objects/CreditCard.md)
-- [`PayPalAccount`](../objects/PayPalAccount.md)
+| Member |
+| --- |
+| [`CreditCard`](../objects/CreditCard.md) |
+| [`PayPalAccount`](../objects/PayPalAccount.md) |
 
 <!-- graphql-okf:generated:end -->
 

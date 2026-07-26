@@ -18,18 +18,20 @@ Directives: [`@auth`](../../directives/auth.md)(requires: CUSTOMER).
 
 Implements [`Node`](../interfaces/Node.md), [`Timestamped`](../interfaces/Timestamped.md).
 
-## Fields
+# Schema
 
-- **`createdAt`** — [`DateTime!`](../scalars/DateTime.md)
-- **`currency`** — [`Currency!`](../enums/Currency.md)
-- **`customer`** — [`Customer!`](Customer.md)
-- **`id`** — [`ID!`](../scalars/ID.md)
-- **`lines`** — [`[OrderLine!]!`](OrderLine.md)
-- **`paidWith`** — [`PaymentMethod`](../unions/PaymentMethod.md)
-- **`shipTo`** — [`Address!`](Address.md)
-- **`status`** — [`OrderStatus!`](../enums/OrderStatus.md)
-- **`total`** — [`Money!`](Money.md) — The order total, including the currency it is denominated in.
-- **`updatedAt`** — [`DateTime`](../scalars/DateTime.md)
+| Field | Type | Description |
+| --- | --- | --- |
+| `createdAt` | [`DateTime!`](../scalars/DateTime.md) |  |
+| `currency` | [`Currency!`](../enums/Currency.md) |  |
+| `customer` | [`Customer!`](Customer.md) |  |
+| `id` | [`ID!`](../scalars/ID.md) |  |
+| `lines` | [`[OrderLine!]!`](OrderLine.md) |  |
+| `paidWith` | [`PaymentMethod`](../unions/PaymentMethod.md) |  |
+| `shipTo` | [`Address!`](Address.md) |  |
+| `status` | [`OrderStatus!`](../enums/OrderStatus.md) |  |
+| `total` | [`Money!`](Money.md) | The order total, including the currency it is denominated in. |
+| `updatedAt` | [`DateTime`](../scalars/DateTime.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

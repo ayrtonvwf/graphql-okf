@@ -16,9 +16,11 @@ Directs the executor to include this field or fragment only when the `if` argume
 
 Locations: `FIELD`, `FRAGMENT_SPREAD`, `INLINE_FRAGMENT`.
 
-## Arguments
+# Schema
 
-- **`if`**: [`Boolean!`](../types/scalars/Boolean.md) — Included when true.
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `if` | [`Boolean!`](../types/scalars/Boolean.md) |  | Included when true. |
 
 <!-- graphql-okf:generated:end -->
 

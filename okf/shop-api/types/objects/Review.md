@@ -16,15 +16,17 @@ A customer's written opinion of a product.
 
 Implements [`Node`](../interfaces/Node.md), [`Timestamped`](../interfaces/Timestamped.md).
 
-## Fields
+# Schema
 
-- **`author`** — [`Customer!`](Customer.md)
-- **`body`** — [`String`](../scalars/String.md)
-- **`createdAt`** — [`DateTime!`](../scalars/DateTime.md)
-- **`id`** — [`ID!`](../scalars/ID.md)
-- **`product`** — [`Product!`](Product.md)
-- **`rating`** — [`Int!`](../scalars/Int.md) — A rating from 1 to 5 inclusive.
-- **`updatedAt`** — [`DateTime`](../scalars/DateTime.md)
+| Field | Type | Description |
+| --- | --- | --- |
+| `author` | [`Customer!`](Customer.md) |  |
+| `body` | [`String`](../scalars/String.md) |  |
+| `createdAt` | [`DateTime!`](../scalars/DateTime.md) |  |
+| `id` | [`ID!`](../scalars/ID.md) |  |
+| `product` | [`Product!`](Product.md) |  |
+| `rating` | [`Int!`](../scalars/Int.md) | A rating from 1 to 5 inclusive. |
+| `updatedAt` | [`DateTime`](../scalars/DateTime.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

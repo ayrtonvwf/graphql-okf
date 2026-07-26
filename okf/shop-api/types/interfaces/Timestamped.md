@@ -16,10 +16,12 @@ Anything that records when it was created and last modified.
 
 Implemented by [`Customer`](../objects/Customer.md), [`Order`](../objects/Order.md), [`Product`](../objects/Product.md), [`Review`](../objects/Review.md).
 
-## Fields
+# Schema
 
-- **`createdAt`** — [`DateTime!`](../scalars/DateTime.md)
-- **`updatedAt`** — [`DateTime`](../scalars/DateTime.md)
+| Field | Type | Description |
+| --- | --- | --- |
+| `createdAt` | [`DateTime!`](../scalars/DateTime.md) |  |
+| `updatedAt` | [`DateTime`](../scalars/DateTime.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

@@ -16,9 +16,11 @@ Anything addressable by a globally unique identifier.
 
 Implemented by [`Customer`](../objects/Customer.md), [`Order`](../objects/Order.md), [`Product`](../objects/Product.md), [`Purchasable`](Purchasable.md), [`Review`](../objects/Review.md).
 
-## Fields
+# Schema
 
-- **`id`** — [`ID!`](../scalars/ID.md) — The globally unique identifier.
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | [`ID!`](../scalars/ID.md) | The globally unique identifier. |
 
 <!-- graphql-okf:generated:end -->
 

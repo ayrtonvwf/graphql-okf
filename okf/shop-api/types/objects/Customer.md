@@ -18,14 +18,16 @@ A customer is created on first sign-in and is never hard-deleted.
 
 Implements [`Node`](../interfaces/Node.md), [`Timestamped`](../interfaces/Timestamped.md).
 
-## Fields
+# Schema
 
-- **`createdAt`** — [`DateTime!`](../scalars/DateTime.md)
-- **`defaultAddress`** — [`Address`](Address.md) — Where orders are shipped by default.
-- **`displayName`** — [`String!`](../scalars/String.md)
-- **`email`** — [`EmailAddress!`](../scalars/EmailAddress.md)
-- **`id`** — [`ID!`](../scalars/ID.md)
-- **`updatedAt`** — [`DateTime`](../scalars/DateTime.md)
+| Field | Type | Description |
+| --- | --- | --- |
+| `createdAt` | [`DateTime!`](../scalars/DateTime.md) |  |
+| `defaultAddress` | [`Address`](Address.md) | Where orders are shipped by default. |
+| `displayName` | [`String!`](../scalars/String.md) |  |
+| `email` | [`EmailAddress!`](../scalars/EmailAddress.md) |  |
+| `id` | [`ID!`](../scalars/ID.md) |  |
+| `updatedAt` | [`DateTime`](../scalars/DateTime.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

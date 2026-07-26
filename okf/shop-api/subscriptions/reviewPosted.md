@@ -16,9 +16,11 @@ Emits each new review as it is posted.
 
 **Returns** [`Review!`](../types/objects/Review.md)
 
-## Arguments
+# Schema
 
-- **`productId`**: [`ID!`](../types/scalars/ID.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `productId` | [`ID!`](../types/scalars/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

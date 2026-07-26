@@ -16,10 +16,12 @@ Lists products, most recently created first.
 
 **Returns** [`[Product!]!`](../types/objects/Product.md)
 
-## Arguments
+# Schema
 
-- **`filter`**: [`ProductFilter`](../types/inputs/ProductFilter.md)
-- **`first`**: [`Int`](../types/scalars/Int.md) = `20` — Maximum number of products to return.
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `filter` | [`ProductFilter`](../types/inputs/ProductFilter.md) |  |  |
+| `first` | [`Int`](../types/scalars/Int.md) | `20` | Maximum number of products to return. |
 
 <!-- graphql-okf:generated:end -->
 

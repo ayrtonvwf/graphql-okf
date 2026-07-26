@@ -14,12 +14,14 @@ timestamp: "2026-01-15T09:00:00.000Z"
 
 A payment card.
 
-## Fields
+# Schema
 
-- **`brand`** — [`String!`](../scalars/String.md)
-- **`expiryMonth`** — [`Int!`](../scalars/Int.md)
-- **`expiryYear`** — [`Int!`](../scalars/Int.md)
-- **`last4`** — [`String!`](../scalars/String.md) — The last four digits of the card number.
+| Field | Type | Description |
+| --- | --- | --- |
+| `brand` | [`String!`](../scalars/String.md) |  |
+| `expiryMonth` | [`Int!`](../scalars/Int.md) |  |
+| `expiryYear` | [`Int!`](../scalars/Int.md) |  |
+| `last4` | [`String!`](../scalars/String.md) | The last four digits of the card number. |
 
 <!-- graphql-okf:generated:end -->
 

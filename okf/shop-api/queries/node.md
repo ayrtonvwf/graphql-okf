@@ -16,9 +16,11 @@ Looks up any node by its globally unique identifier.
 
 **Returns** [`Node`](../types/interfaces/Node.md)
 
-## Arguments
+# Schema
 
-- **`id`**: [`ID!`](../types/scalars/ID.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `id` | [`ID!`](../types/scalars/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

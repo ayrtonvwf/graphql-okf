@@ -14,10 +14,12 @@ timestamp: "2026-03-02T09:00:00.000Z"
 
 An amount of money in a specific currency.
 
-## Fields
+# Schema
 
-- **`amountCents`** — [`Int!`](../scalars/Int.md) — The amount in the smallest unit of the currency, e.g. cents.
-- **`currency`** — [`Currency!`](../enums/Currency.md)
+| Field | Type | Description |
+| --- | --- | --- |
+| `amountCents` | [`Int!`](../scalars/Int.md) | The amount in the smallest unit of the currency, e.g. cents. |
+| `currency` | [`Currency!`](../enums/Currency.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

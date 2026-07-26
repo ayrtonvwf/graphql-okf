@@ -18,11 +18,13 @@ Directives: [`@auth`](../directives/auth.md)(requires: CUSTOMER).
 
 **Returns** [`Review!`](../types/objects/Review.md)
 
-## Arguments
+# Schema
 
-- **`body`**: [`String`](../types/scalars/String.md)
-- **`productId`**: [`ID!`](../types/scalars/ID.md)
-- **`rating`**: [`Int!`](../types/scalars/Int.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `body` | [`String`](../types/scalars/String.md) |  |  |
+| `productId` | [`ID!`](../types/scalars/ID.md) |  |  |
+| `rating` | [`Int!`](../types/scalars/Int.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

@@ -16,9 +16,11 @@ Looks up a single product.
 
 **Returns** [`Product`](../types/objects/Product.md)
 
-## Arguments
+# Schema
 
-- **`id`**: [`ID!`](../types/scalars/ID.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `id` | [`ID!`](../types/scalars/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

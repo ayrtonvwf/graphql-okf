@@ -16,9 +16,11 @@ Restricts a field or type to callers holding at least the given role.
 
 Locations: `FIELD_DEFINITION`, `OBJECT`.
 
-## Arguments
+# Schema
 
-- **`requires`**: [`Role!`](../types/enums/Role.md) = `CUSTOMER`
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `requires` | [`Role!`](../types/enums/Role.md) | `CUSTOMER` |  |
 
 <!-- graphql-okf:generated:end -->
 

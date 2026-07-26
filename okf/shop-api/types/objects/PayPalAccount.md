@@ -14,9 +14,11 @@ timestamp: "2026-01-15T09:00:00.000Z"
 
 A linked PayPal account.
 
-## Fields
+# Schema
 
-- **`email`** — [`EmailAddress!`](../scalars/EmailAddress.md)
+| Field | Type | Description |
+| --- | --- | --- |
+| `email` | [`EmailAddress!`](../scalars/EmailAddress.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

@@ -14,11 +14,13 @@ timestamp: "2026-01-15T09:00:00.000Z"
 
 An ISO-4217 currency code.
 
-## Values
+# Schema
 
-- **`BRL`**
-- **`EUR`**
-- **`USD`**
+| Value | Description |
+| --- | --- |
+| `BRL` |  |
+| `EUR` |  |
+| `USD` |  |
 
 <!-- graphql-okf:generated:end -->
 

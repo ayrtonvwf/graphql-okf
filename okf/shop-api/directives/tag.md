@@ -18,9 +18,11 @@ Locations: `FIELD_DEFINITION`, `OBJECT`.
 
 Repeatable.
 
-## Arguments
+# Schema
 
-- **`name`**: [`String!`](../types/scalars/String.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | [`String!`](../types/scalars/String.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

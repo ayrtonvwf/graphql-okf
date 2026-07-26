@@ -18,11 +18,13 @@ Supply exactly one field; supplying zero or more than one is an error.
 
 Directives: [`@oneOf`](../../directives/oneOf.md).
 
-## Fields
+# Schema
 
-- **`creditCardToken`**: [`String`](../scalars/String.md)
-- **`giftCardCode`**: [`String`](../scalars/String.md)
-- **`payPalToken`**: [`String`](../scalars/String.md)
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `creditCardToken` | [`String`](../scalars/String.md) |  |  |
+| `giftCardCode` | [`String`](../scalars/String.md) |  |  |
+| `payPalToken` | [`String`](../scalars/String.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

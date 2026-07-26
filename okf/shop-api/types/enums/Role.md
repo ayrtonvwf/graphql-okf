@@ -16,11 +16,13 @@ Access levels a caller can hold.
 
 Used by the `@auth` directive to gate fields.
 
-## Values
+# Schema
 
-- **`CUSTOMER`** — A signed-in shopper.
-- **`GUEST`** — Anyone, including unauthenticated callers.
-- **`STAFF`** — A member of shop staff.
+| Value | Description |
+| --- | --- |
+| `CUSTOMER` | A signed-in shopper. |
+| `GUEST` | Anyone, including unauthenticated callers. |
+| `STAFF` | A member of shop staff. |
 
 <!-- graphql-okf:generated:end -->
 

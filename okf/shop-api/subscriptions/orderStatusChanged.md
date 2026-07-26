@@ -18,9 +18,11 @@ Directives: [`@auth`](../directives/auth.md)(requires: CUSTOMER).
 
 **Returns** [`Order!`](../types/objects/Order.md)
 
-## Arguments
+# Schema
 
-- **`orderId`**: [`ID!`](../types/scalars/ID.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `orderId` | [`ID!`](../types/scalars/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

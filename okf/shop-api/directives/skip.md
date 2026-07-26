@@ -16,9 +16,11 @@ Directs the executor to skip this field or fragment when the `if` argument is tr
 
 Locations: `FIELD`, `FRAGMENT_SPREAD`, `INLINE_FRAGMENT`.
 
-## Arguments
+# Schema
 
-- **`if`**: [`Boolean!`](../types/scalars/Boolean.md) — Skipped when true.
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `if` | [`Boolean!`](../types/scalars/Boolean.md) |  | Skipped when true. |
 
 <!-- graphql-okf:generated:end -->
 

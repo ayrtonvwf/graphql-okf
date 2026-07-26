@@ -18,9 +18,11 @@ Directives: [`@auth`](../directives/auth.md)(requires: CUSTOMER).
 
 **Returns** [`Order!`](../types/objects/Order.md)
 
-## Arguments
+# Schema
 
-- **`input`**: [`PlaceOrderInput!`](../types/inputs/PlaceOrderInput.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `input` | [`PlaceOrderInput!`](../types/inputs/PlaceOrderInput.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

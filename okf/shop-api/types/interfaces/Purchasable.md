@@ -20,10 +20,12 @@ Implements [`Node`](Node.md).
 
 Implemented by [`Product`](../objects/Product.md).
 
-## Fields
+# Schema
 
-- **`id`** — [`ID!`](../scalars/ID.md)
-- **`price`** — [`Money!`](../objects/Money.md) — The price, including the currency it is denominated in.
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | [`ID!`](../scalars/ID.md) |  |
+| `price` | [`Money!`](../objects/Money.md) | The price, including the currency it is denominated in. |
 
 <!-- graphql-okf:generated:end -->
 

@@ -18,10 +18,12 @@ removedAt: "2026-05-20T09:00:00.000Z"
 
 A prepaid gift card redeemed against an order.
 
-## Fields
+# Schema
 
-- **`balanceCents`** — [`Int!`](../scalars/Int.md)
-- **`code`** — [`String!`](../scalars/String.md)
+| Field | Type | Description |
+| --- | --- | --- |
+| `balanceCents` | [`Int!`](../scalars/Int.md) |  |
+| `code` | [`String!`](../scalars/String.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

@@ -14,11 +14,13 @@ timestamp: "2026-01-15T09:00:00.000Z"
 
 Everything needed to turn a basket into an order.
 
-## Fields
+# Schema
 
-- **`payWith`**: [`PaymentInput!`](PaymentInput.md)
-- **`productIds`**: [`[ID!]!`](../scalars/ID.md)
-- **`shipTo`**: [`AddressInput!`](AddressInput.md)
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `payWith` | [`PaymentInput!`](PaymentInput.md) |  |  |
+| `productIds` | [`[ID!]!`](../scalars/ID.md) |  |  |
+| `shipTo` | [`AddressInput!`](AddressInput.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 
