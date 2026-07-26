@@ -248,23 +248,37 @@ A run that produces at least one action appends one section; a no-op run appends
 nothing (`GOAL-8.4`).
 
 ```markdown
-## 2026-07-24T09:00:00.000Z
+---
+type: Log
+---
+
+# Update Log
+
+## 2026-07-24
+
+### 09:00:00.000Z
 
 **Added**
-- [`Invoice`](types/objects/Invoice.md)
-- [`invoices`](queries/invoices.md)
+
+* [`Invoice`](types/objects/Invoice.md)
+* [`invoices`](queries/invoices.md)
 
 **Changed**
-- [`User`](types/objects/User.md)
+
+* [`User`](types/objects/User.md)
 
 **Removed**
-- [`LegacyOrder`](types/objects/LegacyOrder.md)
+
+* [`LegacyOrder`](types/objects/LegacyOrder.md)
 ```
 
-Newest entry at the **end** of the file: a true append, so a run's diff is purely
-added lines at the tail with no churn above them. Empty groups are omitted.
-Entries within a group follow the IR's existing sort order, so the log is
-deterministic too.
+`log.md` is read-modify-written on each run: entries are grouped under an ISO
+8601 `## YYYY-MM-DD` heading (required by OKF §7) and ordered newest first, with
+a `### HH:MM:SS.sssZ` sub-heading per run so two runs on the same day stay
+distinguishable. Day grouping requires reading the file regardless, so the
+earlier append-only argument no longer applies. Insertion is a single hunk, so
+`GOAL-8.6` still holds. Empty groups are omitted. Entries within a group follow
+the IR's existing sort order, so the log is deterministic too.
 
 Index-only changes are not logged. The log records concept-level facts about the
 API, not the bundle's internal bookkeeping. Restorations are logged under
@@ -272,7 +286,8 @@ API, not the bundle's internal bookkeeping. Restorations are logged under
 
 `log.md` remains reserved (`GOAL-5.4`) — it is never a concept document, and it
 carries no generated markers, so the ownership rule (§2.2) correctly treats it as
-neither concept nor stray. It is append-target-only.
+neither concept nor stray. It is read-modify-written only by the day-grouping
+insertion above, never regenerated wholesale.
 
 ---
 
@@ -281,8 +296,8 @@ neither concept nor stray. It is append-target-only.
 ```
 plan = reconcile(ir, existing, now)          # pure, nothing touched yet
 if plan.actions.length === 0: return         # GOAL-8.1
-if plan has any concept-level action:        # first
-    appendLogEntry(outDir, renderLogEntry(plan))
+if hasLoggableChanges(plan):                 # first
+    writeLog(outDir, updateLog(existingLog, plan, now))
 for (const action of plan.actions)           # then
     write <path>.tmp -> rename over <path>
 ```

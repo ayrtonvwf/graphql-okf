@@ -99,8 +99,17 @@ fixture, never against graphql-js internals.
 
 B links exclusively through `TypeRef.path` (and each concept's own `path`), both
 already resolved by `naming.ts`. The only path arithmetic B performs is computing
-the **relative** form between two given paths (§5.1). B never turns a type *name*
+the **relative** form between two given paths. B never turns a type *name*
 into a path — that would re-derive the naming scheme and violate `GOAL-4.5`.
+
+Links are relative, which is a deliberate deviation from OKF §5.1's recommended
+absolute `/path/to.md` form. Two reasons, both load-bearing:
+
+- The OKF reference viewer explicitly discards any link target starting with
+  `/`. Switching would silently zero out the entire edge graph (measured at the
+  time of writing: 62 / 162 / 14,527 edges across the three bundles).
+- On GitHub a leading `/` resolves to the repository root, not the bundle root,
+  and we ship bundles at `okf/<name>/` inside a larger repo.
 
 ---
 
@@ -118,12 +127,12 @@ Every **concept** file has three zones, in order:
 
 ```markdown
 ---
-type: object
-title: Country
-description: An ISO country with its languages and continent.
-resource: https://countries.trevorblades.com/graphql
-tags: [graphql, object]
-timestamp: 2026-07-23T12:00:00.000Z
+type: "GraphQL Object Type"
+title: "Country"
+description: "An ISO country with its languages and continent."
+resource: "https://countries.trevorblades.com/graphql#Country"
+tags: ["graphql", "object"]
+timestamp: "2026-07-23T12:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -148,11 +157,11 @@ An ISO country with its languages and continent.
 
 | Field | Value | Notes |
 |---|---|---|
-| `type` | the IR `ConceptKind` string | `object`, `interface`, `union`, `enum`, `input`, `scalar`, `query`, `mutation`, `subscription`, `directive`. The one required OKF field (§5.1); already discriminates every kind (§5.3). |
+| `type` | Title Case noun phrase via `TYPE_LABEL_BY_KIND` | `GraphQL Object Type`, `GraphQL Query`, etc. — see §5.5 below. The one required OKF field (§5.1); already discriminates every kind (§5.3). |
 | `title` | exact GraphQL name | For operations, the field name (e.g. `countries`). Matches the body H1. |
-| `description` | schema doc-string, verbatim | Omitted when the element has no description (§6.2). |
-| `resource` | `ir.resource` | Endpoint URL or SDL origin; identical on every file (§5.2). |
-| `tags` | `[graphql, <kind>]` | Lets a consumer filter broadly (`graphql`) or by kind. |
+| `description` | first sentence of the schema doc-string | Omitted when the element has no description (§6.2, `GOAL-5.2`). The full doc-string is preserved verbatim in the body (§6.3). |
+| `resource` | `conceptResource(ir.resource, concept)` | `<origin>#<anchor>`, unique per concept (`GOAL-5.2`); the bundle-wide origin lives on the root `index.md` instead. |
+| `tags` | `[graphql, <kind>]` | The bare `ConceptKind` token, e.g. `object` — the machine-filterable axis, distinct from `type`'s prose label. |
 | `timestamp` | injected ISO-8601 | §5.2. The sole non-deterministic byte (§2.1). |
 
 Frontmatter is emitted as valid YAML and round-trips (§5.5): a plain string
@@ -216,14 +225,14 @@ Every body opens with `# <name>` and the verbatim description (when present), th
 
 | Kind | Sections |
 |---|---|
-| object | `Implements:` (linked interfaces, when any) · `## Fields` |
+| object | `Implements:` (linked interfaces, when any) · `# Schema` fields table (§5.5) |
 | interface | as object, plus `Implemented by:` (linked `implementedBy`) |
-| union | `## Members` — each member type linked |
-| enum | `## Values` — each value, its description, deprecation |
-| input | `## Fields` — each `name: Type = default`, linked, description/deprecation |
+| union | `# Schema` members table — each member type linked (§5.5) |
+| enum | `# Schema` values table — each value, its description, deprecation (§5.5) |
+| input | `# Schema` fields table with a Default column (§5.5) |
 | scalar | description · `Specified by:` URL when present · built-in note when `isBuiltIn` |
-| query / mutation / subscription | signature · `## Arguments` (linked, defaults) · `Returns:` linked type |
-| directive | `Locations:` · `## Arguments` (linked) · repeatable note |
+| query / mutation / subscription | `# Schema` arguments table (§5.5) · `Returns:` linked type |
+| directive | `Locations:` · `# Schema` arguments table (§5.5) · repeatable note |
 
 Field and argument rendering:
 
@@ -252,6 +261,35 @@ Because every link target is a `TypeRef.path` that A placed in the bundle,
 integrity holds by construction. It is still asserted by a test (§7): extract every
 Markdown link from every generated file and confirm each resolves to a key in the
 bundle map.
+
+### 5.5 Body headings (OKF §4.2)
+
+Every structural section renders as a markdown table under a single top-level
+`# Schema`, which §4.2 gives conventional meaning and the reference tooling's
+`_schema_field_names` helper is the only thing it scans. This is a second H1
+below the `# <Name>` title, matching §4.3's own example.
+
+| Concept kind | Content under `# Schema` |
+| --- | --- |
+| object, interface | Fields table; then `## Arguments` per field that takes arguments |
+| input | Fields table with a Default column |
+| enum | Values table |
+| union | Members table |
+| query, mutation, subscription, directive | Arguments table |
+
+### 5.6 The `type` vocabulary (OKF §4.1)
+
+`type` is a Title Case noun phrase — `GraphQL Object Type`, `GraphQL Query`,
+`GraphQL Directive` — mapped from `ConceptKind` by `TYPE_LABEL_BY_KIND` in
+`src/model/naming.ts`. `tags` keeps the bare kind token as the
+machine-filterable axis.
+
+### 5.7 Quoted datetimes (deviation)
+
+`timestamp` and `removedAt` are emitted quoted, although the spec's own examples
+show `timestamp` unquoted. Bare ISO-8601 values parse as `datetime` under YAML
+1.1 — PyYAML, and js-yaml's default schema, so `gray-matter` — which makes
+`json.dumps` throw and mangles the text on round-trip, failing `GOAL-5.5`.
 
 ---
 
