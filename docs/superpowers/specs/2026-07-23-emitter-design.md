@@ -142,11 +142,13 @@ timestamp: "2026-07-23T12:00:00.000Z"
 
 An ISO country with its languages and continent.
 
-## Fields
+# Schema
 
-- **`code`** — [`ID!`](../scalars/ID.md)
-- **`continent`** — [`Continent!`](Continent.md)
-- **`languages`** — [`[Language!]!`](../objects/Language.md)
+| Field | Type | Description |
+| --- | --- | --- |
+| `code` | [`ID!`](../scalars/ID.md) | |
+| `continent` | [`Continent!`](Continent.md) | |
+| `languages` | [`[Language!]!`](../objects/Language.md) | |
 
 <!-- graphql-okf:generated:end -->
 

@@ -25,7 +25,7 @@ C owns `GOAL-M1` §8 in full:
 | `GOAL-8.3` machine vs. human content preserved | §5 the seam, extended to `index.md` |
 | `GOAL-8.4` chronological `log.md` entry | §6 |
 | `GOAL-8.5` safe to interrupt and re-run | §7 convergent apply |
-| `GOAL-8.6` reviewable as a normal diff | §3.2 (no-write-when-equal), §6 (append-only log) |
+| `GOAL-8.6` reviewable as a normal diff | §3.2 (no-write-when-equal), §6 (single-hunk log insertion) |
 
 It also replaces the create-only entry point with the create-or-update verb
 `GOAL-9.1` asks for (§8).
@@ -53,7 +53,7 @@ The same pure-core / fs-at-the-edge shape as A and B:
 src/reconcile/
   parse.ts    parseConceptFile(text) -> ParsedFile | null                (pure)
   plan.ts     reconcile(ir, existing, timestamp) -> BundlePlan           (pure)
-  log.ts      renderLogEntry(plan) -> string                             (pure)
+  log.ts      updateLog(existing, plan, timestamp) -> string             (pure)
   read.ts     readExistingBundle(outDir) -> ReadonlyMap<path, string>    (fs)
   apply.ts    applyPlan(plan, outDir) -> Promise<void>                   (fs)
 
