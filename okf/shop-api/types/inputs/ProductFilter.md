@@ -1,7 +1,7 @@
 ---
 type: "GraphQL Input Type"
 title: "ProductFilter"
-description: "Narrows a product listing. Every field is optional; omitted fields do not filter."
+description: "Narrows a product listing."
 resource: "https://shop.example/graphql"
 tags: ["graphql", "input"]
 timestamp: "2026-01-15T09:00:00.000Z"

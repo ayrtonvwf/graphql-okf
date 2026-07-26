@@ -46,6 +46,17 @@ describe("renderFrontmatter", () => {
     expect(out).toContain('tags: ["graphql", "enum"]');
   });
 
+  it("emits only the first sentence of a multi-paragraph description", () => {
+    const wordy: ObjectTypeNode = {
+      ...objectConcept,
+      description: "A product.\n\nMay contain Markdown. Refreshed nightly.",
+    };
+
+    const out = renderFrontmatter(wordy, "https://api.test/graphql", "2026-07-23T12:00:00.000Z");
+
+    expect(out).toContain('description: "A product."');
+  });
+
   it("keeps timestamp a string under YAML 1.1, where a bare one would be a date", () => {
     const out = renderFrontmatter(
       objectConcept,

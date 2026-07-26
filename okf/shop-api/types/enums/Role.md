@@ -1,7 +1,7 @@
 ---
 type: "GraphQL Enum Type"
 title: "Role"
-description: "Access levels a caller can hold.\n\nUsed by the `@auth` directive to gate fields."
+description: "Access levels a caller can hold."
 resource: "https://shop.example/graphql"
 tags: ["graphql", "enum"]
 timestamp: "2026-01-15T09:00:00.000Z"

@@ -1,7 +1,7 @@
 ---
 type: "GraphQL Input Type"
 title: "PaymentInput"
-description: "Exactly one payment instrument.\n\nSupply exactly one field; supplying zero or more than one is an error."
+description: "Exactly one payment instrument."
 resource: "https://shop.example/graphql"
 tags: ["graphql", "input"]
 timestamp: "2026-01-15T09:00:00.000Z"
