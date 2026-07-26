@@ -1,5 +1,5 @@
 ---
-type: "mutation"
+type: "GraphQL Mutation"
 title: "placeOrder"
 description: "Places an order for the given products."
 resource: "https://shop.example/graphql"

@@ -1,5 +1,5 @@
 ---
-type: "mutation"
+type: "GraphQL Mutation"
 title: "cancelOrder"
 description: "Cancels an order that has not yet shipped."
 resource: "https://shop.example/graphql"

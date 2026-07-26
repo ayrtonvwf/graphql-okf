@@ -1,5 +1,5 @@
 ---
-type: "query"
+type: "GraphQL Query"
 title: "searchProducts"
 description: "Full-text search across the catalog."
 resource: "https://shop.example/graphql"

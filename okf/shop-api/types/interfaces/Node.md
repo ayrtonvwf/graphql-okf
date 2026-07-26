@@ -1,5 +1,5 @@
 ---
-type: "interface"
+type: "GraphQL Interface Type"
 title: "Node"
 description: "Anything addressable by a globally unique identifier."
 resource: "https://shop.example/graphql"

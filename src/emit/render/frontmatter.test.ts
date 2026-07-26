@@ -20,7 +20,7 @@ describe("renderFrontmatter", () => {
     ).toBe(
       [
         "---",
-        'type: "object"',
+        'type: "GraphQL Object Type"',
         'title: "Country"',
         'description: "An ISO country."',
         'resource: "https://api.test/graphql"',

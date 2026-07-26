@@ -1,5 +1,5 @@
 ---
-type: "union"
+type: "GraphQL Union Type"
 title: "PaymentMethod"
 description: "How an order was paid for."
 resource: "https://shop.example/graphql"

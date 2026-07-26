@@ -1,5 +1,5 @@
 ---
-type: "mutation"
+type: "GraphQL Mutation"
 title: "addReview"
 description: "Adds a review to a product."
 resource: "https://shop.example/graphql"

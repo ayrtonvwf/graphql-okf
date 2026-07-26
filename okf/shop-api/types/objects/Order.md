@@ -1,5 +1,5 @@
 ---
-type: "object"
+type: "GraphQL Object Type"
 title: "Order"
 description: "A customer's purchase."
 resource: "https://shop.example/graphql"

@@ -1,5 +1,5 @@
 ---
-type: "input"
+type: "GraphQL Input Type"
 title: "PaymentInput"
 description: "Exactly one payment instrument.\n\nSupply exactly one field; supplying zero or more than one is an error."
 resource: "https://shop.example/graphql"

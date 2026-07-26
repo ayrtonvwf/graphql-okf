@@ -1,5 +1,5 @@
 ---
-type: "object"
+type: "GraphQL Object Type"
 title: "Address"
 description: "A postal address."
 resource: "https://shop.example/graphql"

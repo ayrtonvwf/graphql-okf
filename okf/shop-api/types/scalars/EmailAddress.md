@@ -1,5 +1,5 @@
 ---
-type: "scalar"
+type: "GraphQL Scalar Type"
 title: "EmailAddress"
 description: "An RFC 5322 email address."
 resource: "https://shop.example/graphql"

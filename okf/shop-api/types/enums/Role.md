@@ -1,5 +1,5 @@
 ---
-type: "enum"
+type: "GraphQL Enum Type"
 title: "Role"
 description: "Access levels a caller can hold.\n\nUsed by the `@auth` directive to gate fields."
 resource: "https://shop.example/graphql"

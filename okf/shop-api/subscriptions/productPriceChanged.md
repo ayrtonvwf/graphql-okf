@@ -1,5 +1,5 @@
 ---
-type: "subscription"
+type: "GraphQL Subscription"
 title: "productPriceChanged"
 description: "Emits a product each time its price changes."
 resource: "https://shop.example/graphql"

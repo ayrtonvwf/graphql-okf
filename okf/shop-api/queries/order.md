@@ -1,5 +1,5 @@
 ---
-type: "query"
+type: "GraphQL Query"
 title: "order"
 description: "Looks up a single order."
 resource: "https://shop.example/graphql"

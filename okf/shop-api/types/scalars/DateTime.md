@@ -1,5 +1,5 @@
 ---
-type: "scalar"
+type: "GraphQL Scalar Type"
 title: "DateTime"
 description: "An ISO-8601 instant, e.g. `2026-01-15T09:00:00Z`."
 resource: "https://shop.example/graphql"

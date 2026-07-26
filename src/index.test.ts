@@ -29,7 +29,7 @@ describe("syncOkfBundle", () => {
     expect(result.changed).toEqual([]);
     expect(result.removed).toEqual([]);
     expect(await readFile(join(outDir, "types/objects/Country.md"), "utf8")).toContain(
-      'type: "object"',
+      'type: "GraphQL Object Type"',
     );
   });
 

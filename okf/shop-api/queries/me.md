@@ -1,5 +1,5 @@
 ---
-type: "query"
+type: "GraphQL Query"
 title: "me"
 description: "The currently authenticated customer, if any."
 resource: "https://shop.example/graphql"

@@ -1,5 +1,5 @@
 ---
-type: "query"
+type: "GraphQL Query"
 title: "products"
 description: "Lists products, most recently created first."
 resource: "https://shop.example/graphql"

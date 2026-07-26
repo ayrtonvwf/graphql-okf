@@ -1,5 +1,5 @@
 ---
-type: "object"
+type: "GraphQL Object Type"
 title: "Customer"
 description: "A person who can place orders.\n\nA customer is created on first sign-in and is never hard-deleted."
 resource: "https://shop.example/graphql"

@@ -1,5 +1,5 @@
 ---
-type: "subscription"
+type: "GraphQL Subscription"
 title: "orderStatusChanged"
 description: "Emits the order each time its status changes."
 resource: "https://shop.example/graphql"

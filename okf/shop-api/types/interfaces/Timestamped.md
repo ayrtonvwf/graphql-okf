@@ -1,5 +1,5 @@
 ---
-type: "interface"
+type: "GraphQL Interface Type"
 title: "Timestamped"
 description: "Anything that records when it was created and last modified."
 resource: "https://shop.example/graphql"

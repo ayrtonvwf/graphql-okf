@@ -1,5 +1,5 @@
 ---
-type: "object"
+type: "GraphQL Object Type"
 title: "CreditCard"
 description: "A payment card."
 resource: "https://shop.example/graphql"

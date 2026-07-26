@@ -1,5 +1,5 @@
 ---
-type: "object"
+type: "GraphQL Object Type"
 title: "Money"
 description: "An amount of money in a specific currency."
 resource: "https://shop.example/graphql"

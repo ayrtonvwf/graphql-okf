@@ -1,5 +1,5 @@
 ---
-type: "object"
+type: "GraphQL Object Type"
 title: "Review"
 description: "A customer's written opinion of a product."
 resource: "https://shop.example/graphql"

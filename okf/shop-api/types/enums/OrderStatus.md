@@ -1,5 +1,5 @@
 ---
-type: "enum"
+type: "GraphQL Enum Type"
 title: "OrderStatus"
 description: "The lifecycle stage of an order."
 resource: "https://shop.example/graphql"

@@ -1,5 +1,5 @@
 ---
-type: "directive"
+type: "GraphQL Directive"
 title: "include"
 description: "Directs the executor to include this field or fragment only when the `if` argument is true."
 resource: "https://shop.example/graphql"

@@ -1,5 +1,5 @@
 ---
-type: "subscription"
+type: "GraphQL Subscription"
 title: "reviewPosted"
 description: "Emits each new review as it is posted."
 resource: "https://shop.example/graphql"

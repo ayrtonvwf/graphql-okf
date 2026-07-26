@@ -1,5 +1,5 @@
 ---
-type: "directive"
+type: "GraphQL Directive"
 title: "tag"
 description: "Attaches a free-form classification label. May be applied more than once."
 resource: "https://shop.example/graphql"

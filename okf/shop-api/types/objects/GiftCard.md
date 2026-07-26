@@ -1,5 +1,5 @@
 ---
-type: "object"
+type: "GraphQL Object Type"
 title: "GiftCard"
 description: "A prepaid gift card redeemed against an order."
 resource: "https://shop.example/graphql"

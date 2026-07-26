@@ -1,5 +1,5 @@
 ---
-type: "input"
+type: "GraphQL Input Type"
 title: "AddressInput"
 description: "A postal address supplied by a client."
 resource: "https://shop.example/graphql"

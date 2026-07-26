@@ -1,5 +1,5 @@
 ---
-type: "enum"
+type: "GraphQL Enum Type"
 title: "Currency"
 description: "An ISO-4217 currency code."
 resource: "https://shop.example/graphql"

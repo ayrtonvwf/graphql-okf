@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { DIRECTORY_BY_KIND, elementId, resolvePaths } from "./naming.js";
+import { DIRECTORY_BY_KIND, elementId, resolvePaths, TYPE_LABEL_BY_KIND } from "./naming.js";
 
 describe("DIRECTORY_BY_KIND", () => {
   it("maps every concept kind to its documented directory", () => {
@@ -16,6 +16,27 @@ describe("DIRECTORY_BY_KIND", () => {
       subscription: "subscriptions",
       directive: "directives",
     });
+  });
+});
+
+describe("TYPE_LABEL_BY_KIND", () => {
+  it("gives every kind a descriptive Title Case label", () => {
+    expect(TYPE_LABEL_BY_KIND).toEqual({
+      object: "GraphQL Object Type",
+      interface: "GraphQL Interface Type",
+      union: "GraphQL Union Type",
+      enum: "GraphQL Enum Type",
+      input: "GraphQL Input Type",
+      scalar: "GraphQL Scalar Type",
+      query: "GraphQL Query",
+      mutation: "GraphQL Mutation",
+      subscription: "GraphQL Subscription",
+      directive: "GraphQL Directive",
+    });
+  });
+
+  it("covers exactly the kinds the naming scheme knows about", () => {
+    expect(Object.keys(TYPE_LABEL_BY_KIND).sort()).toEqual(Object.keys(DIRECTORY_BY_KIND).sort());
   });
 });
 

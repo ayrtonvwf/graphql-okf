@@ -1,5 +1,5 @@
 ---
-type: "mutation"
+type: "GraphQL Mutation"
 title: "updateDefaultAddress"
 description: "Replaces a customer's default shipping address."
 resource: "https://shop.example/graphql"

@@ -1,5 +1,5 @@
 ---
-type: "directive"
+type: "GraphQL Directive"
 title: "skip"
 description: "Directs the executor to skip this field or fragment when the `if` argument is true."
 resource: "https://shop.example/graphql"

@@ -1,5 +1,5 @@
 ---
-type: "directive"
+type: "GraphQL Directive"
 title: "deprecated"
 description: "Marks an element of a GraphQL schema as no longer supported."
 resource: "https://shop.example/graphql"

@@ -1,5 +1,5 @@
 ---
-type: "object"
+type: "GraphQL Object Type"
 title: "PayPalAccount"
 description: "A linked PayPal account."
 resource: "https://shop.example/graphql"

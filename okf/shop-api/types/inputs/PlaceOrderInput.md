@@ -1,5 +1,5 @@
 ---
-type: "input"
+type: "GraphQL Input Type"
 title: "PlaceOrderInput"
 description: "Everything needed to turn a basket into an order."
 resource: "https://shop.example/graphql"

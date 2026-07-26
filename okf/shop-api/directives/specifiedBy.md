@@ -1,5 +1,5 @@
 ---
-type: "directive"
+type: "GraphQL Directive"
 title: "specifiedBy"
 description: "Exposes a URL that specifies the behavior of this scalar."
 resource: "https://shop.example/graphql"

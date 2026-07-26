@@ -1,4 +1,5 @@
 import type { ConceptNode } from "../../model/ir.js";
+import { TYPE_LABEL_BY_KIND } from "../../model/naming.js";
 
 export function renderFrontmatter(
   concept: ConceptNode,
@@ -8,7 +9,7 @@ export function renderFrontmatter(
   const tags = ["graphql", concept.kind].map((tag) => JSON.stringify(tag)).join(", ");
   const lines = [
     "---",
-    `type: ${JSON.stringify(concept.kind)}`,
+    `type: ${JSON.stringify(TYPE_LABEL_BY_KIND[concept.kind])}`,
     `title: ${JSON.stringify(concept.name)}`,
   ];
   if (concept.description !== null) {

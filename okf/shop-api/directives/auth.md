@@ -1,5 +1,5 @@
 ---
-type: "directive"
+type: "GraphQL Directive"
 title: "auth"
 description: "Restricts a field or type to callers holding at least the given role."
 resource: "https://shop.example/graphql"

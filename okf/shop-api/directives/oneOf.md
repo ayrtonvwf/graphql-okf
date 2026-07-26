@@ -1,5 +1,5 @@
 ---
-type: "directive"
+type: "GraphQL Directive"
 title: "oneOf"
 description: "Indicates exactly one field must be supplied and this field must not be `null`."
 resource: "https://shop.example/graphql"

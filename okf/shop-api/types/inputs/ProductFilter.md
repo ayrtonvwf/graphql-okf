@@ -1,5 +1,5 @@
 ---
-type: "input"
+type: "GraphQL Input Type"
 title: "ProductFilter"
 description: "Narrows a product listing. Every field is optional; omitted fields do not filter."
 resource: "https://shop.example/graphql"

@@ -1,5 +1,5 @@
 ---
-type: "query"
+type: "GraphQL Query"
 title: "node"
 description: "Looks up any node by its globally unique identifier."
 resource: "https://shop.example/graphql"
