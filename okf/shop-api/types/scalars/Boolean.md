@@ -2,7 +2,7 @@
 type: "GraphQL Scalar Type"
 title: "Boolean"
 description: "The `Boolean` scalar type represents `true` or `false`."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#Boolean"
 tags: ["graphql", "scalar"]
 timestamp: "2026-01-15T09:00:00.000Z"
 ---

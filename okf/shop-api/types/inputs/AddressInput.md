@@ -2,7 +2,7 @@
 type: "GraphQL Input Type"
 title: "AddressInput"
 description: "A postal address supplied by a client."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#AddressInput"
 tags: ["graphql", "input"]
 timestamp: "2026-01-15T09:00:00.000Z"
 ---

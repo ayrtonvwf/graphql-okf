@@ -238,6 +238,7 @@ describe("renderScalarBody", () => {
 const languages: OperationNode = {
   kind: "query",
   name: "languages",
+  rootTypeName: "Query",
   path: "queries/languages.md",
   description: "Returns every language.",
   appliedDirectives: [],

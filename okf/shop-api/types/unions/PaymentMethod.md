@@ -2,7 +2,7 @@
 type: "GraphQL Union Type"
 title: "PaymentMethod"
 description: "How an order was paid for."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#PaymentMethod"
 tags: ["graphql", "union"]
 timestamp: "2026-05-20T09:00:00.000Z"
 ---

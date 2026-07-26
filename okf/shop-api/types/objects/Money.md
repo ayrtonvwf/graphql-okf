@@ -2,7 +2,7 @@
 type: "GraphQL Object Type"
 title: "Money"
 description: "An amount of money in a specific currency."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#Money"
 tags: ["graphql", "object"]
 timestamp: "2026-03-02T09:00:00.000Z"
 ---

@@ -2,7 +2,7 @@
 type: "GraphQL Input Type"
 title: "ProductFilter"
 description: "Narrows a product listing."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#ProductFilter"
 tags: ["graphql", "input"]
 timestamp: "2026-01-15T09:00:00.000Z"
 ---

@@ -108,7 +108,7 @@ describe("the resource option", () => {
     });
 
     const concept = await readFile(join(outDir, "queries/hello.md"), "utf8");
-    expect(concept).toContain('resource: "https://shop.example/graphql"');
+    expect(concept).toContain('resource: "https://shop.example/graphql#Query.hello"');
     expect(concept).not.toContain(workspace);
   });
 
@@ -121,7 +121,7 @@ describe("the resource option", () => {
     await syncOkfBundle({ source: { kind: "sdl", path: sdlPath }, outDir });
 
     expect(await readFile(join(outDir, "queries/hello.md"), "utf8")).toContain(
-      `resource: "${sdlPath}"`,
+      `resource: "${sdlPath}#Query.hello"`,
     );
   });
 });

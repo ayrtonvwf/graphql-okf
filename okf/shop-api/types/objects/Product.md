@@ -2,7 +2,7 @@
 type: "GraphQL Object Type"
 title: "Product"
 description: "An item offered for sale."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#Product"
 tags: ["graphql", "object"]
 timestamp: "2026-05-20T09:00:00.000Z"
 ---

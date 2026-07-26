@@ -2,7 +2,7 @@
 type: "GraphQL Enum Type"
 title: "OrderStatus"
 description: "The lifecycle stage of an order."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#OrderStatus"
 tags: ["graphql", "enum"]
 timestamp: "2026-05-20T09:00:00.000Z"
 ---

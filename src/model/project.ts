@@ -305,6 +305,7 @@ export function project(loaded: LoadedSchema): SchemaIr {
       concepts.push({
         kind: root.kind,
         name: field.name,
+        rootTypeName: root.type.name,
         path: pathFor({ kind: root.kind, name: field.name }),
         description: normalizeDescription(field.description),
         appliedDirectives: appliedDirectivesOf(field, pathFor),

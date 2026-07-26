@@ -2,7 +2,7 @@
 type: "GraphQL Directive"
 title: "specifiedBy"
 description: "Exposes a URL that specifies the behavior of this scalar."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#@specifiedBy"
 tags: ["graphql", "directive"]
 timestamp: "2026-01-15T09:00:00.000Z"
 ---

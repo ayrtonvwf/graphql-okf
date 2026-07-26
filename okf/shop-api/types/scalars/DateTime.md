@@ -2,7 +2,7 @@
 type: "GraphQL Scalar Type"
 title: "DateTime"
 description: "An ISO-8601 instant, e.g."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#DateTime"
 tags: ["graphql", "scalar"]
 timestamp: "2026-01-15T09:00:00.000Z"
 ---

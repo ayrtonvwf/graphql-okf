@@ -2,7 +2,7 @@
 type: "GraphQL Query"
 title: "products"
 description: "Lists products, most recently created first."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#Query.products"
 tags: ["graphql", "query"]
 timestamp: "2026-03-02T09:00:00.000Z"
 ---

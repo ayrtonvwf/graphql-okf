@@ -2,7 +2,7 @@
 type: "GraphQL Input Type"
 title: "PaymentInput"
 description: "Exactly one payment instrument."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#PaymentInput"
 tags: ["graphql", "input"]
 timestamp: "2026-01-15T09:00:00.000Z"
 ---

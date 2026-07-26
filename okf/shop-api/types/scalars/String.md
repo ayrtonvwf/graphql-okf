@@ -2,7 +2,7 @@
 type: "GraphQL Scalar Type"
 title: "String"
 description: "The `String` scalar type represents textual data, represented as UTF-8 character sequences."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#String"
 tags: ["graphql", "scalar"]
 timestamp: "2026-01-15T09:00:00.000Z"
 ---

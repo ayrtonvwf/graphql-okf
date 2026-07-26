@@ -3,6 +3,7 @@ import type { ConceptNode, SchemaIr } from "../model/ir.js";
 import type { ConceptKind } from "../model/naming.js";
 import { renderConceptParts } from "./render/concept.js";
 import { type IndexEntry, renderDirectoryIndex } from "./render/directory-index.js";
+import { conceptResource } from "./render/resource.js";
 import type { FileParts } from "./render/seam.js";
 
 const KIND_SUMMARY: Record<ConceptKind, string> = {
@@ -58,7 +59,10 @@ export function buildBundle(
 
   // Concept files.
   for (const concept of ir.concepts) {
-    bundle.set(concept.path, renderConceptParts(concept, ir.resource, timestamp));
+    bundle.set(
+      concept.path,
+      renderConceptParts(concept, conceptResource(ir.resource, concept), timestamp),
+    );
   }
 
   // Build the directory tree from concept paths. "." is the root.

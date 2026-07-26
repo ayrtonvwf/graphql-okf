@@ -2,7 +2,7 @@
 type: "GraphQL Object Type"
 title: "Review"
 description: "A customer's written opinion of a product."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#Review"
 tags: ["graphql", "object"]
 timestamp: "2026-03-02T09:00:00.000Z"
 ---

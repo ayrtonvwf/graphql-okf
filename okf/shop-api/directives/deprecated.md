@@ -2,7 +2,7 @@
 type: "GraphQL Directive"
 title: "deprecated"
 description: "Marks an element of a GraphQL schema as no longer supported."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#@deprecated"
 tags: ["graphql", "directive"]
 timestamp: "2026-01-15T09:00:00.000Z"
 ---

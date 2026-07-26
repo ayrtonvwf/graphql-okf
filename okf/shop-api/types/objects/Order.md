@@ -2,7 +2,7 @@
 type: "GraphQL Object Type"
 title: "Order"
 description: "A customer's purchase."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#Order"
 tags: ["graphql", "object"]
 timestamp: "2026-05-20T09:00:00.000Z"
 ---

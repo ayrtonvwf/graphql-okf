@@ -2,7 +2,7 @@
 type: "GraphQL Directive"
 title: "skip"
 description: "Directs the executor to skip this field or fragment when the `if` argument is true."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#@skip"
 tags: ["graphql", "directive"]
 timestamp: "2026-01-15T09:00:00.000Z"
 ---

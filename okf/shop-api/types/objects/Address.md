@@ -2,7 +2,7 @@
 type: "GraphQL Object Type"
 title: "Address"
 description: "A postal address."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#Address"
 tags: ["graphql", "object"]
 timestamp: "2026-01-15T09:00:00.000Z"
 ---

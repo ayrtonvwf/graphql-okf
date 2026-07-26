@@ -2,7 +2,7 @@
 type: "GraphQL Interface Type"
 title: "Purchasable"
 description: "Anything a customer can put in an order."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#Purchasable"
 tags: ["graphql", "interface"]
 timestamp: "2026-05-20T09:00:00.000Z"
 ---

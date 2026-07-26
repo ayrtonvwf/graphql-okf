@@ -2,7 +2,7 @@
 type: "GraphQL Mutation"
 title: "addReview"
 description: "Adds a review to a product."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#Mutation.addReview"
 tags: ["graphql", "mutation"]
 timestamp: "2026-03-02T09:00:00.000Z"
 ---

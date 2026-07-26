@@ -2,7 +2,7 @@
 type: "GraphQL Directive"
 title: "auth"
 description: "Restricts a field or type to callers holding at least the given role."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#@auth"
 tags: ["graphql", "directive"]
 timestamp: "2026-01-15T09:00:00.000Z"
 ---

@@ -2,7 +2,7 @@
 type: "GraphQL Input Type"
 title: "PlaceOrderInput"
 description: "Everything needed to turn a basket into an order."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#PlaceOrderInput"
 tags: ["graphql", "input"]
 timestamp: "2026-01-15T09:00:00.000Z"
 ---

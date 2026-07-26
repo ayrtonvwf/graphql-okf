@@ -2,7 +2,7 @@
 type: "GraphQL Interface Type"
 title: "Timestamped"
 description: "Anything that records when it was created and last modified."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#Timestamped"
 tags: ["graphql", "interface"]
 timestamp: "2026-03-02T09:00:00.000Z"
 ---

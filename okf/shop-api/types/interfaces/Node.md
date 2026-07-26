@@ -2,7 +2,7 @@
 type: "GraphQL Interface Type"
 title: "Node"
 description: "Anything addressable by a globally unique identifier."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#Node"
 tags: ["graphql", "interface"]
 timestamp: "2026-03-02T09:00:00.000Z"
 ---

@@ -2,7 +2,7 @@
 type: "GraphQL Object Type"
 title: "PayPalAccount"
 description: "A linked PayPal account."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#PayPalAccount"
 tags: ["graphql", "object"]
 timestamp: "2026-01-15T09:00:00.000Z"
 ---

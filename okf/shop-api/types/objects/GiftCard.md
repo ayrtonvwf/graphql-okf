@@ -2,7 +2,7 @@
 type: "GraphQL Object Type"
 title: "GiftCard"
 description: "A prepaid gift card redeemed against an order."
-resource: "https://shop.example/graphql"
+resource: "https://shop.example/graphql#GiftCard"
 tags: ["graphql", "object"]
 timestamp: "2026-01-15T09:00:00.000Z"
 status: "removed"
