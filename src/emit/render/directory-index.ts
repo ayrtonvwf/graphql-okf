@@ -18,8 +18,8 @@ export function renderDirectoryIndex(
 ): FileParts {
   const bullets = entries.map((entry) =>
     entry.summary === ""
-      ? `- [${entry.label}](${entry.link})`
-      : `- [${entry.label}](${entry.link}) — ${entry.summary}`,
+      ? `* [${entry.label}](${entry.link})`
+      : `* [${entry.label}](${entry.link}) - ${entry.summary}`,
   );
   const block =
     frontmatter === undefined || frontmatter.length === 0

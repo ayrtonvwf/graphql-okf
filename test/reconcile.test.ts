@@ -103,7 +103,7 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
 
     const index = await readFile(join(outDir, "types/objects/index.md"), "utf8");
 
-    expect(index).toContain("— (removed)");
+    expect(index).toContain("- (removed)");
   });
 
   it("leaves a stray human file untouched and unlisted", async () => {

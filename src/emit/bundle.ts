@@ -1,4 +1,5 @@
 import { posix } from "node:path";
+import { firstSentence } from "../model/description.js";
 import type { ConceptNode, SchemaIr } from "../model/ir.js";
 import type { ConceptKind } from "../model/naming.js";
 import { renderConceptParts } from "./render/concept.js";
@@ -37,10 +38,6 @@ const DIRECTORY_LABELS: Record<string, string> = {
   subscriptions: "Subscription operations",
   directives: "Directives",
 };
-
-function firstLine(description: string | null): string {
-  return description === null ? "" : (description.split("\n")[0] ?? "").trim();
-}
 
 function sortByLabel(entries: IndexEntry[]): IndexEntry[] {
   return entries.sort((left, right) =>
@@ -124,7 +121,7 @@ export function buildBundle(
     }
 
     for (const concept of filesByDir.get(dir) ?? []) {
-      const summary = firstLine(concept.description) || KIND_SUMMARY[concept.kind];
+      const summary = firstSentence(concept.description) ?? KIND_SUMMARY[concept.kind];
       entries.push({
         label: concept.name,
         link: posix.basename(concept.path),
