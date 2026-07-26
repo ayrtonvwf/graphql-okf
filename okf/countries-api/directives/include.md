@@ -1,10 +1,10 @@
 ---
-type: directive
+type: "GraphQL Directive"
 title: "include"
 description: "Directs the executor to include this field or fragment only when the `if` argument is true."
-resource: "https://countries.trevorblades.com/graphql"
-tags: [graphql, directive]
-timestamp: 2026-07-24T13:14:12.015Z
+resource: "https://countries.trevorblades.com/graphql#@include"
+tags: ["graphql", "directive"]
+timestamp: "2026-07-25T00:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -16,9 +16,11 @@ Directs the executor to include this field or fragment only when the `if` argume
 
 Locations: `FIELD`, `FRAGMENT_SPREAD`, `INLINE_FRAGMENT`.
 
-## Arguments
+# Schema
 
-- **`if`**: [`Boolean!`](../types/scalars/Boolean.md) — Included when true.
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `if` | [`Boolean!`](../types/scalars/Boolean.md) |  | Included when true. |
 
 <!-- graphql-okf:generated:end -->
 

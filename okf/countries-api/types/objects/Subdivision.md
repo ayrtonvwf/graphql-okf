@@ -1,9 +1,9 @@
 ---
-type: object
+type: "GraphQL Object Type"
 title: "Subdivision"
-resource: "https://countries.trevorblades.com/graphql"
-tags: [graphql, object]
-timestamp: 2026-07-24T13:14:12.015Z
+resource: "https://countries.trevorblades.com/graphql#Subdivision"
+tags: ["graphql", "object"]
+timestamp: "2026-07-25T00:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -11,11 +11,13 @@ timestamp: 2026-07-24T13:14:12.015Z
 
 # Subdivision
 
-## Fields
+# Schema
 
-- **`code`** — [`ID!`](../scalars/ID.md)
-- **`emoji`** — [`String`](../scalars/String.md)
-- **`name`** — [`String!`](../scalars/String.md)
+| Field | Type | Description |
+| --- | --- | --- |
+| `code` | [`ID!`](../scalars/ID.md) |  |
+| `emoji` | [`String`](../scalars/String.md) |  |
+| `name` | [`String!`](../scalars/String.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

@@ -1,10 +1,10 @@
 ---
-type: scalar
+type: "GraphQL Scalar Type"
 title: "Int"
-description: "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1."
-resource: "https://countries.trevorblades.com/graphql"
-tags: [graphql, scalar]
-timestamp: 2026-07-24T13:14:12.015Z
+description: "The `Int` scalar type represents non-fractional signed whole numeric values."
+resource: "https://countries.trevorblades.com/graphql#Int"
+tags: ["graphql", "scalar"]
+timestamp: "2026-07-25T00:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

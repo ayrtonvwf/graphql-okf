@@ -1,9 +1,9 @@
 ---
-type: query
+type: "GraphQL Query"
 title: "countries"
-resource: "https://countries.trevorblades.com/graphql"
-tags: [graphql, query]
-timestamp: 2026-07-24T13:14:12.015Z
+resource: "https://countries.trevorblades.com/graphql#Query.countries"
+tags: ["graphql", "query"]
+timestamp: "2026-07-25T00:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -13,9 +13,11 @@ timestamp: 2026-07-24T13:14:12.015Z
 
 **Returns** [`[Country!]!`](../types/objects/Country.md)
 
-## Arguments
+# Schema
 
-- **`filter`**: [`CountryFilterInput`](../types/inputs/CountryFilterInput.md) = `{}`
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `filter` | [`CountryFilterInput`](../types/inputs/CountryFilterInput.md) | `{}` |  |
 
 <!-- graphql-okf:generated:end -->
 
