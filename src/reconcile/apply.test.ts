@@ -55,9 +55,12 @@ describe("applyPlan", () => {
     expect(await readdir(dir)).toEqual(["index.md"]);
   });
 
-  it("appends the log entry to an existing log.md rather than replacing it", async () => {
+  it("keeps an existing log.md entry rather than replacing it", async () => {
     const dir = await workspace();
-    await writeFile(join(dir, "log.md"), "# Change log\n\n## 2026-07-01T00:00:00.000Z\n\n");
+    await writeFile(
+      join(dir, "log.md"),
+      "---\ntype: Log\n---\n\n# Update Log\n\n## 2026-07-01\n\n### 00:00:00.000Z\n",
+    );
     const plan: BundlePlan = {
       ...empty,
       actions: [{ kind: "create", path: "queries/a.md", contents: "a\n" }],
@@ -67,9 +70,30 @@ describe("applyPlan", () => {
     await applyPlan(plan, dir, T);
     const log = await readFile(join(dir, "log.md"), "utf8");
 
-    expect(log).toContain("## 2026-07-01T00:00:00.000Z");
-    expect(log.indexOf("## 2026-07-01")).toBeLessThan(log.indexOf(`## ${T}`));
-    expect(log).toContain("- [`a`](queries/a.md)");
+    expect(log).toContain("## 2026-07-01");
+    expect(log.indexOf("## 2026-07-24")).toBeLessThan(log.indexOf("## 2026-07-01"));
+    expect(log).toContain("* [`a`](queries/a.md)");
+  });
+
+  it("rewrites log.md rather than appending, keeping one heading per day", async () => {
+    const dir = await workspace();
+    const plan: BundlePlan = {
+      actions: [{ kind: "create", path: "types/objects/A.md", contents: "a" }],
+      added: [{ name: "A", path: "types/objects/A.md" }],
+      changed: [],
+      removed: [],
+      unchanged: 0,
+      indexes: 0,
+    };
+
+    await applyPlan(plan, dir, "2026-07-24T09:00:00.000Z");
+    await applyPlan(plan, dir, "2026-07-24T17:30:00.000Z");
+
+    const log = await readFile(join(dir, "log.md"), "utf8");
+
+    expect(log.match(/^## 2026-07-24$/gm)).toHaveLength(1);
+    expect(log.match(/^### /gm)).toHaveLength(2);
+    expect(log.startsWith("---\ntype: Log\n---")).toBe(true);
   });
 
   it("writes no log entry for a plan that only touches index files", async () => {

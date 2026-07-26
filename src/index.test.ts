@@ -44,9 +44,10 @@ describe("syncOkfBundle", () => {
     });
 
     const log = await readFile(join(outDir, "log.md"), "utf8");
-    expect(log).toContain("## 2026-07-24T09:00:00.000Z");
+    expect(log).toContain("## 2026-07-24");
+    expect(log).toContain("### 09:00:00.000Z");
     expect(log).toContain("**Added**");
-    expect(log).toContain("- [`Country`](types/objects/Country.md)");
+    expect(log).toContain("* [`Country`](types/objects/Country.md)");
   });
 
   it("refuses a non-empty directory that is not a bundle", async () => {

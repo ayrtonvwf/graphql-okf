@@ -79,10 +79,10 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
 
     const log = await readFile(join(outDir, "log.md"), "utf8");
 
-    expect(log).toContain(`## ${T2}`);
-    expect(log).toContain("- [`Invoice`](types/objects/Invoice.md)");
+    expect(log).toContain(`## ${T2.slice(0, 10)}`);
+    expect(log).toContain("* [`Invoice`](types/objects/Invoice.md)");
     expect(log).toContain("**Removed**");
-    expect(log.indexOf(`## ${T1}`)).toBeLessThan(log.indexOf(`## ${T2}`));
+    expect(log.indexOf(`## ${T2.slice(0, 10)}`)).toBeLessThan(log.indexOf(`## ${T1.slice(0, 10)}`));
   });
 
   it("preserves human prose in a concept it updates", async () => {

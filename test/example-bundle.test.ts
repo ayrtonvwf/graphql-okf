@@ -147,9 +147,9 @@ describe("the committed example bundle", () => {
     const built = await buildExampleBundle();
 
     const log = built.get("log.md") ?? "";
-    expect(log).toContain(`## ${T1}`);
-    expect(log).toContain(`## ${T2}`);
-    expect(log).toContain(`## ${T3}`);
+    expect(log).toContain(`## ${T1.slice(0, 10)}`);
+    expect(log).toContain(`## ${T2.slice(0, 10)}`);
+    expect(log).toContain(`## ${T3.slice(0, 10)}`);
     expect(built.get("types/objects/Product.md")).toContain("Ping #catalog");
   });
 
