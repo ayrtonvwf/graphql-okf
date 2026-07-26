@@ -14,6 +14,7 @@ function rangeOf(node: unknown): readonly [number, number, number] | null {
 /** Keys graphql-okf writes itself. Anything else in a preamble is a human's. */
 const MACHINE_KEYS: ReadonlySet<string> = new Set([
   "type",
+  "okf_version",
   "title",
   "description",
   "resource",

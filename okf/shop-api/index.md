@@ -1,3 +1,8 @@
+---
+okf_version: "0.1"
+resource: "https://shop.example/graphql"
+---
+
 # API interface
 
 <!-- graphql-okf:generated:start -->

@@ -74,6 +74,15 @@ describe("buildBundle", () => {
     expect(bundleFrom(sdl)).toEqual(bundleFrom(sdl));
   });
 
+  it("puts okf_version and the schema origin on the root index only", () => {
+    const ir = irWithOneObject;
+    const bundle = buildBundle(ir, "2026-07-25T00:00:00.000Z");
+
+    expect(bundle.get("index.md")?.preamble).toContain('okf_version: "0.1"');
+    expect(bundle.get("index.md")?.preamble).toContain(`resource: ${JSON.stringify(ir.resource)}`);
+    expect(bundle.get("types/objects/index.md")?.preamble).not.toContain("---");
+  });
+
   it("has referential integrity: every intra-bundle link resolves to a real path", () => {
     const bundle = bundleFrom(`
       interface Node { id: ID! }

@@ -36,4 +36,29 @@ describe("renderDirectoryIndex", () => {
     expect(parts.generated).toContain("- [widgets/](widgets/index.md)");
     expect(parts.generated).not.toContain("—");
   });
+
+  it("emits a frontmatter block above the title when given one", () => {
+    const parts = renderDirectoryIndex(
+      "API interface",
+      [],
+      ['okf_version: "0.1"', 'resource: "https://api.test/graphql"'],
+    );
+
+    expect(parts.preamble).toBe(
+      [
+        "---",
+        'okf_version: "0.1"',
+        'resource: "https://api.test/graphql"',
+        "---",
+        "",
+        "# API interface",
+        "",
+        "",
+      ].join("\n"),
+    );
+  });
+
+  it("emits no frontmatter block when none is given", () => {
+    expect(renderDirectoryIndex("Object types", []).preamble).toBe("# Object types\n\n");
+  });
 });

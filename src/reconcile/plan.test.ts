@@ -121,6 +121,21 @@ describe("reconcile", () => {
     expect(plan.added).toEqual([]);
     expect(plan.changed).toEqual([]);
   });
+
+  it("preserves a human key added to the bundle-root index", () => {
+    const first = reconcile(ir, new Map(), "2026-07-25T00:00:00.000Z");
+    const rootAction = first.actions.find((action) => action.path === "index.md");
+    if (rootAction === undefined) throw new Error("expected a root index action");
+
+    const edited = rootAction.contents.replace("---\n\n# ", "owner: platform-team\n---\n\n# ");
+    const existing = new Map([["index.md", edited]]);
+
+    const second = reconcile(ir, existing, "2026-07-25T00:00:00.000Z");
+    const rewritten = second.actions.find((action) => action.path === "index.md");
+
+    expect(rewritten?.contents ?? edited).toContain("owner: platform-team");
+    expect(rewritten?.contents ?? edited).toContain('okf_version: "0.1"');
+  });
 });
 
 const emptyIr: SchemaIr = { resource: "schema.graphql", origin: "sdl", concepts: [] };
