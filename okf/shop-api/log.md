@@ -4,6 +4,14 @@ type: Log
 
 # Update Log
 
+## 2026-07-27
+
+### 09:00:00.000Z
+
+**Migrated**
+
+* OKF bundle format 0.1 → 0.2 (`timestamp` → `generated`) across 47 concepts.
+
 ## 2026-05-20
 
 ### 09:00:00.000Z

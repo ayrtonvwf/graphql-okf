@@ -4,7 +4,7 @@ title: "ID"
 description: "The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache."
 resource: "https://countries.trevorblades.com/graphql#ID"
 tags: ["graphql", "scalar"]
-timestamp: "2026-07-25T00:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

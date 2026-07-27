@@ -4,7 +4,7 @@ title: "Node"
 description: "Anything addressable by a globally unique identifier."
 resource: "https://shop.example/graphql#Node"
 tags: ["graphql", "interface"]
-timestamp: "2026-03-02T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-03-02T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

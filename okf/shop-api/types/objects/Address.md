@@ -4,7 +4,7 @@ title: "Address"
 description: "A postal address."
 resource: "https://shop.example/graphql#Address"
 tags: ["graphql", "object"]
-timestamp: "2026-01-15T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

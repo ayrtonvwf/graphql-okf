@@ -4,7 +4,7 @@ title: "PaymentInput"
 description: "Exactly one payment instrument."
 resource: "https://shop.example/graphql#PaymentInput"
 tags: ["graphql", "input"]
-timestamp: "2026-01-15T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

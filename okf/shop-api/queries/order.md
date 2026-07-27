@@ -4,7 +4,7 @@ title: "order"
 description: "Looks up a single order."
 resource: "https://shop.example/graphql#Query.order"
 tags: ["graphql", "query"]
-timestamp: "2026-01-15T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

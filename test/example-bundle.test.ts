@@ -13,6 +13,7 @@ const RESOURCE = "https://shop.example/graphql";
 const T1 = "2026-01-15T09:00:00.000Z";
 const T2 = "2026-03-02T09:00:00.000Z";
 const T3 = "2026-05-20T09:00:00.000Z";
+const T4 = "2026-07-27T09:00:00.000Z";
 
 describe("the v1 example schema", () => {
   it("emits every concept kind the model supports", async () => {
@@ -120,9 +121,10 @@ const HUMAN_SECTION =
  * GOAL-8.3 (human edits survive regeneration) verifiable by opening the committed
  * bundle rather than by trusting a test name.
  *
- * Pinned to okf-version 0.1: the committed bundle under okf/shop-api is still
- * v0.1-shaped. Migrating that tracked bundle (and this test) to v0.2 is Task 12's
- * job, not this one's — see the OKF v0.2 migration plan.
+ * v1 -> v2 -> v3 are pinned to okf-version 0.1, then a final v3 run at the
+ * default (v0.2) okf-version migrates the bundle in place — mirroring the real
+ * history of the committed okf/shop-api bundle: written under v0.1 and migrated
+ * to v0.2 by Task 12 (see the OKF v0.2 migration plan).
  */
 async function buildExampleBundle(): Promise<Map<string, string>> {
   const outDir = join(await mkdtemp(join(tmpdir(), "okf-shop-golden-")), "bundle");
@@ -149,6 +151,12 @@ async function buildExampleBundle(): Promise<Map<string, string>> {
     resource: RESOURCE,
     okfVersion: "0.1",
   });
+  await syncOkfBundle({
+    source: { kind: "sdl", path: V3 },
+    outDir,
+    now: T4,
+    resource: RESOURCE,
+  });
 
   return readTree(outDir);
 }
@@ -165,13 +173,15 @@ describe("the committed example bundle", () => {
     expect(await readTree(COMMITTED)).toEqual(built);
   });
 
-  it("carries three dated log entries and the surviving human section", async () => {
+  it("carries four dated log entries and the surviving human section", async () => {
     const built = await buildExampleBundle();
 
     const log = built.get("log.md") ?? "";
     expect(log).toContain(`## ${T1.slice(0, 10)}`);
     expect(log).toContain(`## ${T2.slice(0, 10)}`);
     expect(log).toContain(`## ${T3.slice(0, 10)}`);
+    expect(log).toContain(`## ${T4.slice(0, 10)}`);
+    expect(log).toContain("**Migrated**");
     expect(built.get("types/objects/Product.md")).toContain("Ping #catalog");
   });
 

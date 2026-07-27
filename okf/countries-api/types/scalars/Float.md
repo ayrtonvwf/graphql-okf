@@ -4,7 +4,7 @@ title: "Float"
 description: "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point)."
 resource: "https://countries.trevorblades.com/graphql#Float"
 tags: ["graphql", "scalar"]
-timestamp: "2026-07-25T00:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

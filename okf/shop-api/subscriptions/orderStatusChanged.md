@@ -4,7 +4,7 @@ title: "orderStatusChanged"
 description: "Emits the order each time its status changes."
 resource: "https://shop.example/graphql#Subscription.orderStatusChanged"
 tags: ["graphql", "subscription"]
-timestamp: "2026-01-15T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

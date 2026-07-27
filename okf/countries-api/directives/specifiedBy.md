@@ -4,7 +4,7 @@ title: "specifiedBy"
 description: "Exposes a URL that specifies the behavior of this scalar."
 resource: "https://countries.trevorblades.com/graphql#@specifiedBy"
 tags: ["graphql", "directive"]
-timestamp: "2026-07-25T00:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
