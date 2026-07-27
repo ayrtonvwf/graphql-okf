@@ -4,7 +4,7 @@ title: "ProductFilter"
 description: "Narrows a product listing."
 resource: "https://shop.example/graphql#ProductFilter"
 tags: ["graphql", "input"]
-timestamp: "2026-01-15T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

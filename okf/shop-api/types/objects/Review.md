@@ -4,7 +4,7 @@ title: "Review"
 description: "A customer's written opinion of a product."
 resource: "https://shop.example/graphql#Review"
 tags: ["graphql", "object"]
-timestamp: "2026-03-02T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-03-02T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

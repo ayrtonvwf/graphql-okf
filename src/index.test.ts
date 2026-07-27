@@ -119,7 +119,7 @@ describe("syncOkfBundle", () => {
     await syncOkfBundle({ source: { kind: "sdl", path: sdlPath }, outDir });
 
     const hello = await readFile(join(outDir, "queries/hello.md"), "utf8");
-    expect(hello.match(/^timestamp: "(.+)"$/m)?.[1]).toMatch(
+    expect(hello.match(/generated: \{ by: "[^"]+", at: "(.+)" \}/)?.[1]).toMatch(
       /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
     );
   });
@@ -157,6 +157,52 @@ describe("the resource option", () => {
   });
 });
 
+describe("okfVersion", () => {
+  it("writes a v0.2 bundle by default", async () => {
+    const { sdlPath, outDir } = await workspaceWithSdl();
+
+    await syncOkfBundle({
+      source: { kind: "sdl", path: sdlPath },
+      outDir,
+      now: "2026-07-24T09:00:00.000Z",
+    });
+
+    const root = await readFile(join(outDir, "index.md"), "utf8");
+    expect(root).toContain('okf_version: "0.2"');
+  });
+
+  it("writes a v0.1 bundle when asked", async () => {
+    const { sdlPath, outDir } = await workspaceWithSdl();
+
+    await syncOkfBundle({
+      source: { kind: "sdl", path: sdlPath },
+      outDir,
+      now: "2026-07-24T09:00:00.000Z",
+      okfVersion: "0.1",
+    });
+
+    expect(await readFile(join(outDir, "index.md"), "utf8")).toContain('okf_version: "0.1"');
+  });
+
+  it("refuses to downgrade an existing v0.2 bundle", async () => {
+    const { sdlPath, outDir } = await workspaceWithSdl();
+    await syncOkfBundle({
+      source: { kind: "sdl", path: sdlPath },
+      outDir,
+      now: "2026-07-24T09:00:00.000Z",
+    });
+
+    await expect(
+      syncOkfBundle({
+        source: { kind: "sdl", path: sdlPath },
+        outDir,
+        now: "2026-07-24T09:00:00.000Z",
+        okfVersion: "0.1",
+      }),
+    ).rejects.toThrow(/OKF 0\.2 bundle/);
+  });
+});
+
 describe("the now option", () => {
   it("rejects a value that is not a parseable timestamp", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "okf-now-"));
@@ -188,7 +234,7 @@ describe("the now option", () => {
     });
 
     expect(await readFile(join(outDir, "queries/hello.md"), "utf8")).toContain(
-      'timestamp: "2026-01-15T09:00:00.000Z"',
+      'at: "2026-01-15T09:00:00.000Z"',
     );
   });
 });

@@ -99,7 +99,10 @@ inherits it. It MUST be settled and documented before the emitter is built.
 
 ## 5. Output: OKF conformance
 
-The bundle MUST be a conformant OKF v0.1 bundle. OKF is permissive on the
+The bundle MUST be a conformant OKF bundle. `graphql-okf` emits **OKF v0.2 by
+default** and supports **v0.1** behind `--okf-version 0.1`; an existing v0.1
+bundle is migrated in place on the next v0.2 run. Amended per issue #9: OKF
+v0.2 superseded v0.1 on 2026-07-24. OKF is permissive on the
 consumer side, but graphql-okf is a *producer* and MUST emit well-formed output.
 
 **Requirements**
@@ -107,7 +110,11 @@ consumer side, but graphql-okf is a *producer* and MUST emit well-formed output.
 - `GOAL-5.1` — Every concept file MUST be Markdown with a YAML frontmatter block
   and MUST include the one required OKF field, `type`.
 - `GOAL-5.2` — Each concept SHOULD populate the recommended OKF fields where
-  meaningful: `title`, `description`, `resource`, `tags`, `timestamp`.
+  meaningful: `title`, `description`, `resource`, `tags`, and provenance. Amended
+  per issue #9: provenance is `generated: {by, at}` under v0.2 (§5.1, §13.1) and
+  the flat `timestamp` under v0.1. `generated.by` is the OKF §7 actor identity
+  `graphql-okf/<major.minor>`; `generated.at` is the content's last meaningful
+  change, and is preserved — never restamped — when a v0.1 bundle is migrated.
   - `description` MUST be the first sentence of the schema element's
     documentation string when present, with the full documentation string
     preserved verbatim in the body (see `GOAL-6.3`). Amended per issue #8: OKF
@@ -267,7 +274,7 @@ following. These are named here so they are not smuggled in:
 M1's functional goal is met when all of the following hold:
 
 - `DOD-G-1` — Given an SDL file OR a live endpoint, graphql-okf produces a
-  conformant OKF v0.1 bundle in which every concept has the required `type` field
+  conformant OKF bundle (v0.2 by default) in which every concept has the required `type` field
   and every schema element is represented per the documented naming scheme.
 - `DOD-G-2` — The bundle is fully cross-linked: type/argument/return/interface/
   union references render as Markdown links with intact referential integrity, and

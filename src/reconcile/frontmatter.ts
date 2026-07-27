@@ -20,7 +20,9 @@ const MACHINE_KEYS: ReadonlySet<string> = new Set([
   "resource",
   "tags",
   "timestamp",
+  "generated",
   "status",
+  "graphql_okf_status",
   "removedAt",
 ]);
 
@@ -121,13 +123,43 @@ export function frontmatterValue(preamble: string, key: string): string | null {
   return readBlock(preamble)?.values.get(key) ?? null;
 }
 
-export function withoutTimestamp(preamble: string): string {
+/**
+ * Provenance is excluded from the change comparison: a concept whose content
+ * did not change keeps the `by` and `at` of the run that actually produced it,
+ * which is exactly what §5.1 asks `generated` to record. Without this, every
+ * producer-version bump would rewrite every file in every bundle.
+ */
+const PROVENANCE_KEYS: ReadonlySet<string> = new Set(["timestamp", "generated"]);
+
+export function withoutProvenance(preamble: string): string {
   const block = readBlock(preamble);
   if (block === null || !block.valid) {
     return preamble;
   }
-  const kept = block.entries.filter((entry) => entry.key !== "timestamp");
+  const kept = block.entries.filter((entry) => !PROVENANCE_KEYS.has(entry.key));
   return serialize(kept, block.trailing);
+}
+
+/**
+ * Replaces one machine-owned pair in place. Every other byte of the block —
+ * human keys, comments, blank lines, key order — and everything after the
+ * closing fence survives verbatim, which is what GOAL-8.3 requires of a
+ * migration. Null when there is nothing parseable to rewrite.
+ */
+export function replaceEntry(text: string, key: string, line: string): string | null {
+  const block = readBlock(text);
+  if (block === null || !block.valid) {
+    return null;
+  }
+  let found = false;
+  const entries = block.entries.map((entry) => {
+    if (entry.key !== key) {
+      return entry;
+    }
+    found = true;
+    return { key, text: `${line}\n` };
+  });
+  return found ? serialize(entries, block.trailing) : null;
 }
 
 export function mergeFrontmatter(rendered: string, existing: string): string {

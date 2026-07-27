@@ -1,8 +1,10 @@
 import { buildBundle, type TombstoneEntry } from "../emit/bundle.js";
+import type { EmitContext } from "../emit/context.js";
 import { assembleFile, EMPTY_HUMAN, type FileParts } from "../emit/render/seam.js";
 import type { SchemaIr } from "../model/ir.js";
-import { mergeFrontmatter, withoutTimestamp } from "./frontmatter.js";
-import { type SplitFile, splitFile } from "./parse.js";
+import { mergeFrontmatter, withoutProvenance } from "./frontmatter.js";
+import { migrateBundle } from "./migrate.js";
+import { isIndexPath, type SplitFile, splitFile } from "./parse.js";
 import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
 
 export interface ConceptChange {
@@ -11,7 +13,7 @@ export interface ConceptChange {
 }
 
 interface FileAction {
-  readonly kind: "create" | "update" | "tombstone" | "index";
+  readonly kind: "create" | "update" | "tombstone" | "index" | "migrate";
   readonly path: string;
   readonly contents: string;
 }
@@ -28,10 +30,11 @@ export interface BundlePlan {
    * the root index (which carries okf_version) is invisible.
    */
   readonly indexes: number;
-}
-
-function isIndexPath(path: string): boolean {
-  return path === "index.md" || path.endsWith("/index.md");
+  /**
+   * Concepts whose frontmatter this run converted from v0.1 to v0.2. Reported
+   * as a count in log.md, not a list: naming five thousand paths is noise.
+   */
+  readonly migrated: readonly string[];
 }
 
 /**
@@ -58,16 +61,17 @@ function ownedFiles(existing: ReadonlyMap<string, string>): Map<string, SplitFil
 function sameContent(rendered: FileParts, existing: FileParts): boolean {
   return (
     rendered.generated === existing.generated &&
-    withoutTimestamp(rendered.preamble) === withoutTimestamp(existing.preamble)
+    withoutProvenance(rendered.preamble) === withoutProvenance(existing.preamble)
   );
 }
 
 export function reconcile(
   ir: SchemaIr,
   existing: ReadonlyMap<string, string>,
-  timestamp: string,
+  ctx: EmitContext,
 ): BundlePlan {
-  const owned = ownedFiles(existing);
+  const { files, migrated } = migrateBundle(existing, ctx);
+  const owned = ownedFiles(files);
 
   const irPaths = new Set(ir.concepts.map((concept) => concept.path));
   const tombstones: TombstoneEntry[] = [];
@@ -93,7 +97,7 @@ export function reconcile(
 
   const names = new Map(ir.concepts.map((concept) => [concept.path, concept.name]));
 
-  for (const [path, rendered] of buildBundle(ir, timestamp, tombstones)) {
+  for (const [path, rendered] of buildBundle(ir, ctx, tombstones)) {
     const current = owned.get(path);
     const index = isIndexPath(path);
 
@@ -144,10 +148,22 @@ export function reconcile(
     actions.push({
       kind: "tombstone",
       path: change.path,
-      contents: assembleFile(renderTombstone(split, timestamp), split.human),
+      contents: assembleFile(renderTombstone(split, ctx), split.human),
     });
     removed.push(change);
   }
 
-  return { actions, added, changed, removed, unchanged, indexes };
+  // Migration rewrites exactly the region sameContent ignores, so the loop above
+  // sees these files as unchanged. Their writes have to be added explicitly —
+  // and only where reconcile did not already write a newer version of the file.
+  const acted = new Set(actions.map((action) => action.path));
+  for (const path of migrated) {
+    const contents = files.get(path);
+    if (acted.has(path) || contents === undefined) {
+      continue;
+    }
+    actions.push({ kind: "migrate", path, contents });
+  }
+
+  return { actions, added, changed, removed, unchanged, indexes, migrated };
 }

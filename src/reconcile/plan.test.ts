@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildBundle } from "../emit/bundle.js";
+import { emitContext } from "../emit/context.js";
 import { assembleFile, EMPTY_HUMAN } from "../emit/render/seam.js";
 import type { SchemaIr } from "../model/ir.js";
 import { reconcile } from "./plan.js";
@@ -26,7 +27,7 @@ const ir: SchemaIr = {
 /** The bundle exactly as a previous run would have left it on disk. */
 function bundleOnDisk(source: SchemaIr, timestamp: string): Map<string, string> {
   const files = new Map<string, string>();
-  for (const [path, parts] of buildBundle(source, timestamp)) {
+  for (const [path, parts] of buildBundle(source, emitContext("0.1", timestamp))) {
     files.set(path, assembleFile(parts, EMPTY_HUMAN));
   }
   return files;
@@ -34,7 +35,7 @@ function bundleOnDisk(source: SchemaIr, timestamp: string): Map<string, string> 
 
 describe("reconcile", () => {
   it("creates every file when the bundle does not exist yet", () => {
-    const plan = reconcile(ir, new Map(), T1);
+    const plan = reconcile(ir, new Map(), emitContext("0.1", T1));
 
     expect(plan.added.map((change) => change.path)).toEqual(["types/objects/Country.md"]);
     expect(plan.actions.some((action) => action.path === "index.md")).toBe(true);
@@ -42,7 +43,7 @@ describe("reconcile", () => {
   });
 
   it("is a complete no-op against a bundle it just produced", () => {
-    const plan = reconcile(ir, bundleOnDisk(ir, T1), T2);
+    const plan = reconcile(ir, bundleOnDisk(ir, T1), emitContext("0.1", T2));
 
     expect(plan.actions).toEqual([]);
     expect(plan.added).toEqual([]);
@@ -54,10 +55,18 @@ describe("reconcile", () => {
   it("does not restamp an unchanged concept, even when the run's timestamp differs", () => {
     const disk = bundleOnDisk(ir, T1);
 
-    const plan = reconcile(ir, disk, T2);
+    const plan = reconcile(ir, disk, emitContext("0.1", T2));
 
     expect(plan.actions).toEqual([]);
     expect(disk.get("types/objects/Country.md")).toContain(`timestamp: ${JSON.stringify(T1)}`);
+  });
+
+  it("does not rewrite a concept whose only difference is the producer version", () => {
+    const disk = bundleOnDisk(ir, T1);
+    const plan = reconcile(ir, disk, emitContext("0.1", T2));
+
+    expect(plan.changed).toEqual([]);
+    expect(plan.actions.filter((action) => action.kind === "update")).toEqual([]);
   });
 
   it("updates a concept whose rendered content changed, stamping the new time", () => {
@@ -67,7 +76,7 @@ describe("reconcile", () => {
       concepts: [{ ...ir.concepts[0], description: "A sovereign state." } as never],
     };
 
-    const plan = reconcile(evolved, disk, T2);
+    const plan = reconcile(evolved, disk, emitContext("0.1", T2));
     const action = plan.actions.find((entry) => entry.path === "types/objects/Country.md");
 
     expect(plan.changed.map((change) => change.name)).toEqual(["Country"]);
@@ -85,7 +94,7 @@ describe("reconcile", () => {
       concepts: [{ ...ir.concepts[0], description: "A sovereign state." } as never],
     };
 
-    const plan = reconcile(evolved, disk, T2);
+    const plan = reconcile(evolved, disk, emitContext("0.1", T2));
     const action = plan.actions.find((entry) => entry.path === path);
 
     expect(action?.contents).toContain("Our team owns this type.");
@@ -95,7 +104,7 @@ describe("reconcile", () => {
     const disk = bundleOnDisk(ir, T1);
     disk.delete("types/objects/Country.md");
 
-    const plan = reconcile(ir, disk, T2);
+    const plan = reconcile(ir, disk, emitContext("0.1", T2));
 
     expect(plan.added.map((change) => change.path)).toEqual(["types/objects/Country.md"]);
   });
@@ -104,7 +113,7 @@ describe("reconcile", () => {
     const disk = bundleOnDisk(ir, T1);
     disk.set("guides/onboarding.md", "# Onboarding\n\nRead this first.\n");
 
-    const plan = reconcile(ir, disk, T2);
+    const plan = reconcile(ir, disk, emitContext("0.1", T2));
 
     expect(plan.actions).toEqual([]);
   });
@@ -113,7 +122,7 @@ describe("reconcile", () => {
     const disk = bundleOnDisk(ir, T1);
     disk.set("index.md", "# API interface\n\n- [types/](types/index.md) — Types\n");
 
-    const plan = reconcile(ir, disk, T2);
+    const plan = reconcile(ir, disk, emitContext("0.1", T2));
 
     expect(plan.actions.map((action) => action.path)).toEqual(["index.md"]);
     expect(plan.actions[0]?.kind).toBe("index");
@@ -123,7 +132,7 @@ describe("reconcile", () => {
   });
 
   it("preserves a human key added to the bundle-root index across a real re-run", () => {
-    const first = reconcile(ir, new Map(), T1);
+    const first = reconcile(ir, new Map(), emitContext("0.1", T1));
     const rootAction = first.actions.find((action) => action.path === "index.md");
     if (rootAction === undefined) throw new Error("expected a root index action");
 
@@ -162,7 +171,7 @@ describe("reconcile", () => {
       ],
     };
 
-    const second = reconcile(evolved, existing, T2);
+    const second = reconcile(evolved, existing, emitContext("0.1", T2));
     const rewritten = second.actions.find((action) => action.path === "index.md");
     if (rewritten === undefined) {
       throw new Error("expected reconcile to emit a real action for index.md on the second run");
@@ -176,19 +185,75 @@ describe("reconcile", () => {
   });
 
   it("counts index writes so they are never silent", () => {
-    const plan = reconcile(ir, new Map(), "2026-07-25T00:00:00.000Z");
+    const plan = reconcile(ir, new Map(), emitContext("0.1", "2026-07-25T00:00:00.000Z"));
 
     expect(plan.indexes).toBe(plan.actions.filter((action) => action.kind === "index").length);
     expect(plan.indexes).toBeGreaterThan(0);
   });
 
   it("reports zero index writes on an unchanged re-run", () => {
-    const first = reconcile(ir, new Map(), "2026-07-25T00:00:00.000Z");
+    const first = reconcile(ir, new Map(), emitContext("0.1", "2026-07-25T00:00:00.000Z"));
     const existing = new Map(first.actions.map((action) => [action.path, action.contents]));
 
-    const second = reconcile(ir, existing, "2026-07-25T00:00:00.000Z");
+    const second = reconcile(ir, existing, emitContext("0.1", "2026-07-25T00:00:00.000Z"));
 
     expect(second.indexes).toBe(0);
+  });
+});
+
+/** A bundle exactly as a v0.1 run would have left it. */
+function v1BundleOnDisk(source: SchemaIr, timestamp: string): Map<string, string> {
+  const files = new Map<string, string>();
+  for (const [path, parts] of buildBundle(source, emitContext("0.1", timestamp))) {
+    files.set(path, assembleFile(parts, EMPTY_HUMAN));
+  }
+  return files;
+}
+
+describe("reconcile migrating a v0.1 bundle", () => {
+  it("writes every migrated concept even though its content did not change", () => {
+    const plan = reconcile(ir, v1BundleOnDisk(ir, T1), emitContext("0.2", T2));
+
+    expect(plan.migrated).toEqual(["types/objects/Country.md"]);
+    const migrate = plan.actions.find((action) => action.kind === "migrate");
+    expect(migrate?.path).toBe("types/objects/Country.md");
+    expect(migrate?.contents).toContain(
+      'generated: { by: "graphql-okf/0.1", at: "2026-07-01T10:00:00.000Z" }',
+    );
+  });
+
+  it("does not double-count a concept the schema also changed", () => {
+    const disk = v1BundleOnDisk(ir, T1);
+    const [country] = ir.concepts;
+    if (country === undefined) throw new Error("fixture");
+    const evolved: SchemaIr = {
+      ...ir,
+      concepts: [{ ...country, description: "A sovereign state." }],
+    };
+
+    const plan = reconcile(evolved, disk, emitContext("0.2", T2));
+    const paths = plan.actions.map((action) => action.path);
+
+    expect(paths.filter((path) => path === "types/objects/Country.md")).toHaveLength(1);
+    expect(plan.changed.map((change) => change.path)).toEqual(["types/objects/Country.md"]);
+  });
+
+  it("reports nothing to migrate for a bundle it just wrote in v0.2", () => {
+    const files = new Map<string, string>();
+    for (const [path, parts] of buildBundle(ir, emitContext("0.2", T1))) {
+      files.set(path, assembleFile(parts, EMPTY_HUMAN));
+    }
+
+    const plan = reconcile(ir, files, emitContext("0.2", T2));
+
+    expect(plan.migrated).toEqual([]);
+    expect(plan.actions.filter((action) => action.kind === "migrate")).toEqual([]);
+  });
+
+  it("migrates nothing when the run targets v0.1", () => {
+    const plan = reconcile(ir, v1BundleOnDisk(ir, T1), emitContext("0.1", T2));
+
+    expect(plan.migrated).toEqual([]);
   });
 });
 
@@ -198,18 +263,18 @@ describe("reconcile removals", () => {
   it("tombstones a concept the schema no longer contains", () => {
     const disk = bundleOnDisk(ir, T1);
 
-    const plan = reconcile(emptyIr, disk, T2);
+    const plan = reconcile(emptyIr, disk, emitContext("0.1", T2));
     const action = plan.actions.find((entry) => entry.path === "types/objects/Country.md");
 
     expect(plan.removed.map((change) => change.name)).toEqual(["Country"]);
     expect(action?.kind).toBe("tombstone");
-    expect(action?.contents).toContain('status: "removed"');
+    expect(action?.contents).toContain('graphql_okf_status: "removed"');
     expect(action?.contents).toContain(`removedAt: ${JSON.stringify(T2)}`);
     expect(action?.contents).toContain("# Last known definition");
   });
 
   it("keeps the tombstoned file at its original path so inbound links resolve", () => {
-    const plan = reconcile(emptyIr, bundleOnDisk(ir, T1), T2);
+    const plan = reconcile(emptyIr, bundleOnDisk(ir, T1), emitContext("0.1", T2));
 
     expect(plan.actions.map((action) => action.path)).toContain("types/objects/Country.md");
   });
@@ -219,7 +284,7 @@ describe("reconcile removals", () => {
     const path = "types/objects/Country.md";
     disk.set(path, `${disk.get(path) ?? ""}\nStill referenced by the billing service.\n`);
 
-    const plan = reconcile(emptyIr, disk, T2);
+    const plan = reconcile(emptyIr, disk, emitContext("0.1", T2));
     const action = plan.actions.find((entry) => entry.path === path);
 
     expect(action?.contents).toContain("Still referenced by the billing service.");
@@ -227,12 +292,12 @@ describe("reconcile removals", () => {
 
   it("never re-tombstones: a second run against the same schema is a no-op", () => {
     const disk = bundleOnDisk(ir, T1);
-    const first = reconcile(emptyIr, disk, T2);
+    const first = reconcile(emptyIr, disk, emitContext("0.1", T2));
     for (const action of first.actions) {
       disk.set(action.path, action.contents);
     }
 
-    const second = reconcile(emptyIr, disk, "2026-08-01T00:00:00.000Z");
+    const second = reconcile(emptyIr, disk, emitContext("0.1", "2026-08-01T00:00:00.000Z"));
 
     expect(second.actions).toEqual([]);
     expect(second.removed).toEqual([]);
@@ -240,11 +305,11 @@ describe("reconcile removals", () => {
 
   it("restores a concept that comes back, logging it as added", () => {
     const disk = bundleOnDisk(ir, T1);
-    for (const action of reconcile(emptyIr, disk, T2).actions) {
+    for (const action of reconcile(emptyIr, disk, emitContext("0.1", T2)).actions) {
       disk.set(action.path, action.contents);
     }
 
-    const plan = reconcile(ir, disk, "2026-08-01T00:00:00.000Z");
+    const plan = reconcile(ir, disk, emitContext("0.1", "2026-08-01T00:00:00.000Z"));
     const action = plan.actions.find((entry) => entry.path === "types/objects/Country.md");
 
     expect(plan.added.map((change) => change.name)).toEqual(["Country"]);

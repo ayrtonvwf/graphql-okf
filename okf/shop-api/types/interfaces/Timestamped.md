@@ -4,7 +4,7 @@ title: "Timestamped"
 description: "Anything that records when it was created and last modified."
 resource: "https://shop.example/graphql#Timestamped"
 tags: ["graphql", "interface"]
-timestamp: "2026-03-02T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-03-02T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

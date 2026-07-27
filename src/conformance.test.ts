@@ -4,6 +4,7 @@ import { join, posix } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import { buildBundle } from "./emit/bundle.js";
+import { emitContext } from "./emit/context.js";
 import { assembleFile, EMPTY_HUMAN } from "./emit/render/seam.js";
 import { readSchema, syncOkfBundle } from "./index.js";
 
@@ -12,7 +13,16 @@ const TIMESTAMP = "2026-07-25T00:00:00.000Z";
 async function bundleFor(path: string): Promise<Map<string, string>> {
   const ir = await readSchema({ kind: "sdl", path });
   const files = new Map<string, string>();
-  for (const [filePath, parts] of buildBundle(ir, TIMESTAMP)) {
+  for (const [filePath, parts] of buildBundle(ir, emitContext("0.2", TIMESTAMP))) {
+    files.set(filePath, assembleFile(parts, EMPTY_HUMAN));
+  }
+  return files;
+}
+
+async function bundleForV1(path: string): Promise<Map<string, string>> {
+  const ir = await readSchema({ kind: "sdl", path });
+  const files = new Map<string, string>();
+  for (const [filePath, parts] of buildBundle(ir, emitContext("0.1", TIMESTAMP))) {
     files.set(filePath, assembleFile(parts, EMPTY_HUMAN));
   }
   return files;
@@ -44,8 +54,21 @@ describe("OKF §9 conformance", () => {
     }
   });
 
-  it("keeps every timestamp a string under YAML 1.1", async () => {
+  it("keeps every generated.at a string under YAML 1.1", async () => {
     const files = await bundleFor("examples/shop-api/v1.graphql");
+
+    for (const [path, text] of files) {
+      if (path.endsWith("index.md")) continue;
+      const closing = text.indexOf("\n---\n", 3);
+      const parsed = parse(text.slice(4, closing + 1), { version: "1.1" }) as {
+        generated?: { at?: unknown };
+      };
+      expect(typeof parsed.generated?.at, `${path} generated.at is not a string`).toBe("string");
+    }
+  });
+
+  it("keeps every timestamp a string under YAML 1.1 (legacy v0.1 output)", async () => {
+    const files = await bundleForV1("examples/shop-api/v1.graphql");
 
     for (const [path, text] of files) {
       if (path.endsWith("index.md")) continue;
@@ -85,7 +108,7 @@ describe("OKF §9 conformance", () => {
   it("declares okf_version on the bundle root index and nowhere else", async () => {
     const files = await bundleFor("examples/shop-api/v1.graphql");
 
-    expect(frontmatterOf(files.get("index.md") ?? "")?.okf_version).toBe("0.1");
+    expect(frontmatterOf(files.get("index.md") ?? "")?.okf_version).toBe("0.2");
     expect(frontmatterOf(files.get("types/objects/index.md") ?? "")).toBeNull();
   });
 

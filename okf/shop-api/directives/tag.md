@@ -4,7 +4,7 @@ title: "tag"
 description: "Attaches a free-form classification label."
 resource: "https://shop.example/graphql#@tag"
 tags: ["graphql", "directive"]
-timestamp: "2026-01-15T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

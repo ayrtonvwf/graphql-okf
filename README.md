@@ -143,6 +143,9 @@ committed to git:
   `src/emit/render/resource.ts`). Without `--resource`, an SDL source records
   a `file:` URL for its own path (via `pathToFileURL`), which differs between
   machines.
+- `--okf-version <0.1|0.2>` selects the OKF spec version to emit. Defaults to
+  `0.2`. v0.2 records provenance as `generated: {by, at}`; v0.1 recorded it as a
+  flat `timestamp`. Pass `0.1` only if you have a consumer pinned to it.
 
 ```sh
 graphql-okf examples/shop-api/v1.graphql \
@@ -197,6 +200,23 @@ existing bundle is reconciled in place rather than overwritten:
   files, no `log.md` entry — this is the determinism guarantee M1 requires
   (see [`GOAL-M1.md`](docs/northstar-specs/GOAL-M1.md)).
 
+#### Migrating a v0.1 bundle
+
+A v0.2 run against a bundle written by an older release migrates it in place:
+each concept's `timestamp` becomes `generated: {by, at}`, keeping the original
+timestamp as `at` so provenance survives, and the root `index.md` starts
+declaring `okf_version: "0.2"`. Human-authored frontmatter keys and prose are
+untouched. The run records a single line in `log.md`:
+
+    **Migrated**
+
+    * OKF bundle format 0.1 → 0.2 (`timestamp` → `generated`) across 43 concepts.
+
+Migration is idempotent and resumable — a re-run is a byte-identical no-op, and
+an interrupted run is finished by the next one. The reverse is refused:
+`--okf-version 0.1` against a v0.2 bundle errors rather than silently discarding
+v0.2-only fields.
+
 ## Examples
 
 Three bundles generated with the current build are checked into this repo /
@@ -243,8 +263,10 @@ sub-projects; the first three are done, the last is in progress:
   human-authored edits, record a change log) instead of only writing into an
   empty directory. See [Updating a bundle](#updating-a-bundle).
 - 🚧 **Delivery surface** — the rest of the CLI/library surface. The
-  reproducibility flags (`--now`, `--resource`, see [CLI usage](#cli)) are
-  done; still outstanding are request headers for authenticated
+  reproducibility flags (`--now`, `--resource`, see [CLI usage](#cli)) and the
+  `--okf-version` flag (v0.1/v0.2 selection and in-place migration, see
+  [Migrating a v0.1 bundle](#migrating-a-v01-bundle)) are done; still
+  outstanding are request headers for authenticated
   introspection, config files, and running as a scheduled/CI job that opens a
   diff when the upstream schema changes. Archive/tarball output is *not*
   planned — it's an explicit non-goal (`NG-7`).

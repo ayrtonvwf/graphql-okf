@@ -4,7 +4,7 @@ title: "Int"
 description: "The `Int` scalar type represents non-fractional signed whole numeric values."
 resource: "https://countries.trevorblades.com/graphql#Int"
 tags: ["graphql", "scalar"]
-timestamp: "2026-07-25T00:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

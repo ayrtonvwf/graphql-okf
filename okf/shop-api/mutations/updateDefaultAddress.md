@@ -4,7 +4,7 @@ title: "updateDefaultAddress"
 description: "Replaces a customer's default shipping address."
 resource: "https://shop.example/graphql#Mutation.updateDefaultAddress"
 tags: ["graphql", "mutation"]
-timestamp: "2026-01-15T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

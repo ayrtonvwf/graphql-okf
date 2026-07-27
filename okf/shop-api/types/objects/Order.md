@@ -4,7 +4,7 @@ title: "Order"
 description: "A customer's purchase."
 resource: "https://shop.example/graphql#Order"
 tags: ["graphql", "object"]
-timestamp: "2026-05-20T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-05-20T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

@@ -3,7 +3,7 @@ type: "GraphQL Object Type"
 title: "Continent"
 resource: "https://countries.trevorblades.com/graphql#Continent"
 tags: ["graphql", "object"]
-timestamp: "2026-07-25T00:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

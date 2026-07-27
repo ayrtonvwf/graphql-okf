@@ -1,9 +1,11 @@
+import { DEFAULT_OKF_VERSION, emitContext, type OkfVersion } from "./emit/context.js";
 import { GraphqlOkfError } from "./errors.js";
 import type { SchemaIr } from "./model/ir.js";
 import { project } from "./model/project.js";
 import { applyPlan } from "./reconcile/apply.js";
 import { reconcile } from "./reconcile/plan.js";
 import { isEmptyOrMissing, readExistingBundle } from "./reconcile/read.js";
+import { assertNoDowngrade } from "./reconcile/version.js";
 import { loadSchema } from "./source/index.js";
 import type { SourceSpec } from "./source/types.js";
 
@@ -12,6 +14,7 @@ export interface SyncOkfBundleOptions {
   readonly outDir: string;
   readonly now?: string;
   readonly resource?: string;
+  readonly okfVersion?: OkfVersion;
 }
 
 export interface SyncResult {
@@ -21,6 +24,8 @@ export interface SyncResult {
   readonly removed: readonly string[];
   readonly unchanged: number;
   readonly indexes: number;
+  /** Concepts whose frontmatter this run converted from OKF v0.1 to v0.2. */
+  readonly migrated: readonly string[];
 }
 
 export async function syncOkfBundle(options: SyncOkfBundleOptions): Promise<SyncResult> {
@@ -34,10 +39,14 @@ export async function syncOkfBundle(options: SyncOkfBundleOptions): Promise<Sync
     );
   }
 
+  const okfVersion = options.okfVersion ?? DEFAULT_OKF_VERSION;
+  assertNoDowngrade(existing, okfVersion, options.outDir);
+
   const loaded = await readSchema(options.source);
   const ir = options.resource === undefined ? loaded : { ...loaded, resource: options.resource };
   const timestamp = normalizeTimestamp(options.now);
-  const plan = reconcile(ir, existing, timestamp);
+  const ctx = emitContext(okfVersion, timestamp);
+  const plan = reconcile(ir, existing, ctx);
   await applyPlan(plan, options.outDir, timestamp);
 
   return {
@@ -47,9 +56,11 @@ export async function syncOkfBundle(options: SyncOkfBundleOptions): Promise<Sync
     removed: plan.removed.map((change) => change.path),
     unchanged: plan.unchanged,
     indexes: plan.indexes,
+    migrated: [...plan.migrated],
   };
 }
 
+export type { EmitContext, OkfVersion } from "./emit/context.js";
 export type { GraphqlOkfErrorCode } from "./errors.js";
 export { GraphqlOkfError } from "./errors.js";
 export type {

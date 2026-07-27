@@ -4,7 +4,7 @@ title: "oneOf"
 description: "Indicates exactly one field must be supplied and this field must not be `null`."
 resource: "https://shop.example/graphql#@oneOf"
 tags: ["graphql", "directive"]
-timestamp: "2026-01-15T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

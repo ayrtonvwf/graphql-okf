@@ -2,13 +2,11 @@ import { posix } from "node:path";
 import { firstSentence } from "../model/description.js";
 import type { ConceptNode, SchemaIr } from "../model/ir.js";
 import type { ConceptKind } from "../model/naming.js";
+import type { EmitContext } from "./context.js";
 import { renderConceptParts } from "./render/concept.js";
 import { type IndexEntry, renderDirectoryIndex } from "./render/directory-index.js";
 import { conceptResource } from "./render/resource.js";
 import type { FileParts } from "./render/seam.js";
-
-/** The OKF version this producer targets, declared on the bundle-root index (§11). */
-const OKF_VERSION = "0.1";
 
 const KIND_SUMMARY: Record<ConceptKind, string> = {
   object: "Object type.",
@@ -52,7 +50,7 @@ export interface TombstoneEntry {
 
 export function buildBundle(
   ir: SchemaIr,
-  timestamp: string,
+  ctx: EmitContext,
   tombstones: readonly TombstoneEntry[] = [],
 ): ReadonlyMap<string, FileParts> {
   const bundle = new Map<string, FileParts>();
@@ -61,7 +59,7 @@ export function buildBundle(
   for (const concept of ir.concepts) {
     bundle.set(
       concept.path,
-      renderConceptParts(concept, conceptResource(ir.resource, concept), timestamp),
+      renderConceptParts(concept, conceptResource(ir.resource, concept), ctx),
     );
   }
 
@@ -142,7 +140,7 @@ export function buildBundle(
     const frontmatter =
       dir === "."
         ? [
-            `okf_version: ${JSON.stringify(OKF_VERSION)}`,
+            `okf_version: ${JSON.stringify(ctx.okfVersion)}`,
             `resource: ${JSON.stringify(ir.resource)}`,
           ]
         : undefined;

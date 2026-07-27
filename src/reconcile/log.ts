@@ -8,7 +8,7 @@ import type { BundlePlan, ConceptChange } from "./plan.js";
 export const LOG_HEADER = ["---", "type: Log", "---", "", "# Update Log"].join("\n");
 
 export function hasLoggableChanges(plan: BundlePlan): boolean {
-  return plan.added.length + plan.changed.length + plan.removed.length > 0;
+  return plan.added.length + plan.changed.length + plan.removed.length + plan.migrated.length > 0;
 }
 
 function group(heading: string, changes: readonly ConceptChange[]): string[] {
@@ -23,11 +23,30 @@ function group(heading: string, changes: readonly ConceptChange[]): string[] {
   ];
 }
 
+/**
+ * A whole-bundle format conversion, as one line. Listing every migrated concept
+ * would bury the run's real changes under thousands of identical entries; the
+ * count carries the fact and git carries the detail. Plain digits — a locale
+ * separator would make the log non-deterministic.
+ */
+function migrationGroup(plan: BundlePlan): string[] {
+  if (plan.migrated.length === 0) {
+    return [];
+  }
+  return [
+    "**Migrated**",
+    "",
+    `* OKF bundle format 0.1 → 0.2 (\`timestamp\` → \`generated\`) across ${plan.migrated.length} concepts.`,
+    "",
+  ];
+}
+
 /** One run's changes, headed by its time of day. No trailing newline. */
 export function renderRunBlock(plan: BundlePlan, timestamp: string): string {
   const lines = [
     `### ${timestamp.slice(11)}`,
     "",
+    ...migrationGroup(plan),
     ...group("Added", plan.added),
     ...group("Changed", plan.changed),
     ...group("Removed", plan.removed),

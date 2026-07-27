@@ -3,7 +3,7 @@ type: "GraphQL Query"
 title: "continents"
 resource: "https://countries.trevorblades.com/graphql#Query.continents"
 tags: ["graphql", "query"]
-timestamp: "2026-07-25T00:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

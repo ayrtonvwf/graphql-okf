@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { main, parseArgs } from "./cli.js";
-import type { GraphqlOkfError } from "./errors.js";
+import { GraphqlOkfError } from "./errors.js";
 import * as indexModule from "./index.js";
 
 describe("parseArgs", () => {
@@ -65,6 +65,48 @@ describe("parseArgs", () => {
   });
 });
 
+describe("--okf-version", () => {
+  it("is undefined when not given, so the library default applies", () => {
+    expect(parseArgs(["schema.graphql", "--out", "bundle"]).okfVersion).toBeUndefined();
+  });
+
+  it("accepts the supported versions", () => {
+    expect(
+      parseArgs(["schema.graphql", "--out", "bundle", "--okf-version", "0.1"]).okfVersion,
+    ).toBe("0.1");
+    expect(
+      parseArgs(["schema.graphql", "--out", "bundle", "--okf-version", "0.2"]).okfVersion,
+    ).toBe("0.2");
+  });
+
+  it("refuses an unsupported version instead of silently defaulting", () => {
+    try {
+      parseArgs(["schema.graphql", "--out", "bundle", "--okf-version", "0.3"]);
+      expect.unreachable("expected an invalid-version error");
+    } catch (error) {
+      expect((error as GraphqlOkfError).code).toBe("INVALID_OKF_VERSION");
+      expect((error as Error).message).toContain("0.3");
+      expect((error as Error).message).toContain("0.1");
+      expect((error as Error).message).toContain("0.2");
+    }
+  });
+
+  it("refuses a bare flag with no value", () => {
+    expect(() => parseArgs(["schema.graphql", "--out", "bundle", "--okf-version"])).toThrow(
+      GraphqlOkfError,
+    );
+  });
+
+  it("documents the flag in the usage message", () => {
+    try {
+      parseArgs([]);
+      expect.unreachable("expected a usage error");
+    } catch (error) {
+      expect((error as Error).message).toContain("--okf-version");
+    }
+  });
+});
+
 describe("main", () => {
   afterEach(() => {
     process.exitCode = undefined;
@@ -91,7 +133,7 @@ describe("main", () => {
 
     expect(process.exitCode).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith(
-      "Usage: graphql-okf <sdl-path-or-endpoint-url> --out <dir> [--now <iso-8601>] [--resource <url-or-id>]",
+      "Usage: graphql-okf <sdl-path-or-endpoint-url> --out <dir> [--now <iso-8601>] [--resource <url-or-id>] [--okf-version <0.1|0.2>]",
     );
   });
 
@@ -114,7 +156,7 @@ describe("main", () => {
     await main([sdlPath, "--out", outDir, "--now", "2026-01-15T09:00:00.000Z"]);
 
     expect(await readFile(join(outDir, "queries/hello.md"), "utf8")).toContain(
-      'timestamp: "2026-01-15T09:00:00.000Z"',
+      'at: "2026-01-15T09:00:00.000Z"',
     );
   });
 });

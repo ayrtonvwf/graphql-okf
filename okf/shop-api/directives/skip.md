@@ -4,7 +4,7 @@ title: "skip"
 description: "Directs the executor to skip this field or fragment when the `if` argument is true."
 resource: "https://shop.example/graphql#@skip"
 tags: ["graphql", "directive"]
-timestamp: "2026-01-15T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

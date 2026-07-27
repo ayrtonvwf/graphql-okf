@@ -4,7 +4,7 @@ title: "OrderLine"
 description: "One line of an order: a product and how many of it were bought."
 resource: "https://shop.example/graphql#OrderLine"
 tags: ["graphql", "object"]
-timestamp: "2026-01-15T09:00:00.000Z"
+generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
