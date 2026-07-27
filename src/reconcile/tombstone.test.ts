@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { parse } from "yaml";
 import { GENERATED_HINT } from "../emit/render/seam.js";
 import { splitFile } from "./parse.js";
 import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
@@ -70,7 +71,11 @@ describe("renderTombstone", () => {
 
     const parts = renderTombstone(split, "2026-08-01T00:00:00.000Z");
 
-    expect(parts.preamble).toContain('removedAt: "2026-08-01T00:00:00.000Z"');
+    const [, body] = /^---\n([\s\S]*?)\n---\n/.exec(parts.preamble) ?? [];
+    if (body === undefined) throw new Error("preamble must be fenced");
+    const parsed = parse(body, { version: "1.1" });
+
+    expect(typeof (parsed as { removedAt: unknown }).removedAt).toBe("string");
   });
 
   it("states the removal and retains the last known definition", () => {

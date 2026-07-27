@@ -1,9 +1,11 @@
-import { posix } from "node:path";
+import { mkdtemp, readFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, posix } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import { buildBundle } from "./emit/bundle.js";
 import { assembleFile, EMPTY_HUMAN } from "./emit/render/seam.js";
-import { readSchema } from "./index.js";
+import { readSchema, syncOkfBundle } from "./index.js";
 
 const TIMESTAMP = "2026-07-25T00:00:00.000Z";
 
@@ -53,6 +55,31 @@ describe("OKF §9 conformance", () => {
       };
       expect(typeof parsed.timestamp, `${path} timestamp is not a string`).toBe("string");
     }
+  });
+
+  it("keeps a tombstone's removedAt a string under YAML 1.1", async () => {
+    // v1.graphql has no removed elements, so exercising a tombstone needs a
+    // real reconcile across two schema versions rather than a single build.
+    const outDir = join(await mkdtemp(join(tmpdir(), "okf-conformance-")), "bundle");
+    await syncOkfBundle({
+      source: { kind: "sdl", path: "examples/shop-api/v1.graphql" },
+      outDir,
+      now: "2026-01-15T09:00:00.000Z",
+    });
+    await syncOkfBundle({
+      source: { kind: "sdl", path: "examples/shop-api/v2.graphql" },
+      outDir,
+      now: "2026-03-02T09:00:00.000Z",
+    });
+
+    // v2 tombstones queries/searchProducts.md (removed in favor of Money/Review).
+    const text = await readFile(join(outDir, "queries/searchProducts.md"), "utf8");
+    const closing = text.indexOf("\n---\n", 3);
+    const parsed = parse(text.slice(4, closing + 1), { version: "1.1" }) as {
+      removedAt?: unknown;
+    };
+
+    expect(typeof parsed.removedAt).toBe("string");
   });
 
   it("declares okf_version on the bundle root index and nowhere else", async () => {
