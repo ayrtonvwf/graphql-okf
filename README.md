@@ -130,8 +130,11 @@ committed to git:
 
 - `--now <iso-8601>` pins the timestamp written to new and changed concepts
   instead of using the wall clock.
-- `--resource <url-or-id>` sets the `resource` field recorded in frontmatter.
-  Without it, an SDL source records its own file path, which differs between
+- `--resource <url-or-id>` sets the bundle-wide origin, recorded as the
+  `resource` field on the root `index.md`. Each concept's own `resource`
+  field is derived from it as `<origin>#<Anchor>` (see
+  `src/emit/render/resource.ts`). Without `--resource`, an SDL source records
+  a `file:` URL for its own path (via `pathToFileURL`), which differs between
   machines.
 
 ```sh
@@ -178,8 +181,11 @@ existing bundle is reconciled in place rather than overwritten:
   every concept added, changed, or removed on each run, so the bundle's
   history is auditable without relying on git blame.
 - **Unknown frontmatter keys are preserved.** Any YAML frontmatter key that
-  isn't one `graphql-okf` itself writes (for example, a human-added `owner:`
-  or `status: draft` note) survives reconciliation unchanged.
+  isn't one `graphql-okf` itself writes (for example, a human-added
+  `owner: platform-team` note) survives reconciliation unchanged. This does
+  *not* apply to non-root `index.md` files: OKF §6 requires non-root indexes
+  to carry no frontmatter at all, so any frontmatter block a human adds to one
+  is removed on the next run — this is intentional, not a bug.
 - Re-running against an **unchanged** schema is a no-op: byte-identical
   files, no `log.md` entry — this is the determinism guarantee M1 requires
   (see [`GOAL-M1.md`](docs/northstar-specs/GOAL-M1.md)).

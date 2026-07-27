@@ -159,14 +159,14 @@ An ISO country with its languages and continent.
 
 | Field | Value | Notes |
 |---|---|---|
-| `type` | Title Case noun phrase via `TYPE_LABEL_BY_KIND` | `GraphQL Object Type`, `GraphQL Query`, etc. — see §5.5 below. The one required OKF field (§5.1); already discriminates every kind (§5.3). |
+| `type` | Title Case noun phrase via `TYPE_LABEL_BY_KIND` | `GraphQL Object Type`, `GraphQL Query`, etc. — see this document's §5.6 below. The one required OKF field (§5.1); already discriminates every kind (§5.3). |
 | `title` | exact GraphQL name | For operations, the field name (e.g. `countries`). Matches the body H1. |
 | `description` | first sentence of the schema doc-string | Omitted when the element has no description (§6.2, `GOAL-5.2`). The full doc-string is preserved verbatim in the body (§6.3). |
 | `resource` | `conceptResource(ir.resource, concept)` | `<origin>#<anchor>`, unique per concept (`GOAL-5.2`); the bundle-wide origin lives on the root `index.md` instead. |
 | `tags` | `[graphql, <kind>]` | The bare `ConceptKind` token, e.g. `object` — the machine-filterable axis, distinct from `type`'s prose label. |
 | `timestamp` | injected ISO-8601 | §5.2. The sole non-deterministic byte (§2.1). |
 
-Frontmatter is emitted as valid YAML and round-trips (§5.5): a plain string
+Frontmatter is emitted as valid YAML and round-trips (`GOAL-5.5`): a plain string
 serializer with correct quoting/escaping of description text; no custom YAML dialect.
 
 ### 3.3 Reserved filenames (§5.4)
