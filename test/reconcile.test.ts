@@ -2,6 +2,7 @@ import { mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { emitContext } from "../src/emit/context.js";
 import { readSchema, syncOkfBundle } from "../src/index.js";
 import { applyPlan } from "../src/reconcile/apply.js";
 import { reconcile } from "../src/reconcile/plan.js";
@@ -168,7 +169,7 @@ describe("an interrupted run (GOAL-8.5)", () => {
     // Interrupted: apply only the first half of the very same plan.
     const ir = await readSchema({ kind: "sdl", path: EVOLVED });
     const existing = await readExistingBundle(interrupted);
-    const plan = reconcile(ir, existing, T2);
+    const plan = reconcile(ir, existing, emitContext("0.1", T2));
     const half = Math.floor(plan.actions.length / 2);
     expect(half).toBeGreaterThan(0);
     await applyPlan({ ...plan, actions: plan.actions.slice(0, half) }, interrupted, T2);
@@ -186,7 +187,7 @@ describe("an interrupted run (GOAL-8.5)", () => {
   it("leaves no temp files behind after recovery", async () => {
     const outDir = await freshBundle(BASE);
     const ir = await readSchema({ kind: "sdl", path: EVOLVED });
-    const plan = reconcile(ir, await readExistingBundle(outDir), T2);
+    const plan = reconcile(ir, await readExistingBundle(outDir), emitContext("0.1", T2));
     await applyPlan({ ...plan, actions: plan.actions.slice(0, 2) }, outDir, T2);
 
     await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir, now: T2 });

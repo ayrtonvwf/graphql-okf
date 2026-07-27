@@ -1,3 +1,4 @@
+import { emitContext } from "./emit/context.js";
 import { GraphqlOkfError } from "./errors.js";
 import type { SchemaIr } from "./model/ir.js";
 import { project } from "./model/project.js";
@@ -37,7 +38,8 @@ export async function syncOkfBundle(options: SyncOkfBundleOptions): Promise<Sync
   const loaded = await readSchema(options.source);
   const ir = options.resource === undefined ? loaded : { ...loaded, resource: options.resource };
   const timestamp = normalizeTimestamp(options.now);
-  const plan = reconcile(ir, existing, timestamp);
+  const ctx = emitContext("0.1", timestamp);
+  const plan = reconcile(ir, existing, ctx);
   await applyPlan(plan, options.outDir, timestamp);
 
   return {

@@ -1,11 +1,12 @@
 import { firstSentence } from "../../model/description.js";
 import type { ConceptNode } from "../../model/ir.js";
 import { TYPE_LABEL_BY_KIND } from "../../model/naming.js";
+import type { EmitContext } from "../context.js";
 
 export function renderFrontmatter(
   concept: ConceptNode,
   resource: string,
-  timestamp: string,
+  ctx: EmitContext,
 ): string {
   const tags = ["graphql", concept.kind].map((tag) => JSON.stringify(tag)).join(", ");
   const lines = [
@@ -19,7 +20,7 @@ export function renderFrontmatter(
   }
   lines.push(`resource: ${JSON.stringify(resource)}`);
   lines.push(`tags: [${tags}]`);
-  lines.push(`timestamp: ${JSON.stringify(timestamp)}`);
+  lines.push(`timestamp: ${JSON.stringify(ctx.timestamp)}`);
   lines.push("---", "");
   return lines.join("\n");
 }

@@ -1,3 +1,4 @@
+import type { EmitContext } from "../emit/context.js";
 import type { FileParts } from "../emit/render/seam.js";
 import { GENERATED_HINT } from "../emit/render/seam.js";
 import { frontmatterValue } from "./frontmatter.js";
@@ -27,12 +28,12 @@ function lastKnownBody(generated: string): string {
   return generated.replace(GENERATED_HINT, "").trim();
 }
 
-export function renderTombstone(split: SplitFile, removedAt: string): FileParts {
+export function renderTombstone(split: SplitFile, ctx: EmitContext): FileParts {
   const preamble = split.parts.preamble.replace(
     /\n---\n(\s*)$/,
-    `\nstatus: "removed"\nremovedAt: ${JSON.stringify(removedAt)}\n---\n$1`,
+    `\nstatus: "removed"\nremovedAt: ${JSON.stringify(ctx.timestamp)}\n---\n$1`,
   );
-  const day = removedAt.slice(0, 10);
+  const day = ctx.timestamp.slice(0, 10);
   const generated = [
     "",
     `> **Removed.** This element is no longer present in the schema as of ${day}.`,

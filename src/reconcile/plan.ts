@@ -1,4 +1,5 @@
 import { buildBundle, type TombstoneEntry } from "../emit/bundle.js";
+import type { EmitContext } from "../emit/context.js";
 import { assembleFile, EMPTY_HUMAN, type FileParts } from "../emit/render/seam.js";
 import type { SchemaIr } from "../model/ir.js";
 import { mergeFrontmatter, withoutTimestamp } from "./frontmatter.js";
@@ -65,7 +66,7 @@ function sameContent(rendered: FileParts, existing: FileParts): boolean {
 export function reconcile(
   ir: SchemaIr,
   existing: ReadonlyMap<string, string>,
-  timestamp: string,
+  ctx: EmitContext,
 ): BundlePlan {
   const owned = ownedFiles(existing);
 
@@ -93,7 +94,7 @@ export function reconcile(
 
   const names = new Map(ir.concepts.map((concept) => [concept.path, concept.name]));
 
-  for (const [path, rendered] of buildBundle(ir, timestamp, tombstones)) {
+  for (const [path, rendered] of buildBundle(ir, ctx, tombstones)) {
     const current = owned.get(path);
     const index = isIndexPath(path);
 
@@ -144,7 +145,7 @@ export function reconcile(
     actions.push({
       kind: "tombstone",
       path: change.path,
-      contents: assembleFile(renderTombstone(split, timestamp), split.human),
+      contents: assembleFile(renderTombstone(split, ctx), split.human),
     });
     removed.push(change);
   }

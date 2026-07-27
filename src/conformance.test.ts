@@ -4,6 +4,7 @@ import { join, posix } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import { buildBundle } from "./emit/bundle.js";
+import { emitContext } from "./emit/context.js";
 import { assembleFile, EMPTY_HUMAN } from "./emit/render/seam.js";
 import { readSchema, syncOkfBundle } from "./index.js";
 
@@ -12,7 +13,7 @@ const TIMESTAMP = "2026-07-25T00:00:00.000Z";
 async function bundleFor(path: string): Promise<Map<string, string>> {
   const ir = await readSchema({ kind: "sdl", path });
   const files = new Map<string, string>();
-  for (const [filePath, parts] of buildBundle(ir, TIMESTAMP)) {
+  for (const [filePath, parts] of buildBundle(ir, emitContext("0.1", TIMESTAMP))) {
     files.set(filePath, assembleFile(parts, EMPTY_HUMAN));
   }
   return files;

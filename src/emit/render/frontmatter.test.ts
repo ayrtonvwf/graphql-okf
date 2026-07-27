@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import type { EnumTypeNode, ObjectTypeNode } from "../../model/ir.js";
+import { emitContext } from "../context.js";
 import { renderFrontmatter } from "./frontmatter.js";
 
 const objectConcept: ObjectTypeNode = {
@@ -16,7 +17,11 @@ const objectConcept: ObjectTypeNode = {
 describe("renderFrontmatter", () => {
   it("emits all fields in order, with every value quoted", () => {
     expect(
-      renderFrontmatter(objectConcept, "https://api.test/graphql", "2026-07-23T12:00:00.000Z"),
+      renderFrontmatter(
+        objectConcept,
+        "https://api.test/graphql",
+        emitContext("0.1", "2026-07-23T12:00:00.000Z"),
+      ),
     ).toBe(
       [
         "---",
@@ -41,7 +46,11 @@ describe("renderFrontmatter", () => {
       appliedDirectives: [],
       values: [],
     };
-    const out = renderFrontmatter(enumConcept, "test.graphql", "2026-07-23T12:00:00.000Z");
+    const out = renderFrontmatter(
+      enumConcept,
+      "test.graphql",
+      emitContext("0.1", "2026-07-23T12:00:00.000Z"),
+    );
     expect(out).not.toContain("description:");
     expect(out).toContain('tags: ["graphql", "enum"]');
   });
@@ -52,7 +61,11 @@ describe("renderFrontmatter", () => {
       description: "A product.\n\nMay contain Markdown. Refreshed nightly.",
     };
 
-    const out = renderFrontmatter(wordy, "https://api.test/graphql", "2026-07-23T12:00:00.000Z");
+    const out = renderFrontmatter(
+      wordy,
+      "https://api.test/graphql",
+      emitContext("0.1", "2026-07-23T12:00:00.000Z"),
+    );
 
     expect(out).toContain('description: "A product."');
   });
@@ -61,7 +74,7 @@ describe("renderFrontmatter", () => {
     const out = renderFrontmatter(
       objectConcept,
       "https://api.test/graphql",
-      "2026-07-23T12:00:00.000Z",
+      emitContext("0.1", "2026-07-23T12:00:00.000Z"),
     );
     const parsed = parse(out.replace(/^---\n/, "").replace(/---\n$/, ""), { version: "1.1" });
 

@@ -1,6 +1,7 @@
 // src/emit/render/concept.test.ts
 import { describe, expect, it } from "vitest";
 import type { ScalarTypeNode } from "../../model/ir.js";
+import { emitContext } from "../context.js";
 import { renderConcept } from "./concept.js";
 import { GENERATED_END, GENERATED_START } from "./seam.js";
 
@@ -16,7 +17,11 @@ const scalar: ScalarTypeNode = {
 
 describe("renderConcept", () => {
   it("wraps frontmatter and body with the generated markers and a human area", () => {
-    const out = renderConcept(scalar, "test.graphql", "2026-07-23T12:00:00.000Z");
+    const out = renderConcept(
+      scalar,
+      "test.graphql",
+      emitContext("0.1", "2026-07-23T12:00:00.000Z"),
+    );
     expect(out.startsWith("---\n")).toBe(true);
     expect(out).toContain(GENERATED_START);
     expect(out).toContain("# String");

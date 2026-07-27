@@ -2,6 +2,7 @@ import { posix } from "node:path";
 import { firstSentence } from "../model/description.js";
 import type { ConceptNode, SchemaIr } from "../model/ir.js";
 import type { ConceptKind } from "../model/naming.js";
+import type { EmitContext } from "./context.js";
 import { renderConceptParts } from "./render/concept.js";
 import { type IndexEntry, renderDirectoryIndex } from "./render/directory-index.js";
 import { conceptResource } from "./render/resource.js";
@@ -52,7 +53,7 @@ export interface TombstoneEntry {
 
 export function buildBundle(
   ir: SchemaIr,
-  timestamp: string,
+  ctx: EmitContext,
   tombstones: readonly TombstoneEntry[] = [],
 ): ReadonlyMap<string, FileParts> {
   const bundle = new Map<string, FileParts>();
@@ -61,7 +62,7 @@ export function buildBundle(
   for (const concept of ir.concepts) {
     bundle.set(
       concept.path,
-      renderConceptParts(concept, conceptResource(ir.resource, concept), timestamp),
+      renderConceptParts(concept, conceptResource(ir.resource, concept), ctx),
     );
   }
 

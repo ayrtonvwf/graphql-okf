@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
+import { emitContext } from "../emit/context.js";
 import { GENERATED_HINT } from "../emit/render/seam.js";
 import { splitFile } from "./parse.js";
 import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
@@ -49,7 +50,7 @@ describe("isTombstoned", () => {
 
   it("is true once the file has been tombstoned", () => {
     const tombstoned = {
-      parts: renderTombstone(live, "2026-07-24T09:00:00.000Z"),
+      parts: renderTombstone(live, emitContext("0.1", "2026-07-24T09:00:00.000Z")),
       human: live.human,
     };
     expect(isTombstoned(tombstoned)).toBe(true);
@@ -57,7 +58,7 @@ describe("isTombstoned", () => {
 });
 
 describe("renderTombstone", () => {
-  const parts = renderTombstone(live, "2026-07-24T09:00:00.000Z");
+  const parts = renderTombstone(live, emitContext("0.1", "2026-07-24T09:00:00.000Z"));
 
   it("adds status and removedAt without disturbing the original timestamp", () => {
     expect(parts.preamble).toContain('status: "removed"');
@@ -69,7 +70,7 @@ describe("renderTombstone", () => {
     const split = splitFile(existingConcept, "types/objects/Country.md");
     if (split === null) throw new Error("fixture must be an owned file");
 
-    const parts = renderTombstone(split, "2026-08-01T00:00:00.000Z");
+    const parts = renderTombstone(split, emitContext("0.1", "2026-08-01T00:00:00.000Z"));
 
     const [, body] = /^---\n([\s\S]*?)\n---\n/.exec(parts.preamble) ?? [];
     if (body === undefined) throw new Error("preamble must be fenced");
@@ -93,7 +94,7 @@ describe("renderTombstone", () => {
     const split = splitFile(existingConcept, "types/objects/Country.md");
     if (split === null) throw new Error("fixture must be an owned file");
 
-    const parts = renderTombstone(split, "2026-08-01T00:00:00.000Z");
+    const parts = renderTombstone(split, emitContext("0.1", "2026-08-01T00:00:00.000Z"));
 
     expect(parts.generated).toContain("# Last known definition");
     expect(parts.generated).not.toContain("## Last known definition");

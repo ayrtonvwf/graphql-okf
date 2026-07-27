@@ -4,6 +4,7 @@ import type { SchemaIr } from "../model/ir.js";
 import { project } from "../model/project.js";
 import type { LoadedSchema } from "../source/types.js";
 import { buildBundle } from "./bundle.js";
+import { emitContext } from "./context.js";
 import type { FileParts } from "./render/seam.js";
 import { assembleFile, EMPTY_HUMAN } from "./render/seam.js";
 
@@ -19,7 +20,7 @@ function irFrom(sdl: string): SchemaIr {
 }
 
 function bundleFrom(sdl: string): ReadonlyMap<string, FileParts> {
-  return buildBundle(irFrom(sdl), TS);
+  return buildBundle(irFrom(sdl), emitContext("0.1", TS));
 }
 
 const irWithOneObject = irFrom(`
@@ -86,7 +87,7 @@ describe("buildBundle", () => {
           },
         ],
       },
-      "2026-07-25T00:00:00.000Z",
+      emitContext("0.1", "2026-07-25T00:00:00.000Z"),
     );
 
     expect(bundle.get("types/objects/index.md")?.generated).toContain(
@@ -101,7 +102,7 @@ describe("buildBundle", () => {
 
   it("puts okf_version and the schema origin on the root index only", () => {
     const ir = irWithOneObject;
-    const bundle = buildBundle(ir, "2026-07-25T00:00:00.000Z");
+    const bundle = buildBundle(ir, emitContext("0.1", "2026-07-25T00:00:00.000Z"));
 
     expect(bundle.get("index.md")?.preamble).toContain('okf_version: "0.1"');
     expect(bundle.get("index.md")?.preamble).toContain(`resource: ${JSON.stringify(ir.resource)}`);
@@ -136,7 +137,7 @@ describe("buildBundle", () => {
 
 describe("buildBundle with tombstones", () => {
   it("lists a tombstoned concept in its directory index, marked removed", () => {
-    const bundle = buildBundle(irWithOneObject, "2026-07-24T00:00:00.000Z", [
+    const bundle = buildBundle(irWithOneObject, emitContext("0.1", "2026-07-24T00:00:00.000Z"), [
       { path: "types/objects/LegacyOrder.md", title: "LegacyOrder" },
     ]);
 
@@ -145,7 +146,7 @@ describe("buildBundle with tombstones", () => {
   });
 
   it("keeps a directory index alive when only tombstones remain in it", () => {
-    const bundle = buildBundle(irWithNoInputs, "2026-07-24T00:00:00.000Z", [
+    const bundle = buildBundle(irWithNoInputs, emitContext("0.1", "2026-07-24T00:00:00.000Z"), [
       { path: "types/inputs/OldInput.md", title: "OldInput" },
     ]);
 
@@ -156,7 +157,7 @@ describe("buildBundle with tombstones", () => {
   });
 
   it("does not write a concept file for a tombstone", () => {
-    const bundle = buildBundle(irWithOneObject, "2026-07-24T00:00:00.000Z", [
+    const bundle = buildBundle(irWithOneObject, emitContext("0.1", "2026-07-24T00:00:00.000Z"), [
       { path: "types/objects/LegacyOrder.md", title: "LegacyOrder" },
     ]);
 
