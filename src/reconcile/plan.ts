@@ -2,7 +2,7 @@ import { buildBundle, type TombstoneEntry } from "../emit/bundle.js";
 import type { EmitContext } from "../emit/context.js";
 import { assembleFile, EMPTY_HUMAN, type FileParts } from "../emit/render/seam.js";
 import type { SchemaIr } from "../model/ir.js";
-import { mergeFrontmatter, withoutTimestamp } from "./frontmatter.js";
+import { mergeFrontmatter, withoutProvenance } from "./frontmatter.js";
 import { type SplitFile, splitFile } from "./parse.js";
 import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
 
@@ -59,7 +59,7 @@ function ownedFiles(existing: ReadonlyMap<string, string>): Map<string, SplitFil
 function sameContent(rendered: FileParts, existing: FileParts): boolean {
   return (
     rendered.generated === existing.generated &&
-    withoutTimestamp(rendered.preamble) === withoutTimestamp(existing.preamble)
+    withoutProvenance(rendered.preamble) === withoutProvenance(existing.preamble)
   );
 }
 

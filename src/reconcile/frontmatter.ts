@@ -123,12 +123,20 @@ export function frontmatterValue(preamble: string, key: string): string | null {
   return readBlock(preamble)?.values.get(key) ?? null;
 }
 
-export function withoutTimestamp(preamble: string): string {
+/**
+ * Provenance is excluded from the change comparison: a concept whose content
+ * did not change keeps the `by` and `at` of the run that actually produced it,
+ * which is exactly what §5.1 asks `generated` to record. Without this, every
+ * producer-version bump would rewrite every file in every bundle.
+ */
+const PROVENANCE_KEYS: ReadonlySet<string> = new Set(["timestamp", "generated"]);
+
+export function withoutProvenance(preamble: string): string {
   const block = readBlock(preamble);
   if (block === null || !block.valid) {
     return preamble;
   }
-  const kept = block.entries.filter((entry) => entry.key !== "timestamp");
+  const kept = block.entries.filter((entry) => !PROVENANCE_KEYS.has(entry.key));
   return serialize(kept, block.trailing);
 }
 

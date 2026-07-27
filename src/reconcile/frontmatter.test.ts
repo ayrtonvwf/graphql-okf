@@ -3,7 +3,7 @@ import {
   frontmatterValue,
   mergeFrontmatter,
   parseFrontmatterEntries,
-  withoutTimestamp,
+  withoutProvenance,
 } from "./frontmatter.js";
 
 const rendered = [
@@ -122,16 +122,47 @@ describe("mergeFrontmatter", () => {
   });
 });
 
-describe("withoutTimestamp", () => {
+describe("withoutProvenance", () => {
   it("drops the timestamp entry and leaves the rest byte-identical", () => {
-    const stripped = withoutTimestamp(rendered);
+    const stripped = withoutProvenance(rendered);
 
     expect(stripped).not.toContain("timestamp:");
     expect(stripped).toContain('title: "Country"');
   });
 
   it("returns the preamble unchanged when there is no frontmatter block", () => {
-    expect(withoutTimestamp("# Types\n\n")).toBe("# Types\n\n");
+    expect(withoutProvenance("# Types\n\n")).toBe("# Types\n\n");
+  });
+
+  it("drops the v0.1 timestamp", () => {
+    expect(withoutProvenance(rendered)).not.toContain("timestamp:");
+  });
+
+  it("drops the v0.2 generated mapping", () => {
+    const v2 = [
+      "---",
+      'type: "object"',
+      'title: "Country"',
+      'generated: { by: "graphql-okf/0.1", at: "2026-07-24T09:00:00.000Z" }',
+      "---",
+      "",
+    ].join("\n");
+
+    expect(withoutProvenance(v2)).not.toContain("generated:");
+    expect(withoutProvenance(v2)).toContain('title: "Country"');
+  });
+
+  it("makes two runs of different producer versions compare equal", () => {
+    const older =
+      '---\ntype: "object"\ngenerated: { by: "graphql-okf/0.1", at: "2026-01-01T00:00:00.000Z" }\n---\n';
+    const newer =
+      '---\ntype: "object"\ngenerated: { by: "graphql-okf/9.9", at: "2026-07-27T09:00:00.000Z" }\n---\n';
+
+    expect(withoutProvenance(older)).toBe(withoutProvenance(newer));
+  });
+
+  it("leaves a block it cannot parse alone", () => {
+    expect(withoutProvenance("# Types\n\n")).toBe("# Types\n\n");
   });
 });
 

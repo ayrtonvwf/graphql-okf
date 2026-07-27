@@ -61,6 +61,14 @@ describe("reconcile", () => {
     expect(disk.get("types/objects/Country.md")).toContain(`timestamp: ${JSON.stringify(T1)}`);
   });
 
+  it("does not rewrite a concept whose only difference is the producer version", () => {
+    const disk = bundleOnDisk(ir, T1);
+    const plan = reconcile(ir, disk, emitContext("0.1", T2));
+
+    expect(plan.changed).toEqual([]);
+    expect(plan.actions.filter((action) => action.kind === "update")).toEqual([]);
+  });
+
   it("updates a concept whose rendered content changed, stamping the new time", () => {
     const disk = bundleOnDisk(ir, T1);
     const evolved: SchemaIr = {
