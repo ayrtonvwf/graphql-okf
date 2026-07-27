@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { realpathSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 import { GraphqlOkfError } from "./errors.js";
 import { syncOkfBundle } from "./index.js";
 import type { SourceSpec } from "./source/types.js";
@@ -52,7 +54,10 @@ export async function main(argv: readonly string[]): Promise<void> {
   }
 }
 
-/* v8 ignore next 3 */
-if (import.meta.url === `file://${process.argv[1]}`) {
+/* v8 ignore next 6 */
+const entryPath = process.argv[1];
+const isMain =
+  entryPath !== undefined && import.meta.url === pathToFileURL(realpathSync(entryPath)).href;
+if (isMain) {
   void main(process.argv.slice(2));
 }
