@@ -1,9 +1,11 @@
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { GraphqlOkfError } from "./errors.js";
 import { syncOkfBundle } from "./index.js";
+import { readExistingBundle } from "./reconcile/read.js";
 
 const SDL = '"An ISO country." type Country { code: ID! } type Query { countries: [Country!]! }';
 
@@ -29,7 +31,7 @@ describe("syncOkfBundle", () => {
     expect(result.changed).toEqual([]);
     expect(result.removed).toEqual([]);
     expect(await readFile(join(outDir, "types/objects/Country.md"), "utf8")).toContain(
-      "type: object",
+      'type: "GraphQL Object Type"',
     );
   });
 
@@ -43,9 +45,10 @@ describe("syncOkfBundle", () => {
     });
 
     const log = await readFile(join(outDir, "log.md"), "utf8");
-    expect(log).toContain("## 2026-07-24T09:00:00.000Z");
+    expect(log).toContain("## 2026-07-24");
+    expect(log).toContain("### 09:00:00.000Z");
     expect(log).toContain("**Added**");
-    expect(log).toContain("- [`Country`](types/objects/Country.md)");
+    expect(log).toContain("* [`Country`](types/objects/Country.md)");
   });
 
   it("refuses a non-empty directory that is not a bundle", async () => {
@@ -82,13 +85,41 @@ describe("syncOkfBundle", () => {
     expect(result.unchanged).toBeGreaterThan(0);
   });
 
+  it("is a byte-identical no-op when re-run against an unchanged schema", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "okf-idempotence-"));
+    const out = join(workspace, "bundle");
+
+    await syncOkfBundle({
+      source: { kind: "sdl", path: "examples/shop-api/v1.graphql" },
+      outDir: out,
+      now: "2026-07-25T00:00:00.000Z",
+      resource: "https://shop.example/graphql",
+    });
+    const first = await readExistingBundle(out);
+    const firstLog = await readFile(join(out, "log.md"), "utf8");
+
+    const second = await syncOkfBundle({
+      source: { kind: "sdl", path: "examples/shop-api/v1.graphql" },
+      outDir: out,
+      now: "2026-07-26T00:00:00.000Z",
+      resource: "https://shop.example/graphql",
+    });
+
+    expect(second.added).toEqual([]);
+    expect(second.changed).toEqual([]);
+    expect(second.removed).toEqual([]);
+    expect(second.indexes).toBe(0);
+    expect(await readExistingBundle(out)).toEqual(first);
+    expect(await readFile(join(out, "log.md"), "utf8")).toBe(firstLog);
+  });
+
   it("defaults the timestamp to the current wall-clock time when `now` is omitted", async () => {
     const { sdlPath, outDir } = await workspaceWithSdl("type Query { hello: String }");
 
     await syncOkfBundle({ source: { kind: "sdl", path: sdlPath }, outDir });
 
     const hello = await readFile(join(outDir, "queries/hello.md"), "utf8");
-    expect(hello.match(/^timestamp: (.+)$/m)?.[1]).toMatch(
+    expect(hello.match(/^timestamp: "(.+)"$/m)?.[1]).toMatch(
       /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
     );
   });
@@ -108,7 +139,7 @@ describe("the resource option", () => {
     });
 
     const concept = await readFile(join(outDir, "queries/hello.md"), "utf8");
-    expect(concept).toContain('resource: "https://shop.example/graphql"');
+    expect(concept).toContain('resource: "https://shop.example/graphql#Query.hello"');
     expect(concept).not.toContain(workspace);
   });
 
@@ -121,7 +152,7 @@ describe("the resource option", () => {
     await syncOkfBundle({ source: { kind: "sdl", path: sdlPath }, outDir });
 
     expect(await readFile(join(outDir, "queries/hello.md"), "utf8")).toContain(
-      `resource: "${sdlPath}"`,
+      `resource: "${pathToFileURL(resolve(sdlPath)).href}#Query.hello"`,
     );
   });
 });
@@ -157,7 +188,7 @@ describe("the now option", () => {
     });
 
     expect(await readFile(join(outDir, "queries/hello.md"), "utf8")).toContain(
-      "timestamp: 2026-01-15T09:00:00.000Z",
+      'timestamp: "2026-01-15T09:00:00.000Z"',
     );
   });
 });

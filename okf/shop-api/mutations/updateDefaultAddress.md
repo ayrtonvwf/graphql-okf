@@ -1,10 +1,10 @@
 ---
-type: mutation
+type: "GraphQL Mutation"
 title: "updateDefaultAddress"
 description: "Replaces a customer's default shipping address."
-resource: "https://shop.example/graphql"
-tags: [graphql, mutation]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#Mutation.updateDefaultAddress"
+tags: ["graphql", "mutation"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -16,10 +16,12 @@ Replaces a customer's default shipping address.
 
 **Returns** [`Customer!`](../types/objects/Customer.md)
 
-## Arguments
+# Schema
 
-- **`address`**: [`AddressInput!`](../types/inputs/AddressInput.md)
-- **`customerId`**: [`ID!`](../types/scalars/ID.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `address` | [`AddressInput!`](../types/inputs/AddressInput.md) |  |  |
+| `customerId` | [`ID!`](../types/scalars/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

@@ -25,7 +25,7 @@ C owns `GOAL-M1` §8 in full:
 | `GOAL-8.3` machine vs. human content preserved | §5 the seam, extended to `index.md` |
 | `GOAL-8.4` chronological `log.md` entry | §6 |
 | `GOAL-8.5` safe to interrupt and re-run | §7 convergent apply |
-| `GOAL-8.6` reviewable as a normal diff | §3.2 (no-write-when-equal), §6 (append-only log) |
+| `GOAL-8.6` reviewable as a normal diff | §3.2 (no-write-when-equal), §6 (single-hunk log insertion) |
 
 It also replaces the create-only entry point with the create-or-update verb
 `GOAL-9.1` asks for (§8).
@@ -53,7 +53,7 @@ The same pure-core / fs-at-the-edge shape as A and B:
 src/reconcile/
   parse.ts    parseConceptFile(text) -> ParsedFile | null                (pure)
   plan.ts     reconcile(ir, existing, timestamp) -> BundlePlan           (pure)
-  log.ts      renderLogEntry(plan) -> string                             (pure)
+  log.ts      updateLog(existing, plan, timestamp) -> string             (pure)
   read.ts     readExistingBundle(outDir) -> ReadonlyMap<path, string>    (fs)
   apply.ts    applyPlan(plan, outDir) -> Promise<void>                   (fs)
 
@@ -248,23 +248,37 @@ A run that produces at least one action appends one section; a no-op run appends
 nothing (`GOAL-8.4`).
 
 ```markdown
-## 2026-07-24T09:00:00.000Z
+---
+type: Log
+---
+
+# Update Log
+
+## 2026-07-24
+
+### 09:00:00.000Z
 
 **Added**
-- [`Invoice`](types/objects/Invoice.md)
-- [`invoices`](queries/invoices.md)
+
+* [`Invoice`](types/objects/Invoice.md)
+* [`invoices`](queries/invoices.md)
 
 **Changed**
-- [`User`](types/objects/User.md)
+
+* [`User`](types/objects/User.md)
 
 **Removed**
-- [`LegacyOrder`](types/objects/LegacyOrder.md)
+
+* [`LegacyOrder`](types/objects/LegacyOrder.md)
 ```
 
-Newest entry at the **end** of the file: a true append, so a run's diff is purely
-added lines at the tail with no churn above them. Empty groups are omitted.
-Entries within a group follow the IR's existing sort order, so the log is
-deterministic too.
+`log.md` is read-modify-written on each run: entries are grouped under an ISO
+8601 `## YYYY-MM-DD` heading (required by OKF §7) and ordered newest first, with
+a `### HH:MM:SS.sssZ` sub-heading per run so two runs on the same day stay
+distinguishable. Day grouping requires reading the file regardless, so the
+earlier append-only argument no longer applies. Insertion is a single hunk, so
+`GOAL-8.6` still holds. Empty groups are omitted. Entries within a group follow
+the IR's existing sort order, so the log is deterministic too.
 
 Index-only changes are not logged. The log records concept-level facts about the
 API, not the bundle's internal bookkeeping. Restorations are logged under
@@ -272,7 +286,8 @@ API, not the bundle's internal bookkeeping. Restorations are logged under
 
 `log.md` remains reserved (`GOAL-5.4`) — it is never a concept document, and it
 carries no generated markers, so the ownership rule (§2.2) correctly treats it as
-neither concept nor stray. It is append-target-only.
+neither concept nor stray. It is read-modify-written only by the day-grouping
+insertion above, never regenerated wholesale.
 
 ---
 
@@ -281,8 +296,8 @@ neither concept nor stray. It is append-target-only.
 ```
 plan = reconcile(ir, existing, now)          # pure, nothing touched yet
 if plan.actions.length === 0: return         # GOAL-8.1
-if plan has any concept-level action:        # first
-    appendLogEntry(outDir, renderLogEntry(plan))
+if hasLoggableChanges(plan):                 # first
+    writeLog(outDir, updateLog(existingLog, plan, now))
 for (const action of plan.actions)           # then
     write <path>.tmp -> rename over <path>
 ```

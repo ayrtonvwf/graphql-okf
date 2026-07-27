@@ -15,6 +15,7 @@ import type {
   UnionTypeNode,
 } from "../../model/ir.js";
 import { relLink, typeLink } from "./links.js";
+import { cell } from "./text.js";
 
 function deprecatedSuffix(deprecation: Deprecation | null): string {
   if (deprecation === null) {
@@ -43,35 +44,6 @@ function directivesLine(applied: readonly AppliedDirective[], fromPath: string):
   return applied.length === 0 ? [] : ["", `Directives: ${appliedInline(applied, fromPath)}.`];
 }
 
-function defaultSuffix(defaultValue: string | null): string {
-  return defaultValue === null ? "" : ` = \`${defaultValue}\``;
-}
-
-function descSuffix(description: string | null): string {
-  return description === null ? "" : ` — ${description}`;
-}
-
-// A field bullet, plus one sub-bullet per argument.
-function renderField(field: FieldNode, fromPath: string): string[] {
-  const head = `- **\`${field.name}\`** — ${typeLink(fromPath, field.type)}${descSuffix(
-    field.description,
-  )}${deprecatedSuffix(field.deprecation)}`;
-  const args = field.args.map(
-    (arg) =>
-      `  - Argument **\`${arg.name}\`**: ${typeLink(fromPath, arg.type)}${defaultSuffix(
-        arg.defaultValue,
-      )}${descSuffix(arg.description)}${deprecatedSuffix(arg.deprecation)}`,
-  );
-  return [head, ...args];
-}
-
-// A bullet for an input-object field or a standalone argument list entry.
-function bulletForInputValue(value: InputValueNode, fromPath: string): string {
-  return `- **\`${value.name}\`**: ${typeLink(fromPath, value.type)}${defaultSuffix(
-    value.defaultValue,
-  )}${descSuffix(value.description)}${deprecatedSuffix(value.deprecation)}`;
-}
-
 function implementsLine(interfaces: readonly TypeRef[], fromPath: string): string[] {
   if (interfaces.length === 0) {
     return [];
@@ -80,11 +52,103 @@ function implementsLine(interfaces: readonly TypeRef[], fromPath: string): strin
   return ["", `Implements ${links}.`];
 }
 
-function fieldsSection(fields: readonly FieldNode[], fromPath: string): string[] {
+function table(headers: readonly string[], rows: readonly (readonly string[])[]): string[] {
+  return [
+    `| ${headers.join(" | ")} |`,
+    `| ${headers.map(() => "---").join(" | ")} |`,
+    ...rows.map((row) => `| ${row.join(" | ")} |`),
+  ];
+}
+
+function descriptionCell(description: string | null, deprecation: Deprecation | null): string {
+  const text = description === null ? "" : cell(description);
+  const suffix = deprecatedSuffix(deprecation);
+  return `${text}${suffix}`.trim();
+}
+
+function defaultCell(defaultValue: string | null): string {
+  return defaultValue === null ? "" : `\`${defaultValue}\``;
+}
+
+/**
+ * OKF §4.2 gives `# Schema` conventional meaning for an asset's fields, and the
+ * reference tooling only extracts field names from a top-level `# Schema`
+ * section. This is a second H1 below the title, matching §4.3's own example.
+ */
+function schemaSection(lines: readonly string[]): string[] {
+  return lines.length === 0 ? [] : ["", "# Schema", "", ...lines];
+}
+
+function fieldsTable(fields: readonly FieldNode[], fromPath: string): string[] {
+  return table(
+    ["Field", "Type", "Description"],
+    fields.map((field) => [
+      `\`${field.name}\``,
+      typeLink(fromPath, field.type),
+      descriptionCell(field.description, field.deprecation),
+    ]),
+  );
+}
+
+function argumentsTable(args: readonly InputValueNode[], fromPath: string): string[] {
+  return table(
+    ["Argument", "Type", "Default", "Description"],
+    args.map((arg) => [
+      `\`${arg.name}\``,
+      typeLink(fromPath, arg.type),
+      defaultCell(arg.defaultValue),
+      descriptionCell(arg.description, arg.deprecation),
+    ]),
+  );
+}
+
+/** Field arguments do not fit a flat table, so they get their own subsection. */
+function fieldArgumentsSection(fields: readonly FieldNode[], fromPath: string): string[] {
+  const withArgs = fields.filter((field) => field.args.length > 0);
+  if (withArgs.length === 0) {
+    return [];
+  }
+  return [
+    "",
+    "## Arguments",
+    ...withArgs.flatMap((field) => [
+      "",
+      `### \`${field.name}\``,
+      "",
+      ...argumentsTable(field.args, fromPath),
+    ]),
+  ];
+}
+
+function fieldsSchema(fields: readonly FieldNode[], fromPath: string): string[] {
   if (fields.length === 0) {
     return [];
   }
-  return ["", "## Fields", "", ...fields.flatMap((field) => renderField(field, fromPath))];
+  return [
+    ...schemaSection(fieldsTable(fields, fromPath)),
+    ...fieldArgumentsSection(fields, fromPath),
+  ];
+}
+
+function inputFieldsSchema(fields: readonly InputValueNode[], fromPath: string): string[] {
+  if (fields.length === 0) {
+    return [];
+  }
+  return schemaSection(
+    table(
+      ["Field", "Type", "Default", "Description"],
+      fields.map((value) => [
+        `\`${value.name}\``,
+        typeLink(fromPath, value.type),
+        defaultCell(value.defaultValue),
+        descriptionCell(value.description, value.deprecation),
+      ]),
+    ),
+  );
+}
+
+function argumentsSchema(args: readonly InputValueNode[], fromPath: string): string[] {
+  return args.length === 0 ? [] : schemaSection(argumentsTable(args, fromPath));
 }
 
 export function renderObjectBody(node: ObjectTypeNode): string {
@@ -93,7 +157,7 @@ export function renderObjectBody(node: ObjectTypeNode): string {
     ...descriptionLine(node.description),
     ...directivesLine(node.appliedDirectives, node.path),
     ...implementsLine(node.interfaces, node.path),
-    ...fieldsSection(node.fields, node.path),
+    ...fieldsSchema(node.fields, node.path),
     "",
   ].join("\n");
 }
@@ -112,7 +176,7 @@ export function renderInterfaceBody(node: InterfaceTypeNode): string {
     ...directivesLine(node.appliedDirectives, node.path),
     ...implementsLine(node.interfaces, node.path),
     ...implementedBy,
-    ...fieldsSection(node.fields, node.path),
+    ...fieldsSchema(node.fields, node.path),
     "",
   ].join("\n");
 }
@@ -121,7 +185,12 @@ export function renderUnionBody(node: UnionTypeNode): string {
   const members =
     node.members.length === 0
       ? []
-      : ["", "## Members", "", ...node.members.map((ref) => `- ${typeLink(node.path, ref)}`)];
+      : schemaSection(
+          table(
+            ["Member"],
+            node.members.map((ref) => [typeLink(node.path, ref)]),
+          ),
+        );
   return [
     `# ${node.name}`,
     ...descriptionLine(node.description),
@@ -135,17 +204,15 @@ export function renderEnumBody(node: EnumTypeNode): string {
   const values =
     node.values.length === 0
       ? []
-      : [
-          "",
-          "## Values",
-          "",
-          ...node.values.map(
-            (value) =>
-              `- **\`${value.name}\`**${descSuffix(value.description)}${deprecatedSuffix(
-                value.deprecation,
-              )}`,
+      : schemaSection(
+          table(
+            ["Value", "Description"],
+            node.values.map((value) => [
+              `\`${value.name}\``,
+              descriptionCell(value.description, value.deprecation),
+            ]),
           ),
-        ];
+        );
   return [
     `# ${node.name}`,
     ...descriptionLine(node.description),
@@ -156,15 +223,11 @@ export function renderEnumBody(node: EnumTypeNode): string {
 }
 
 export function renderInputBody(node: InputObjectTypeNode): string {
-  const fields =
-    node.fields.length === 0
-      ? []
-      : ["", "## Fields", "", ...node.fields.map((value) => bulletForInputValue(value, node.path))];
   return [
     `# ${node.name}`,
     ...descriptionLine(node.description),
     ...directivesLine(node.appliedDirectives, node.path),
-    ...fields,
+    ...inputFieldsSchema(node.fields, node.path),
     "",
   ].join("\n");
 }
@@ -194,13 +257,6 @@ function deprecatedBlock(deprecation: Deprecation | null): string[] {
     : ["", `**Deprecated: ${deprecation.reason}**`];
 }
 
-function argumentsSection(args: readonly InputValueNode[], fromPath: string): string[] {
-  if (args.length === 0) {
-    return [];
-  }
-  return ["", "## Arguments", "", ...args.map((value) => bulletForInputValue(value, fromPath))];
-}
-
 export function renderOperationBody(node: OperationNode): string {
   return [
     `# ${node.name}`,
@@ -209,7 +265,7 @@ export function renderOperationBody(node: OperationNode): string {
     ...directivesLine(node.appliedDirectives, node.path),
     "",
     `**Returns** ${typeLink(node.path, node.type)}`,
-    ...argumentsSection(node.args, node.path),
+    ...argumentsSchema(node.args, node.path),
     "",
   ].join("\n");
 }
@@ -226,7 +282,7 @@ export function renderDirectiveBody(node: DirectiveDefinitionNode): string {
     ...directivesLine(node.appliedDirectives, node.path),
     ...locations,
     ...repeatable,
-    ...argumentsSection(node.args, node.path),
+    ...argumentsSchema(node.args, node.path),
     "",
   ].join("\n");
 }

@@ -1,10 +1,10 @@
 ---
-type: query
+type: "GraphQL Query"
 title: "products"
 description: "Lists products, most recently created first."
-resource: "https://shop.example/graphql"
-tags: [graphql, query]
-timestamp: 2026-03-02T09:00:00.000Z
+resource: "https://shop.example/graphql#Query.products"
+tags: ["graphql", "query"]
+timestamp: "2026-03-02T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -16,10 +16,12 @@ Lists products, most recently created first.
 
 **Returns** [`[Product!]!`](../types/objects/Product.md)
 
-## Arguments
+# Schema
 
-- **`filter`**: [`ProductFilter`](../types/inputs/ProductFilter.md)
-- **`first`**: [`Int`](../types/scalars/Int.md) = `20` — Maximum number of products to return.
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `filter` | [`ProductFilter`](../types/inputs/ProductFilter.md) |  |  |
+| `first` | [`Int`](../types/scalars/Int.md) | `20` | Maximum number of products to return. |
 
 <!-- graphql-okf:generated:end -->
 

@@ -83,6 +83,8 @@ export type ScalarTypeNode = ConceptBase & {
 
 export type OperationNode = ConceptBase & {
   readonly kind: "query" | "mutation" | "subscription";
+  /** The schema's declared root type name, which may not be "Query". */
+  readonly rootTypeName: string;
   readonly args: readonly InputValueNode[];
   readonly type: TypeRef;
   readonly deprecation: Deprecation | null;

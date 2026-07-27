@@ -1,10 +1,10 @@
 ---
-type: subscription
+type: "GraphQL Subscription"
 title: "productPriceChanged"
 description: "Emits a product each time its price changes."
-resource: "https://shop.example/graphql"
-tags: [graphql, subscription]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#Subscription.productPriceChanged"
+tags: ["graphql", "subscription"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

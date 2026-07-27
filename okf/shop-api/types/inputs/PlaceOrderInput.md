@@ -1,10 +1,10 @@
 ---
-type: input
+type: "GraphQL Input Type"
 title: "PlaceOrderInput"
 description: "Everything needed to turn a basket into an order."
-resource: "https://shop.example/graphql"
-tags: [graphql, input]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#PlaceOrderInput"
+tags: ["graphql", "input"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -14,11 +14,13 @@ timestamp: 2026-01-15T09:00:00.000Z
 
 Everything needed to turn a basket into an order.
 
-## Fields
+# Schema
 
-- **`payWith`**: [`PaymentInput!`](PaymentInput.md)
-- **`productIds`**: [`[ID!]!`](../scalars/ID.md)
-- **`shipTo`**: [`AddressInput!`](AddressInput.md)
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `payWith` | [`PaymentInput!`](PaymentInput.md) |  |  |
+| `productIds` | [`[ID!]!`](../scalars/ID.md) |  |  |
+| `shipTo` | [`AddressInput!`](AddressInput.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

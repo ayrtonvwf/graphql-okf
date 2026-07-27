@@ -56,22 +56,56 @@ describe("buildBundle", () => {
 
   it("lists child directories in a grouping index and concepts in a leaf index", () => {
     const bundle = bundleFrom("type Query { hello: String }");
-    expect(assembled(bundle, "index.md")).toContain("- [types/](types/index.md)");
-    expect(assembled(bundle, "index.md")).toContain("- [queries/](queries/index.md)");
-    expect(assembled(bundle, "types/index.md")).toContain("- [scalars/](scalars/index.md)");
-    expect(assembled(bundle, "types/scalars/index.md")).toContain("- [String](String.md)");
+    expect(assembled(bundle, "index.md")).toContain("* [types/](types/index.md)");
+    expect(assembled(bundle, "index.md")).toContain("* [queries/](queries/index.md)");
+    expect(assembled(bundle, "types/index.md")).toContain("* [scalars/](scalars/index.md)");
+    expect(assembled(bundle, "types/scalars/index.md")).toContain("* [String](String.md)");
   });
 
   it("uses a structural fallback summary when a concept has no description", () => {
     const bundle = bundleFrom("type Query { hello: String }");
     expect(assembled(bundle, "queries/index.md")).toContain(
-      "- [hello](hello.md) — Query operation.",
+      "* [hello](hello.md) - Query operation.",
+    );
+  });
+
+  it("summarizes an index entry with the concept's first sentence", () => {
+    const bundle = buildBundle(
+      {
+        resource: "https://api.test/graphql",
+        origin: "sdl",
+        concepts: [
+          {
+            kind: "object",
+            name: "Product",
+            path: "types/objects/Product.md",
+            description: "A product\nspanning lines. More.",
+            appliedDirectives: [],
+            fields: [],
+            interfaces: [],
+          },
+        ],
+      },
+      "2026-07-25T00:00:00.000Z",
+    );
+
+    expect(bundle.get("types/objects/index.md")?.generated).toContain(
+      "* [Product](Product.md) - A product spanning lines.",
     );
   });
 
   it("is deterministic: same input and timestamp yields identical output", () => {
     const sdl = "type Country { code: ID! } type Query { countries: [Country!]! }";
     expect(bundleFrom(sdl)).toEqual(bundleFrom(sdl));
+  });
+
+  it("puts okf_version and the schema origin on the root index only", () => {
+    const ir = irWithOneObject;
+    const bundle = buildBundle(ir, "2026-07-25T00:00:00.000Z");
+
+    expect(bundle.get("index.md")?.preamble).toContain('okf_version: "0.1"');
+    expect(bundle.get("index.md")?.preamble).toContain(`resource: ${JSON.stringify(ir.resource)}`);
+    expect(bundle.get("types/objects/index.md")?.preamble).not.toContain("---");
   });
 
   it("has referential integrity: every intra-bundle link resolves to a real path", () => {
@@ -107,7 +141,7 @@ describe("buildBundle with tombstones", () => {
     ]);
 
     const index = bundle.get("types/objects/index.md");
-    expect(index?.generated).toContain("- [LegacyOrder](LegacyOrder.md) — (removed)");
+    expect(index?.generated).toContain("* [LegacyOrder](LegacyOrder.md) - (removed)");
   });
 
   it("keeps a directory index alive when only tombstones remain in it", () => {
@@ -116,9 +150,9 @@ describe("buildBundle with tombstones", () => {
     ]);
 
     expect(bundle.get("types/inputs/index.md")?.generated).toContain(
-      "- [OldInput](OldInput.md) — (removed)",
+      "* [OldInput](OldInput.md) - (removed)",
     );
-    expect(bundle.get("types/index.md")?.generated).toContain("- [inputs/](inputs/index.md)");
+    expect(bundle.get("types/index.md")?.generated).toContain("* [inputs/](inputs/index.md)");
   });
 
   it("does not write a concept file for a tombstone", () => {

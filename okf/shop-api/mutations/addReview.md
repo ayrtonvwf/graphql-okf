@@ -1,10 +1,10 @@
 ---
-type: mutation
+type: "GraphQL Mutation"
 title: "addReview"
 description: "Adds a review to a product."
-resource: "https://shop.example/graphql"
-tags: [graphql, mutation]
-timestamp: 2026-03-02T09:00:00.000Z
+resource: "https://shop.example/graphql#Mutation.addReview"
+tags: ["graphql", "mutation"]
+timestamp: "2026-03-02T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -18,11 +18,13 @@ Directives: [`@auth`](../directives/auth.md)(requires: CUSTOMER).
 
 **Returns** [`Review!`](../types/objects/Review.md)
 
-## Arguments
+# Schema
 
-- **`body`**: [`String`](../types/scalars/String.md)
-- **`productId`**: [`ID!`](../types/scalars/ID.md)
-- **`rating`**: [`Int!`](../types/scalars/Int.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `body` | [`String`](../types/scalars/String.md) |  |  |
+| `productId` | [`ID!`](../types/scalars/ID.md) |  |  |
+| `rating` | [`Int!`](../types/scalars/Int.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

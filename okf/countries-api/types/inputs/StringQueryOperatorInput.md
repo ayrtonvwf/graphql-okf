@@ -1,9 +1,9 @@
 ---
-type: input
+type: "GraphQL Input Type"
 title: "StringQueryOperatorInput"
-resource: "https://countries.trevorblades.com/graphql"
-tags: [graphql, input]
-timestamp: 2026-07-24T13:14:12.015Z
+resource: "https://countries.trevorblades.com/graphql#StringQueryOperatorInput"
+tags: ["graphql", "input"]
+timestamp: "2026-07-25T00:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -11,13 +11,15 @@ timestamp: 2026-07-24T13:14:12.015Z
 
 # StringQueryOperatorInput
 
-## Fields
+# Schema
 
-- **`eq`**: [`String`](../scalars/String.md)
-- **`in`**: [`[String!]`](../scalars/String.md)
-- **`ne`**: [`String`](../scalars/String.md)
-- **`nin`**: [`[String!]`](../scalars/String.md)
-- **`regex`**: [`String`](../scalars/String.md)
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `eq` | [`String`](../scalars/String.md) |  |  |
+| `in` | [`[String!]`](../scalars/String.md) |  |  |
+| `ne` | [`String`](../scalars/String.md) |  |  |
+| `nin` | [`[String!]`](../scalars/String.md) |  |  |
+| `regex` | [`String`](../scalars/String.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

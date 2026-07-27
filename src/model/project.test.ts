@@ -177,6 +177,19 @@ describe("project object and interface types", () => {
       "types/objects/User.md",
     ]);
   });
+
+  it("normalizes an empty GraphQL description to null", () => {
+    const ir = project(
+      loadedFrom(`
+        type Query { thing: Thing }
+        ""
+        type Thing { id: ID! }
+      `),
+    );
+    const thing = conceptAt(ir.concepts, "types/objects/Thing.md") as ObjectTypeNode;
+
+    expect(thing.description).toBeNull();
+  });
 });
 
 describe("project unions, inputs, and default values", () => {

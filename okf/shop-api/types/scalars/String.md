@@ -1,10 +1,10 @@
 ---
-type: scalar
+type: "GraphQL Scalar Type"
 title: "String"
-description: "The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text."
-resource: "https://shop.example/graphql"
-tags: [graphql, scalar]
-timestamp: 2026-01-15T09:00:00.000Z
+description: "The `String` scalar type represents textual data, represented as UTF-8 character sequences."
+resource: "https://shop.example/graphql#String"
+tags: ["graphql", "scalar"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

@@ -1,10 +1,10 @@
 ---
-type: object
+type: "GraphQL Object Type"
 title: "OrderLine"
 description: "One line of an order: a product and how many of it were bought."
-resource: "https://shop.example/graphql"
-tags: [graphql, object]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#OrderLine"
+tags: ["graphql", "object"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -14,11 +14,13 @@ timestamp: 2026-01-15T09:00:00.000Z
 
 One line of an order: a product and how many of it were bought.
 
-## Fields
+# Schema
 
-- **`product`** — [`Product!`](Product.md)
-- **`quantity`** — [`Int!`](../scalars/Int.md)
-- **`unitPriceCents`** — [`Int!`](../scalars/Int.md) — The price of a single unit at the time the order was placed.
+| Field | Type | Description |
+| --- | --- | --- |
+| `product` | [`Product!`](Product.md) |  |
+| `quantity` | [`Int!`](../scalars/Int.md) |  |
+| `unitPriceCents` | [`Int!`](../scalars/Int.md) | The price of a single unit at the time the order was placed. |
 
 <!-- graphql-okf:generated:end -->
 

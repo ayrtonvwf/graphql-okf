@@ -1,10 +1,10 @@
 ---
-type: subscription
+type: "GraphQL Subscription"
 title: "reviewPosted"
 description: "Emits each new review as it is posted."
-resource: "https://shop.example/graphql"
-tags: [graphql, subscription]
-timestamp: 2026-03-02T09:00:00.000Z
+resource: "https://shop.example/graphql#Subscription.reviewPosted"
+tags: ["graphql", "subscription"]
+timestamp: "2026-03-02T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -16,9 +16,11 @@ Emits each new review as it is posted.
 
 **Returns** [`Review!`](../types/objects/Review.md)
 
-## Arguments
+# Schema
 
-- **`productId`**: [`ID!`](../types/scalars/ID.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `productId` | [`ID!`](../types/scalars/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

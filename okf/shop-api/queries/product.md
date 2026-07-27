@@ -1,10 +1,10 @@
 ---
-type: query
+type: "GraphQL Query"
 title: "product"
 description: "Looks up a single product."
-resource: "https://shop.example/graphql"
-tags: [graphql, query]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#Query.product"
+tags: ["graphql", "query"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -16,9 +16,11 @@ Looks up a single product.
 
 **Returns** [`Product`](../types/objects/Product.md)
 
-## Arguments
+# Schema
 
-- **`id`**: [`ID!`](../types/scalars/ID.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `id` | [`ID!`](../types/scalars/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

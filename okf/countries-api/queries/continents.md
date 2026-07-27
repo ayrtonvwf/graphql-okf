@@ -1,9 +1,9 @@
 ---
-type: query
+type: "GraphQL Query"
 title: "continents"
-resource: "https://countries.trevorblades.com/graphql"
-tags: [graphql, query]
-timestamp: 2026-07-24T13:14:12.015Z
+resource: "https://countries.trevorblades.com/graphql#Query.continents"
+tags: ["graphql", "query"]
+timestamp: "2026-07-25T00:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -13,9 +13,11 @@ timestamp: 2026-07-24T13:14:12.015Z
 
 **Returns** [`[Continent!]!`](../types/objects/Continent.md)
 
-## Arguments
+# Schema
 
-- **`filter`**: [`ContinentFilterInput`](../types/inputs/ContinentFilterInput.md) = `{}`
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `filter` | [`ContinentFilterInput`](../types/inputs/ContinentFilterInput.md) | `{}` |  |
 
 <!-- graphql-okf:generated:end -->
 

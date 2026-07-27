@@ -1,10 +1,10 @@
 ---
-type: object
+type: "GraphQL Object Type"
 title: "Product"
 description: "An item offered for sale."
-resource: "https://shop.example/graphql"
-tags: [graphql, object]
-timestamp: 2026-05-20T09:00:00.000Z
+resource: "https://shop.example/graphql#Product"
+tags: ["graphql", "object"]
+timestamp: "2026-05-20T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -18,20 +18,20 @@ Directives: [`@tag`](../../directives/tag.md)(name: "catalog"), [`@tag`](../../d
 
 Implements [`Node`](../interfaces/Node.md), [`Purchasable`](../interfaces/Purchasable.md), [`Timestamped`](../interfaces/Timestamped.md).
 
-## Fields
+# Schema
 
-- **`createdAt`** — [`DateTime!`](../scalars/DateTime.md)
-- **`description`** — [`String`](../scalars/String.md) — A long-form description.
-
-May contain Markdown, including **bold** text and [links](https://example.test).
-- **`id`** — [`ID!`](../scalars/ID.md)
-- **`inStock`** — [`Boolean!`](../scalars/Boolean.md) — Whether the product can currently be ordered.
-- **`labels`** — [`[String!]!`](../scalars/String.md) — Free-form merchandising labels.
-- **`name`** — [`String!`](../scalars/String.md) — The customer-facing name.
-- **`price`** — [`Money!`](Money.md)
-- **`reviews`** — [`[Review!]!`](Review.md) — Reviews left by customers, newest first.
-- **`sku`** — [`String`](../scalars/String.md) — The internal SKU. Not stable across catalog migrations. (deprecated: No longer supported)
-- **`updatedAt`** — [`DateTime`](../scalars/DateTime.md)
+| Field | Type | Description |
+| --- | --- | --- |
+| `createdAt` | [`DateTime!`](../scalars/DateTime.md) |  |
+| `description` | [`String`](../scalars/String.md) | A long-form description. May contain Markdown, including **bold** text and [links](https://example.test). |
+| `id` | [`ID!`](../scalars/ID.md) |  |
+| `inStock` | [`Boolean!`](../scalars/Boolean.md) | Whether the product can currently be ordered. |
+| `labels` | [`[String!]!`](../scalars/String.md) | Free-form merchandising labels. |
+| `name` | [`String!`](../scalars/String.md) | The customer-facing name. |
+| `price` | [`Money!`](Money.md) |  |
+| `reviews` | [`[Review!]!`](Review.md) | Reviews left by customers, newest first. |
+| `sku` | [`String`](../scalars/String.md) | The internal SKU. Not stable across catalog migrations. (deprecated: No longer supported) |
+| `updatedAt` | [`DateTime`](../scalars/DateTime.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

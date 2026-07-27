@@ -114,7 +114,7 @@ describe("main", () => {
     await main([sdlPath, "--out", outDir, "--now", "2026-01-15T09:00:00.000Z"]);
 
     expect(await readFile(join(outDir, "queries/hello.md"), "utf8")).toContain(
-      "timestamp: 2026-01-15T09:00:00.000Z",
+      'timestamp: "2026-01-15T09:00:00.000Z"',
     );
   });
 });

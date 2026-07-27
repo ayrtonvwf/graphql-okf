@@ -26,6 +26,7 @@ import {
   print,
 } from "graphql";
 import type { LoadedSchema } from "../source/types.js";
+import { normalizeDescription } from "./description.js";
 import type {
   AppliedDirective,
   ConceptNode,
@@ -144,7 +145,7 @@ function argNode(
 ): InputValueNode {
   return {
     name: arg.name,
-    description: arg.description ?? null,
+    description: normalizeDescription(arg.description),
     type: toTypeRef(arg.type, pathFor, rootDirectoryByTypeName),
     defaultValue: printDefaultValue(arg),
     deprecation: deprecationOf(arg.deprecationReason),
@@ -159,7 +160,7 @@ function inputFieldNode(
 ): InputValueNode {
   return {
     name: field.name,
-    description: field.description ?? null,
+    description: normalizeDescription(field.description),
     type: toTypeRef(field.type, pathFor, rootDirectoryByTypeName),
     defaultValue: printDefaultValue(field),
     deprecation: deprecationOf(field.deprecationReason),
@@ -174,7 +175,7 @@ function fieldNode(
 ): FieldNode {
   return {
     name: field.name,
-    description: field.description ?? null,
+    description: normalizeDescription(field.description),
     type: toTypeRef(field.type, pathFor, rootDirectoryByTypeName),
     args: byName(field.args).map((arg) => argNode(arg, pathFor, rootDirectoryByTypeName)),
     deprecation: deprecationOf(field.deprecationReason),
@@ -304,8 +305,9 @@ export function project(loaded: LoadedSchema): SchemaIr {
       concepts.push({
         kind: root.kind,
         name: field.name,
+        rootTypeName: root.type.name,
         path: pathFor({ kind: root.kind, name: field.name }),
-        description: field.description ?? null,
+        description: normalizeDescription(field.description),
         appliedDirectives: appliedDirectivesOf(field, pathFor),
         args: byName(field.args).map((arg) => argNode(arg, pathFor, rootDirectoryByTypeName)),
         type: toTypeRef(field.type, pathFor, rootDirectoryByTypeName),
@@ -332,7 +334,7 @@ function scalarConcept(
     kind: "scalar",
     name: type.name,
     path,
-    description: type.description ?? null,
+    description: normalizeDescription(type.description),
     appliedDirectives: appliedDirectivesOf(type, pathFor),
     specifiedByUrl: type.specifiedByURL ?? null,
     isBuiltIn: isSpecifiedScalarType(type),
@@ -348,11 +350,11 @@ function enumConcept(
     kind: "enum",
     name: type.name,
     path,
-    description: type.description ?? null,
+    description: normalizeDescription(type.description),
     appliedDirectives: appliedDirectivesOf(type, pathFor),
     values: byName(type.getValues()).map((value) => ({
       name: value.name,
-      description: value.description ?? null,
+      description: normalizeDescription(value.description),
       deprecation: deprecationOf(value.deprecationReason),
       appliedDirectives: appliedDirectivesOf(value, pathFor),
     })),
@@ -369,7 +371,7 @@ function objectConcept(
     kind: "object",
     name: type.name,
     path,
-    description: type.description ?? null,
+    description: normalizeDescription(type.description),
     appliedDirectives: appliedDirectivesOf(type, pathFor),
     fields: byName(Object.values(type.getFields())).map((field) =>
       fieldNode(field, pathFor, rootDirectoryByTypeName),
@@ -391,7 +393,7 @@ function interfaceConcept(
     kind: "interface",
     name: type.name,
     path,
-    description: type.description ?? null,
+    description: normalizeDescription(type.description),
     appliedDirectives: appliedDirectivesOf(type, pathFor),
     fields: byName(Object.values(type.getFields())).map((field) =>
       fieldNode(field, pathFor, rootDirectoryByTypeName),
@@ -417,7 +419,7 @@ function unionConcept(
     kind: "union",
     name: type.name,
     path,
-    description: type.description ?? null,
+    description: normalizeDescription(type.description),
     appliedDirectives: appliedDirectivesOf(type, pathFor),
     members: byName(type.getTypes()).map((member) =>
       toTypeRef(member, pathFor, rootDirectoryByTypeName),
@@ -435,7 +437,7 @@ function inputConcept(
     kind: "input",
     name: type.name,
     path,
-    description: type.description ?? null,
+    description: normalizeDescription(type.description),
     appliedDirectives: appliedDirectivesOf(type, pathFor),
     fields: byName(Object.values(type.getFields())).map((field) =>
       inputFieldNode(field, pathFor, rootDirectoryByTypeName),
@@ -452,7 +454,7 @@ function directiveConcept(
     kind: "directive",
     name: directive.name,
     path: pathFor({ kind: "directive", name: directive.name }),
-    description: directive.description ?? null,
+    description: normalizeDescription(directive.description),
     appliedDirectives: [],
     locations: [...directive.locations].sort(),
     args: byName(directive.args).map((arg) => argNode(arg, pathFor, rootDirectoryByTypeName)),

@@ -1,10 +1,10 @@
 ---
-type: enum
+type: "GraphQL Enum Type"
 title: "Role"
-description: "Access levels a caller can hold.\n\nUsed by the `@auth` directive to gate fields."
-resource: "https://shop.example/graphql"
-tags: [graphql, enum]
-timestamp: 2026-01-15T09:00:00.000Z
+description: "Access levels a caller can hold."
+resource: "https://shop.example/graphql#Role"
+tags: ["graphql", "enum"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -16,11 +16,13 @@ Access levels a caller can hold.
 
 Used by the `@auth` directive to gate fields.
 
-## Values
+# Schema
 
-- **`CUSTOMER`** — A signed-in shopper.
-- **`GUEST`** — Anyone, including unauthenticated callers.
-- **`STAFF`** — A member of shop staff.
+| Value | Description |
+| --- | --- |
+| `CUSTOMER` | A signed-in shopper. |
+| `GUEST` | Anyone, including unauthenticated callers. |
+| `STAFF` | A member of shop staff. |
 
 <!-- graphql-okf:generated:end -->
 

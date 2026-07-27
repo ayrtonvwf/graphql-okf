@@ -1,10 +1,10 @@
 ---
-type: enum
+type: "GraphQL Enum Type"
 title: "OrderStatus"
 description: "The lifecycle stage of an order."
-resource: "https://shop.example/graphql"
-tags: [graphql, enum]
-timestamp: 2026-05-20T09:00:00.000Z
+resource: "https://shop.example/graphql#OrderStatus"
+tags: ["graphql", "enum"]
+timestamp: "2026-05-20T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -14,14 +14,16 @@ timestamp: 2026-05-20T09:00:00.000Z
 
 The lifecycle stage of an order.
 
-## Values
+# Schema
 
-- **`CANCELLED`**
-- **`DELIVERED`**
-- **`PAID`**
-- **`PENDING`** — Created but not yet paid.
-- **`REFUNDED`** — Paid, then fully refunded.
-- **`SHIPPED`**
+| Value | Description |
+| --- | --- |
+| `CANCELLED` |  |
+| `DELIVERED` |  |
+| `PAID` |  |
+| `PENDING` | Created but not yet paid. |
+| `REFUNDED` | Paid, then fully refunded. |
+| `SHIPPED` |  |
 
 <!-- graphql-okf:generated:end -->
 

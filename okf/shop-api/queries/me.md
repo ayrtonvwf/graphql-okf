@@ -1,10 +1,10 @@
 ---
-type: query
+type: "GraphQL Query"
 title: "me"
 description: "The currently authenticated customer, if any."
-resource: "https://shop.example/graphql"
-tags: [graphql, query]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#Query.me"
+tags: ["graphql", "query"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

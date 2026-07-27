@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { parse } from "yaml";
 import type { EnumTypeNode, ObjectTypeNode } from "../../model/ir.js";
 import { renderFrontmatter } from "./frontmatter.js";
 
@@ -13,18 +14,18 @@ const objectConcept: ObjectTypeNode = {
 };
 
 describe("renderFrontmatter", () => {
-  it("emits all fields in order with the kind as type", () => {
+  it("emits all fields in order, with every value quoted", () => {
     expect(
       renderFrontmatter(objectConcept, "https://api.test/graphql", "2026-07-23T12:00:00.000Z"),
     ).toBe(
       [
         "---",
-        "type: object",
+        'type: "GraphQL Object Type"',
         'title: "Country"',
         'description: "An ISO country."',
         'resource: "https://api.test/graphql"',
-        "tags: [graphql, object]",
-        "timestamp: 2026-07-23T12:00:00.000Z",
+        'tags: ["graphql", "object"]',
+        'timestamp: "2026-07-23T12:00:00.000Z"',
         "---",
         "",
       ].join("\n"),
@@ -42,6 +43,28 @@ describe("renderFrontmatter", () => {
     };
     const out = renderFrontmatter(enumConcept, "test.graphql", "2026-07-23T12:00:00.000Z");
     expect(out).not.toContain("description:");
-    expect(out).toContain("tags: [graphql, enum]");
+    expect(out).toContain('tags: ["graphql", "enum"]');
+  });
+
+  it("emits only the first sentence of a multi-paragraph description", () => {
+    const wordy: ObjectTypeNode = {
+      ...objectConcept,
+      description: "A product.\n\nMay contain Markdown. Refreshed nightly.",
+    };
+
+    const out = renderFrontmatter(wordy, "https://api.test/graphql", "2026-07-23T12:00:00.000Z");
+
+    expect(out).toContain('description: "A product."');
+  });
+
+  it("keeps timestamp a string under YAML 1.1, where a bare one would be a date", () => {
+    const out = renderFrontmatter(
+      objectConcept,
+      "https://api.test/graphql",
+      "2026-07-23T12:00:00.000Z",
+    );
+    const parsed = parse(out.replace(/^---\n/, "").replace(/---\n$/, ""), { version: "1.1" });
+
+    expect(typeof (parsed as { timestamp: unknown }).timestamp).toBe("string");
   });
 });

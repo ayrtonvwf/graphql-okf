@@ -1,10 +1,10 @@
 ---
-type: interface
+type: "GraphQL Interface Type"
 title: "Timestamped"
 description: "Anything that records when it was created and last modified."
-resource: "https://shop.example/graphql"
-tags: [graphql, interface]
-timestamp: 2026-03-02T09:00:00.000Z
+resource: "https://shop.example/graphql#Timestamped"
+tags: ["graphql", "interface"]
+timestamp: "2026-03-02T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -16,10 +16,12 @@ Anything that records when it was created and last modified.
 
 Implemented by [`Customer`](../objects/Customer.md), [`Order`](../objects/Order.md), [`Product`](../objects/Product.md), [`Review`](../objects/Review.md).
 
-## Fields
+# Schema
 
-- **`createdAt`** — [`DateTime!`](../scalars/DateTime.md)
-- **`updatedAt`** — [`DateTime`](../scalars/DateTime.md)
+| Field | Type | Description |
+| --- | --- | --- |
+| `createdAt` | [`DateTime!`](../scalars/DateTime.md) |  |
+| `updatedAt` | [`DateTime`](../scalars/DateTime.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

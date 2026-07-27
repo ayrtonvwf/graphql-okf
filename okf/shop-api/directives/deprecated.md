@@ -1,10 +1,10 @@
 ---
-type: directive
+type: "GraphQL Directive"
 title: "deprecated"
 description: "Marks an element of a GraphQL schema as no longer supported."
-resource: "https://shop.example/graphql"
-tags: [graphql, directive]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#@deprecated"
+tags: ["graphql", "directive"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -16,9 +16,11 @@ Marks an element of a GraphQL schema as no longer supported.
 
 Locations: `ARGUMENT_DEFINITION`, `DIRECTIVE_DEFINITION`, `ENUM_VALUE`, `FIELD_DEFINITION`, `INPUT_FIELD_DEFINITION`.
 
-## Arguments
+# Schema
 
-- **`reason`**: [`String`](../types/scalars/String.md) = `"No longer supported"` — Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax, as specified by [CommonMark](https://commonmark.org/).
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `reason` | [`String`](../types/scalars/String.md) | `"No longer supported"` | Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax, as specified by [CommonMark](https://commonmark.org/). |
 
 <!-- graphql-okf:generated:end -->
 

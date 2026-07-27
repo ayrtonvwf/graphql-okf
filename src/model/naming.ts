@@ -26,6 +26,24 @@ export const DIRECTORY_BY_KIND: Record<ConceptKind, string> = {
   directive: "directives",
 };
 
+/**
+ * The `type` value emitted into frontmatter. OKF §4.1 asks for values that are
+ * descriptive and self-explanatory; `object` is neither in a shared catalog.
+ * `ConceptKind` stays the internal key — only the emitted label lives here.
+ */
+export const TYPE_LABEL_BY_KIND: Record<ConceptKind, string> = {
+  object: "GraphQL Object Type",
+  interface: "GraphQL Interface Type",
+  union: "GraphQL Union Type",
+  enum: "GraphQL Enum Type",
+  input: "GraphQL Input Type",
+  scalar: "GraphQL Scalar Type",
+  query: "GraphQL Query",
+  mutation: "GraphQL Mutation",
+  subscription: "GraphQL Subscription",
+  directive: "GraphQL Directive",
+};
+
 export type ElementName = {
   readonly kind: ConceptKind;
   readonly name: string;

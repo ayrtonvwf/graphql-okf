@@ -1,9 +1,14 @@
 import { posix } from "node:path";
+import { firstSentence } from "../model/description.js";
 import type { ConceptNode, SchemaIr } from "../model/ir.js";
 import type { ConceptKind } from "../model/naming.js";
 import { renderConceptParts } from "./render/concept.js";
 import { type IndexEntry, renderDirectoryIndex } from "./render/directory-index.js";
+import { conceptResource } from "./render/resource.js";
 import type { FileParts } from "./render/seam.js";
+
+/** The OKF version this producer targets, declared on the bundle-root index (§11). */
+const OKF_VERSION = "0.1";
 
 const KIND_SUMMARY: Record<ConceptKind, string> = {
   object: "Object type.",
@@ -34,10 +39,6 @@ const DIRECTORY_LABELS: Record<string, string> = {
   directives: "Directives",
 };
 
-function firstLine(description: string | null): string {
-  return description === null ? "" : (description.split("\n")[0] ?? "").trim();
-}
-
 function sortByLabel(entries: IndexEntry[]): IndexEntry[] {
   return entries.sort((left, right) =>
     left.label < right.label ? -1 : left.label > right.label ? 1 : 0,
@@ -58,7 +59,10 @@ export function buildBundle(
 
   // Concept files.
   for (const concept of ir.concepts) {
-    bundle.set(concept.path, renderConceptParts(concept, ir.resource, timestamp));
+    bundle.set(
+      concept.path,
+      renderConceptParts(concept, conceptResource(ir.resource, concept), timestamp),
+    );
   }
 
   // Build the directory tree from concept paths. "." is the root.
@@ -117,7 +121,7 @@ export function buildBundle(
     }
 
     for (const concept of filesByDir.get(dir) ?? []) {
-      const summary = firstLine(concept.description) || KIND_SUMMARY[concept.kind];
+      const summary = firstSentence(concept.description) ?? KIND_SUMMARY[concept.kind];
       entries.push({
         label: concept.name,
         link: posix.basename(concept.path),
@@ -135,7 +139,14 @@ export function buildBundle(
 
     const title = DIRECTORY_LABELS[dir] ?? posix.basename(dir);
     const indexPath = dir === "." ? "index.md" : `${dir}/index.md`;
-    bundle.set(indexPath, renderDirectoryIndex(title, sortByLabel(entries)));
+    const frontmatter =
+      dir === "."
+        ? [
+            `okf_version: ${JSON.stringify(OKF_VERSION)}`,
+            `resource: ${JSON.stringify(ir.resource)}`,
+          ]
+        : undefined;
+    bundle.set(indexPath, renderDirectoryIndex(title, sortByLabel(entries), frontmatter));
   }
 
   return bundle;

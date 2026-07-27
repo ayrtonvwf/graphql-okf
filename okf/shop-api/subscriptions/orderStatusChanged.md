@@ -1,10 +1,10 @@
 ---
-type: subscription
+type: "GraphQL Subscription"
 title: "orderStatusChanged"
 description: "Emits the order each time its status changes."
-resource: "https://shop.example/graphql"
-tags: [graphql, subscription]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#Subscription.orderStatusChanged"
+tags: ["graphql", "subscription"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -18,9 +18,11 @@ Directives: [`@auth`](../directives/auth.md)(requires: CUSTOMER).
 
 **Returns** [`Order!`](../types/objects/Order.md)
 
-## Arguments
+# Schema
 
-- **`orderId`**: [`ID!`](../types/scalars/ID.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `orderId` | [`ID!`](../types/scalars/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

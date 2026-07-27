@@ -1,10 +1,10 @@
 ---
-type: object
+type: "GraphQL Object Type"
 title: "Address"
 description: "A postal address."
-resource: "https://shop.example/graphql"
-tags: [graphql, object]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#Address"
+tags: ["graphql", "object"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -14,13 +14,15 @@ timestamp: 2026-01-15T09:00:00.000Z
 
 A postal address.
 
-## Fields
+# Schema
 
-- **`city`** — [`String!`](../scalars/String.md)
-- **`country`** — [`String!`](../scalars/String.md) — An ISO-3166-1 alpha-2 country code.
-- **`line1`** — [`String!`](../scalars/String.md)
-- **`line2`** — [`String`](../scalars/String.md)
-- **`postalCode`** — [`String!`](../scalars/String.md)
+| Field | Type | Description |
+| --- | --- | --- |
+| `city` | [`String!`](../scalars/String.md) |  |
+| `country` | [`String!`](../scalars/String.md) | An ISO-3166-1 alpha-2 country code. |
+| `line1` | [`String!`](../scalars/String.md) |  |
+| `line2` | [`String`](../scalars/String.md) |  |
+| `postalCode` | [`String!`](../scalars/String.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

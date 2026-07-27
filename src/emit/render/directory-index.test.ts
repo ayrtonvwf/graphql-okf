@@ -11,7 +11,7 @@ describe("renderDirectoryIndex", () => {
 
     expect(parts.preamble).toBe("# Object types\n\n");
     expect(parts.generated).toBe(
-      "\n- [Country](Country.md) — An ISO country.\n- [Language](Language.md) — A spoken language.\n",
+      "\n* [Country](Country.md) - An ISO country.\n* [Language](Language.md) - A spoken language.\n",
     );
   });
 
@@ -23,7 +23,7 @@ describe("renderDirectoryIndex", () => {
     const file = assembleFile(parts, EMPTY_HUMAN);
 
     expect(file).toContain("# Types");
-    expect(file).toContain("- [objects/](objects/index.md) — Object types");
+    expect(file).toContain("* [objects/](objects/index.md) - Object types");
     expect(file).toContain("<!-- graphql-okf:generated:end -->");
     expect(file.trimEnd().endsWith("-->")).toBe(true);
   });
@@ -33,7 +33,49 @@ describe("renderDirectoryIndex", () => {
       { label: "widgets/", link: "widgets/index.md", summary: "" },
     ]);
 
-    expect(parts.generated).toContain("- [widgets/](widgets/index.md)");
+    expect(parts.generated).toContain("* [widgets/](widgets/index.md)");
     expect(parts.generated).not.toContain("—");
+  });
+
+  it("uses the OKF §6 bullet and separator", () => {
+    const parts = renderDirectoryIndex("Object types", [
+      { label: "Country", link: "Country.md", summary: "An ISO country." },
+    ]);
+
+    expect(parts.generated).toContain("* [Country](Country.md) - An ISO country.");
+  });
+
+  it("omits the separator when there is no summary", () => {
+    const parts = renderDirectoryIndex("Object types", [
+      { label: "Country", link: "Country.md", summary: "" },
+    ]);
+
+    expect(parts.generated).toContain("* [Country](Country.md)\n");
+    expect(parts.generated).not.toContain(" - ");
+  });
+
+  it("emits a frontmatter block above the title when given one", () => {
+    const parts = renderDirectoryIndex(
+      "API interface",
+      [],
+      ['okf_version: "0.1"', 'resource: "https://api.test/graphql"'],
+    );
+
+    expect(parts.preamble).toBe(
+      [
+        "---",
+        'okf_version: "0.1"',
+        'resource: "https://api.test/graphql"',
+        "---",
+        "",
+        "# API interface",
+        "",
+        "",
+      ].join("\n"),
+    );
+  });
+
+  it("emits no frontmatter block when none is given", () => {
+    expect(renderDirectoryIndex("Object types", []).preamble).toBe("# Object types\n\n");
   });
 });

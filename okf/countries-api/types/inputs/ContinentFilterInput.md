@@ -1,9 +1,9 @@
 ---
-type: input
+type: "GraphQL Input Type"
 title: "ContinentFilterInput"
-resource: "https://countries.trevorblades.com/graphql"
-tags: [graphql, input]
-timestamp: 2026-07-24T13:14:12.015Z
+resource: "https://countries.trevorblades.com/graphql#ContinentFilterInput"
+tags: ["graphql", "input"]
+timestamp: "2026-07-25T00:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -11,9 +11,11 @@ timestamp: 2026-07-24T13:14:12.015Z
 
 # ContinentFilterInput
 
-## Fields
+# Schema
 
-- **`code`**: [`StringQueryOperatorInput`](StringQueryOperatorInput.md)
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `code` | [`StringQueryOperatorInput`](StringQueryOperatorInput.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

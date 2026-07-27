@@ -1,10 +1,10 @@
 ---
-type: interface
+type: "GraphQL Interface Type"
 title: "Node"
 description: "Anything addressable by a globally unique identifier."
-resource: "https://shop.example/graphql"
-tags: [graphql, interface]
-timestamp: 2026-03-02T09:00:00.000Z
+resource: "https://shop.example/graphql#Node"
+tags: ["graphql", "interface"]
+timestamp: "2026-03-02T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -16,9 +16,11 @@ Anything addressable by a globally unique identifier.
 
 Implemented by [`Customer`](../objects/Customer.md), [`Order`](../objects/Order.md), [`Product`](../objects/Product.md), [`Purchasable`](Purchasable.md), [`Review`](../objects/Review.md).
 
-## Fields
+# Schema
 
-- **`id`** — [`ID!`](../scalars/ID.md) — The globally unique identifier.
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | [`ID!`](../scalars/ID.md) | The globally unique identifier. |
 
 <!-- graphql-okf:generated:end -->
 

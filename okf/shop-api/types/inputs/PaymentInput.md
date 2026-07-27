@@ -1,10 +1,10 @@
 ---
-type: input
+type: "GraphQL Input Type"
 title: "PaymentInput"
-description: "Exactly one payment instrument.\n\nSupply exactly one field; supplying zero or more than one is an error."
-resource: "https://shop.example/graphql"
-tags: [graphql, input]
-timestamp: 2026-01-15T09:00:00.000Z
+description: "Exactly one payment instrument."
+resource: "https://shop.example/graphql#PaymentInput"
+tags: ["graphql", "input"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -18,11 +18,13 @@ Supply exactly one field; supplying zero or more than one is an error.
 
 Directives: [`@oneOf`](../../directives/oneOf.md).
 
-## Fields
+# Schema
 
-- **`creditCardToken`**: [`String`](../scalars/String.md)
-- **`giftCardCode`**: [`String`](../scalars/String.md)
-- **`payPalToken`**: [`String`](../scalars/String.md)
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `creditCardToken` | [`String`](../scalars/String.md) |  |  |
+| `giftCardCode` | [`String`](../scalars/String.md) |  |  |
+| `payPalToken` | [`String`](../scalars/String.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

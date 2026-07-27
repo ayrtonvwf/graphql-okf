@@ -1,10 +1,10 @@
 ---
-type: mutation
+type: "GraphQL Mutation"
 title: "placeOrder"
 description: "Places an order for the given products."
-resource: "https://shop.example/graphql"
-tags: [graphql, mutation]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#Mutation.placeOrder"
+tags: ["graphql", "mutation"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -18,9 +18,11 @@ Directives: [`@auth`](../directives/auth.md)(requires: CUSTOMER).
 
 **Returns** [`Order!`](../types/objects/Order.md)
 
-## Arguments
+# Schema
 
-- **`input`**: [`PlaceOrderInput!`](../types/inputs/PlaceOrderInput.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `input` | [`PlaceOrderInput!`](../types/inputs/PlaceOrderInput.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

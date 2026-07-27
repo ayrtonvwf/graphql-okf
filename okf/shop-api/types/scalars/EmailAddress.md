@@ -1,10 +1,10 @@
 ---
-type: scalar
+type: "GraphQL Scalar Type"
 title: "EmailAddress"
 description: "An RFC 5322 email address."
-resource: "https://shop.example/graphql"
-tags: [graphql, scalar]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#EmailAddress"
+tags: ["graphql", "scalar"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

@@ -1,9 +1,9 @@
 ---
-type: object
+type: "GraphQL Object Type"
 title: "Language"
-resource: "https://countries.trevorblades.com/graphql"
-tags: [graphql, object]
-timestamp: 2026-07-24T13:14:12.015Z
+resource: "https://countries.trevorblades.com/graphql#Language"
+tags: ["graphql", "object"]
+timestamp: "2026-07-25T00:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -11,13 +11,15 @@ timestamp: 2026-07-24T13:14:12.015Z
 
 # Language
 
-## Fields
+# Schema
 
-- **`code`** — [`ID!`](../scalars/ID.md)
-- **`countries`** — [`[Country!]!`](Country.md)
-- **`name`** — [`String!`](../scalars/String.md)
-- **`native`** — [`String!`](../scalars/String.md)
-- **`rtl`** — [`Boolean!`](../scalars/Boolean.md)
+| Field | Type | Description |
+| --- | --- | --- |
+| `code` | [`ID!`](../scalars/ID.md) |  |
+| `countries` | [`[Country!]!`](Country.md) |  |
+| `name` | [`String!`](../scalars/String.md) |  |
+| `native` | [`String!`](../scalars/String.md) |  |
+| `rtl` | [`Boolean!`](../scalars/Boolean.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

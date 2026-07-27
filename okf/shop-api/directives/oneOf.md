@@ -1,10 +1,10 @@
 ---
-type: directive
+type: "GraphQL Directive"
 title: "oneOf"
 description: "Indicates exactly one field must be supplied and this field must not be `null`."
-resource: "https://shop.example/graphql"
-tags: [graphql, directive]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#@oneOf"
+tags: ["graphql", "directive"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

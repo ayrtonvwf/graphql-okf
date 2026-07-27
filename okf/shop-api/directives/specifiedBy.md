@@ -1,10 +1,10 @@
 ---
-type: directive
+type: "GraphQL Directive"
 title: "specifiedBy"
 description: "Exposes a URL that specifies the behavior of this scalar."
-resource: "https://shop.example/graphql"
-tags: [graphql, directive]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#@specifiedBy"
+tags: ["graphql", "directive"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -16,9 +16,11 @@ Exposes a URL that specifies the behavior of this scalar.
 
 Locations: `SCALAR`.
 
-## Arguments
+# Schema
 
-- **`url`**: [`String!`](../types/scalars/String.md) — The URL that specifies the behavior of this scalar.
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `url` | [`String!`](../types/scalars/String.md) |  | The URL that specifies the behavior of this scalar. |
 
 <!-- graphql-okf:generated:end -->
 

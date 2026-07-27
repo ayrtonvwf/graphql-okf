@@ -1,10 +1,10 @@
 ---
-type: directive
+type: "GraphQL Directive"
 title: "tag"
-description: "Attaches a free-form classification label. May be applied more than once."
-resource: "https://shop.example/graphql"
-tags: [graphql, directive]
-timestamp: 2026-01-15T09:00:00.000Z
+description: "Attaches a free-form classification label."
+resource: "https://shop.example/graphql#@tag"
+tags: ["graphql", "directive"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -18,9 +18,11 @@ Locations: `FIELD_DEFINITION`, `OBJECT`.
 
 Repeatable.
 
-## Arguments
+# Schema
 
-- **`name`**: [`String!`](../types/scalars/String.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | [`String!`](../types/scalars/String.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

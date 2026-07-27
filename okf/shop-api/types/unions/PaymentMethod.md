@@ -1,10 +1,10 @@
 ---
-type: union
+type: "GraphQL Union Type"
 title: "PaymentMethod"
 description: "How an order was paid for."
-resource: "https://shop.example/graphql"
-tags: [graphql, union]
-timestamp: 2026-05-20T09:00:00.000Z
+resource: "https://shop.example/graphql#PaymentMethod"
+tags: ["graphql", "union"]
+timestamp: "2026-05-20T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -14,10 +14,12 @@ timestamp: 2026-05-20T09:00:00.000Z
 
 How an order was paid for.
 
-## Members
+# Schema
 
-- [`CreditCard`](../objects/CreditCard.md)
-- [`PayPalAccount`](../objects/PayPalAccount.md)
+| Member |
+| --- |
+| [`CreditCard`](../objects/CreditCard.md) |
+| [`PayPalAccount`](../objects/PayPalAccount.md) |
 
 <!-- graphql-okf:generated:end -->
 

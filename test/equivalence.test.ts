@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import type { IntrospectionQuery } from "graphql";
 import { buildClientSchema, buildSchema, getIntrospectionQuery, graphqlSync } from "graphql";
 import { describe, expect, it } from "vitest";
@@ -23,7 +24,7 @@ describe("readSchema", () => {
     const ir = await readSchema({ kind: "sdl", path: FIXTURE });
 
     expect(ir.origin).toBe("sdl");
-    expect(ir.resource).toBe(FIXTURE);
+    expect(ir.resource).toBe(pathToFileURL(resolve(FIXTURE)).href);
     expect(ir.concepts.length).toBeGreaterThan(0);
   });
 

@@ -104,8 +104,8 @@ describe("reconciling v2 to v3", () => {
     await syncOkfBundle({ source: { kind: "sdl", path: V3 }, outDir, now: T3, resource: RESOURCE });
 
     const giftCard = await readFile(join(outDir, "types/objects/GiftCard.md"), "utf8");
-    expect(giftCard).toContain("status: removed");
-    expect(giftCard).toContain(`removedAt: ${T3}`);
+    expect(giftCard).toContain('status: "removed"');
+    expect(giftCard).toContain(`removedAt: ${JSON.stringify(T3)}`);
   });
 });
 
@@ -147,9 +147,9 @@ describe("the committed example bundle", () => {
     const built = await buildExampleBundle();
 
     const log = built.get("log.md") ?? "";
-    expect(log).toContain(`## ${T1}`);
-    expect(log).toContain(`## ${T2}`);
-    expect(log).toContain(`## ${T3}`);
+    expect(log).toContain(`## ${T1.slice(0, 10)}`);
+    expect(log).toContain(`## ${T2.slice(0, 10)}`);
+    expect(log).toContain(`## ${T3.slice(0, 10)}`);
     expect(built.get("types/objects/Product.md")).toContain("Ping #catalog");
   });
 

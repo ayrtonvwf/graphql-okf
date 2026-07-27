@@ -108,9 +108,17 @@ consumer side, but graphql-okf is a *producer* and MUST emit well-formed output.
   and MUST include the one required OKF field, `type`.
 - `GOAL-5.2` — Each concept SHOULD populate the recommended OKF fields where
   meaningful: `title`, `description`, `resource`, `tags`, `timestamp`.
-  - `description` MUST be sourced from the schema element's documentation string
-    when present.
-  - `resource` MUST point at the source of truth (the endpoint URL or SDL origin).
+  - `description` MUST be the first sentence of the schema element's
+    documentation string when present, with the full documentation string
+    preserved verbatim in the body (see `GOAL-6.3`). Amended per issue #8: OKF
+    §4.1 defines this field as a single sentence used by `index.md` generators,
+    search snippets and previews.
+  - `resource` MUST uniquely identify the concept's schema element as a URI
+    fragment on the schema origin (`<origin>#Country`, `<origin>#Query.countries`,
+    `<origin>#@deprecated`). The bundle-wide origin is declared once on the
+    bundle-root `index.md`. Amended per issue #8: OKF §4.1 defines `resource` as
+    a URI that uniquely identifies the underlying asset, and a bundle-wide value
+    identifies nothing.
   - `timestamp` MUST be an ISO-8601 value reflecting when the concept was
     generated or last changed.
 - `GOAL-5.3` — The `type` value MUST distinguish GraphQL element kinds (e.g. an

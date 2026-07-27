@@ -57,7 +57,7 @@ describe("reconcile", () => {
     const plan = reconcile(ir, disk, T2);
 
     expect(plan.actions).toEqual([]);
-    expect(disk.get("types/objects/Country.md")).toContain(`timestamp: ${T1}`);
+    expect(disk.get("types/objects/Country.md")).toContain(`timestamp: ${JSON.stringify(T1)}`);
   });
 
   it("updates a concept whose rendered content changed, stamping the new time", () => {
@@ -72,7 +72,7 @@ describe("reconcile", () => {
 
     expect(plan.changed.map((change) => change.name)).toEqual(["Country"]);
     expect(action?.kind).toBe("update");
-    expect(action?.contents).toContain(`timestamp: ${T2}`);
+    expect(action?.contents).toContain(`timestamp: ${JSON.stringify(T2)}`);
     expect(action?.contents).toContain("A sovereign state.");
   });
 
@@ -121,6 +121,75 @@ describe("reconcile", () => {
     expect(plan.added).toEqual([]);
     expect(plan.changed).toEqual([]);
   });
+
+  it("preserves a human key added to the bundle-root index across a real re-run", () => {
+    const first = reconcile(ir, new Map(), T1);
+    const rootAction = first.actions.find((action) => action.path === "index.md");
+    if (rootAction === undefined) throw new Error("expected a root index action");
+
+    const edited = rootAction.contents.replace("---\n\n# ", "owner: platform-team\n---\n\n# ");
+    const existing = new Map([["index.md", edited]]);
+
+    // The schema genuinely diverges between runs in two ways that matter for
+    // catching a broken mergeFrontmatter:
+    //  1. A concept in a brand-new top-level directory, so the root index's
+    //     generated listing of child directories differs from what's on
+    //     disk and reconcile must actually emit an action for index.md
+    //     (adding a concept under an existing top-level dir, e.g. types/,
+    //     would not move the needle: the root index only lists immediate
+    //     child dirs).
+    //  2. The `resource` machine field itself changes value, so a
+    //     mergeFrontmatter that just returns `existing` unchanged (the
+    //     no-op the reviewer used to prove the old test tautological) is
+    //     distinguishable from a real merge: only a real merge picks up the
+    //     new resource value while still keeping the human `owner` key.
+    const evolved: SchemaIr = {
+      ...ir,
+      resource: "schema-v2.graphql",
+      concepts: [
+        ...ir.concepts,
+        {
+          kind: "directive",
+          name: "custom",
+          path: "directives/custom.md",
+          description: "A custom directive.",
+          appliedDirectives: [],
+          locations: ["FIELD"],
+          args: [],
+          isRepeatable: false,
+          isBuiltIn: false,
+        } as never,
+      ],
+    };
+
+    const second = reconcile(evolved, existing, T2);
+    const rewritten = second.actions.find((action) => action.path === "index.md");
+    if (rewritten === undefined) {
+      throw new Error("expected reconcile to emit a real action for index.md on the second run");
+    }
+
+    // Preserved from the human edit — proves merge doesn't just re-render.
+    expect(rewritten.contents).toContain("owner: platform-team");
+    // Picked up from the new render — proves merge doesn't just keep existing.
+    expect(rewritten.contents).toContain('resource: "schema-v2.graphql"');
+    expect(rewritten.contents).toContain('okf_version: "0.1"');
+  });
+
+  it("counts index writes so they are never silent", () => {
+    const plan = reconcile(ir, new Map(), "2026-07-25T00:00:00.000Z");
+
+    expect(plan.indexes).toBe(plan.actions.filter((action) => action.kind === "index").length);
+    expect(plan.indexes).toBeGreaterThan(0);
+  });
+
+  it("reports zero index writes on an unchanged re-run", () => {
+    const first = reconcile(ir, new Map(), "2026-07-25T00:00:00.000Z");
+    const existing = new Map(first.actions.map((action) => [action.path, action.contents]));
+
+    const second = reconcile(ir, existing, "2026-07-25T00:00:00.000Z");
+
+    expect(second.indexes).toBe(0);
+  });
 });
 
 const emptyIr: SchemaIr = { resource: "schema.graphql", origin: "sdl", concepts: [] };
@@ -134,9 +203,9 @@ describe("reconcile removals", () => {
 
     expect(plan.removed.map((change) => change.name)).toEqual(["Country"]);
     expect(action?.kind).toBe("tombstone");
-    expect(action?.contents).toContain("status: removed");
-    expect(action?.contents).toContain(`removedAt: ${T2}`);
-    expect(action?.contents).toContain("## Last known definition");
+    expect(action?.contents).toContain('status: "removed"');
+    expect(action?.contents).toContain(`removedAt: ${JSON.stringify(T2)}`);
+    expect(action?.contents).toContain("# Last known definition");
   });
 
   it("keeps the tombstoned file at its original path so inbound links resolve", () => {

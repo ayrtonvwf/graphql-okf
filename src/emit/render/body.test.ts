@@ -71,12 +71,14 @@ describe("renderObjectBody", () => {
     expect(out).toContain("# Country");
     expect(out).toContain("An ISO country.");
     expect(out).toContain("Implements [`Node`](../interfaces/Node.md).");
-    expect(out).toContain("- **`code`** — [`ID!`](../scalars/ID.md) — The ISO code.");
+    expect(out).toContain("| `code` | [`ID!`](../scalars/ID.md) | The ISO code. |");
     expect(out).toContain(
-      "- **`phone`** — [`String`](../scalars/String.md) (deprecated: use dialCode)",
+      "| `phone` | [`String`](../scalars/String.md) | (deprecated: use dialCode) |",
     );
+    expect(out).toContain("## Arguments");
+    expect(out).toContain("### `phone`");
     expect(out).toContain(
-      '  - Argument **`code`**: [`String!`](../scalars/String.md) = `"+1"` — Calling code.',
+      '| `code` | [`String!`](../scalars/String.md) | `"+1"` | Calling code. |',
     );
   });
 
@@ -100,7 +102,7 @@ describe("renderObjectBody", () => {
   it("omits the Fields section when a type has no fields", () => {
     const node: ObjectTypeNode = { ...country, fields: [] };
     const out = renderObjectBody(node);
-    expect(out).not.toContain("## Fields");
+    expect(out).not.toContain("# Schema");
   });
 });
 
@@ -128,7 +130,7 @@ describe("renderInterfaceBody", () => {
     const out = renderInterfaceBody(node);
     expect(out).toContain("# Node");
     expect(out).toContain("Implemented by [`Country`](../objects/Country.md).");
-    expect(out).toContain("- **`id`** — [`ID!`](../scalars/ID.md)");
+    expect(out).toContain("| `id` | [`ID!`](../scalars/ID.md) |  |");
   });
 });
 
@@ -146,9 +148,10 @@ describe("renderUnionBody", () => {
       ],
     };
     const out = renderUnionBody(node);
-    expect(out).toContain("## Members");
-    expect(out).toContain("- [`Country`](../objects/Country.md)");
-    expect(out).toContain("- [`Continent`](../objects/Continent.md)");
+    expect(out).toContain("# Schema");
+    expect(out).toContain("| Member |");
+    expect(out).toContain("| [`Country`](../objects/Country.md) |");
+    expect(out).toContain("| [`Continent`](../objects/Continent.md) |");
   });
 });
 
@@ -172,10 +175,11 @@ describe("renderEnumBody", () => {
       ],
     };
     const out = renderEnumBody(node);
-    expect(out).toContain("## Values");
-    expect(out).toContain("- **`ADMIN`**");
-    expect(out).toContain("- **`OWNER`** — Full access.");
-    expect(out).toContain("- **`VIEWER`** (deprecated: use READER)");
+    expect(out).toContain("# Schema");
+    expect(out).toContain("| Value | Description |");
+    expect(out).toContain("| `ADMIN` |  |");
+    expect(out).toContain("| `OWNER` | Full access. |");
+    expect(out).toContain("| `VIEWER` | (deprecated: use READER) |");
   });
 });
 
@@ -199,8 +203,9 @@ describe("renderInputBody", () => {
       ],
     };
     const out = renderInputBody(node);
-    expect(out).toContain("## Fields");
-    expect(out).toContain("- **`limit`**: [`Int`](../scalars/Int.md) = `10`");
+    expect(out).toContain("# Schema");
+    expect(out).toContain("| Field | Type | Default | Description |");
+    expect(out).toContain("| `limit` | [`Int`](../scalars/Int.md) | `10` |  |");
   });
 });
 
@@ -238,6 +243,7 @@ describe("renderScalarBody", () => {
 const languages: OperationNode = {
   kind: "query",
   name: "languages",
+  rootTypeName: "Query",
   path: "queries/languages.md",
   description: "Returns every language.",
   appliedDirectives: [],
@@ -268,9 +274,10 @@ describe("renderOperationBody", () => {
     const out = renderOperationBody(languages);
     expect(out).toContain("# languages");
     expect(out).toContain("**Returns** [`[Language!]!`](../types/objects/Language.md)");
-    expect(out).toContain("## Arguments");
+    expect(out).toContain("# Schema");
+    expect(out).toContain("| Argument | Type | Default | Description |");
     expect(out).toContain(
-      "- **`filter`**: [`LanguageFilterInput`](../types/inputs/LanguageFilterInput.md) — Narrows results.",
+      "| `filter` | [`LanguageFilterInput`](../types/inputs/LanguageFilterInput.md) |  | Narrows results. |",
     );
   });
 
@@ -305,8 +312,9 @@ describe("renderDirectiveBody", () => {
     const out = renderDirectiveBody(node);
     expect(out).toContain("# @deprecated");
     expect(out).toContain("Locations: `ARGUMENT_DEFINITION`, `ENUM_VALUE`, `FIELD_DEFINITION`.");
+    expect(out).toContain("# Schema");
     expect(out).toContain(
-      '- **`reason`**: [`String`](../types/scalars/String.md) = `"No longer supported"` — Why.',
+      '| `reason` | [`String`](../types/scalars/String.md) | `"No longer supported"` | Why. |',
     );
   });
 });
@@ -377,5 +385,236 @@ describe("renderBody dispatcher", () => {
     expect(renderBody(mutation)).toContain("# addLanguage");
     expect(renderBody(subscription)).toContain("# languageAdded");
     expect(renderBody(directive)).toContain("# @deprecated");
+  });
+});
+
+describe("# Schema sections", () => {
+  it("renders object fields as a table under a top-level # Schema", () => {
+    const body = renderObjectBody({
+      kind: "object",
+      name: "Country",
+      path: "types/objects/Country.md",
+      description: null,
+      appliedDirectives: [],
+      interfaces: [],
+      fields: [
+        {
+          name: "code",
+          description: "ISO 3166-1 alpha-2 code.",
+          type: { wrappers: ["nonNull"], name: "ID", path: "types/scalars/ID.md" },
+          args: [],
+          deprecation: null,
+          appliedDirectives: [],
+        },
+      ],
+    });
+
+    expect(body).toContain("\n# Schema\n");
+    expect(body).toContain("| Field | Type | Description |");
+    expect(body).toContain("| --- | --- | --- |");
+    expect(body).toContain("| `code` | [`ID!`](../scalars/ID.md) | ISO 3166-1 alpha-2 code. |");
+  });
+
+  it("keeps a multi-paragraph field description on one row", () => {
+    const body = renderObjectBody({
+      kind: "object",
+      name: "Product",
+      path: "types/objects/Product.md",
+      description: null,
+      appliedDirectives: [],
+      interfaces: [],
+      fields: [
+        {
+          name: "description",
+          description: "The blurb.\n\nMay contain Markdown.",
+          type: { wrappers: [], name: "String", path: "types/scalars/String.md" },
+          args: [],
+          deprecation: null,
+          appliedDirectives: [],
+        },
+        {
+          name: "sku",
+          description: null,
+          type: { wrappers: [], name: "String", path: "types/scalars/String.md" },
+          args: [],
+          deprecation: null,
+          appliedDirectives: [],
+        },
+      ],
+    });
+
+    expect(body).toContain(
+      "| `description` | [`String`](../scalars/String.md) | The blurb. May contain Markdown. |",
+    );
+    // The second field must still be in the same table, not a new one.
+    expect(body.match(/\| Field \| Type \| Description \|/g)).toHaveLength(1);
+    expect(body).toContain("| `sku` |");
+  });
+
+  it("puts field arguments in their own subsection below the table", () => {
+    const body = renderObjectBody({
+      kind: "object",
+      name: "Query",
+      path: "types/objects/Thing.md",
+      description: null,
+      appliedDirectives: [],
+      interfaces: [],
+      fields: [
+        {
+          name: "languages",
+          description: null,
+          type: { wrappers: [], name: "Language", path: "types/objects/Language.md" },
+          args: [
+            {
+              name: "limit",
+              description: "How many.",
+              type: { wrappers: [], name: "Int", path: "types/scalars/Int.md" },
+              defaultValue: "10",
+              deprecation: null,
+              appliedDirectives: [],
+            },
+          ],
+          deprecation: null,
+          appliedDirectives: [],
+        },
+      ],
+    });
+
+    expect(body).toContain("## Arguments");
+    expect(body).toContain("### `languages`");
+    expect(body).toContain("| Argument | Type | Default | Description |");
+    expect(body).toContain("| `limit` | [`Int`](../scalars/Int.md) | `10` | How many. |");
+  });
+
+  it("omits the Arguments subsection when no field takes arguments", () => {
+    const body = renderObjectBody({
+      kind: "object",
+      name: "Country",
+      path: "types/objects/Country.md",
+      description: null,
+      appliedDirectives: [],
+      interfaces: [],
+      fields: [
+        {
+          name: "code",
+          description: null,
+          type: { wrappers: [], name: "ID", path: "types/scalars/ID.md" },
+          args: [],
+          deprecation: null,
+          appliedDirectives: [],
+        },
+      ],
+    });
+
+    expect(body).not.toContain("## Arguments");
+  });
+
+  it("renders enum values as a table", () => {
+    const body = renderEnumBody({
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: null,
+      appliedDirectives: [],
+      values: [
+        { name: "ADMIN", description: "Full access.", deprecation: null, appliedDirectives: [] },
+      ],
+    });
+
+    expect(body).toContain("# Schema");
+    expect(body).toContain("| Value | Description |");
+    expect(body).toContain("| `ADMIN` | Full access. |");
+  });
+
+  it("renders union members as a table", () => {
+    const body = renderUnionBody({
+      kind: "union",
+      name: "Result",
+      path: "types/unions/Result.md",
+      description: null,
+      appliedDirectives: [],
+      members: [{ wrappers: [], name: "Country", path: "types/objects/Country.md" }],
+    });
+
+    expect(body).toContain("| Member |");
+    expect(body).toContain("| [`Country`](../objects/Country.md) |");
+  });
+
+  it("renders operation arguments as a table under # Schema", () => {
+    const body = renderOperationBody({
+      kind: "query",
+      name: "countries",
+      rootTypeName: "Query",
+      path: "queries/countries.md",
+      description: null,
+      appliedDirectives: [],
+      deprecation: null,
+      type: { wrappers: [], name: "Country", path: "types/objects/Country.md" },
+      args: [
+        {
+          name: "filter",
+          description: "Narrow the list.",
+          type: { wrappers: [], name: "Filter", path: "types/inputs/Filter.md" },
+          defaultValue: null,
+          deprecation: null,
+          appliedDirectives: [],
+        },
+      ],
+    });
+
+    expect(body).toContain("# Schema");
+    expect(body).toContain("| Argument | Type | Default | Description |");
+    expect(body).toContain(
+      "| `filter` | [`Filter`](../types/inputs/Filter.md) |  | Narrow the list. |",
+    );
+  });
+
+  it("surfaces deprecation in the description cell", () => {
+    const body = renderEnumBody({
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: null,
+      appliedDirectives: [],
+      values: [
+        {
+          name: "GUEST",
+          description: "Anonymous.",
+          deprecation: { reason: "Use ANON." },
+          appliedDirectives: [],
+        },
+      ],
+    });
+
+    expect(body).toContain("| `GUEST` | Anonymous. (deprecated: Use ANON.) |");
+  });
+
+  it("escapes a pipe in a description so the row survives", () => {
+    const body = renderEnumBody({
+      kind: "enum",
+      name: "Sep",
+      path: "types/enums/Sep.md",
+      description: null,
+      appliedDirectives: [],
+      values: [
+        { name: "PIPE", description: "A | character.", deprecation: null, appliedDirectives: [] },
+      ],
+    });
+
+    expect(body).toContain("| `PIPE` | A \\| character. |");
+  });
+
+  it("keeps the concept-level docstring verbatim, paragraph breaks and all", () => {
+    const body = renderObjectBody({
+      kind: "object",
+      name: "Product",
+      path: "types/objects/Product.md",
+      description: "A product.\n\nMay contain Markdown.",
+      appliedDirectives: [],
+      interfaces: [],
+      fields: [],
+    });
+
+    expect(body).toContain("A product.\n\nMay contain Markdown.");
   });
 });

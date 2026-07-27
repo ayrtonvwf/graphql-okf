@@ -1,10 +1,10 @@
 ---
-type: scalar
+type: "GraphQL Scalar Type"
 title: "Boolean"
 description: "The `Boolean` scalar type represents `true` or `false`."
-resource: "https://countries.trevorblades.com/graphql"
-tags: [graphql, scalar]
-timestamp: 2026-07-24T13:14:12.015Z
+resource: "https://countries.trevorblades.com/graphql#Boolean"
+tags: ["graphql", "scalar"]
+timestamp: "2026-07-25T00:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

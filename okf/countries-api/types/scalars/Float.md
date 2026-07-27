@@ -1,10 +1,10 @@
 ---
-type: scalar
+type: "GraphQL Scalar Type"
 title: "Float"
 description: "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point)."
-resource: "https://countries.trevorblades.com/graphql"
-tags: [graphql, scalar]
-timestamp: 2026-07-24T13:14:12.015Z
+resource: "https://countries.trevorblades.com/graphql#Float"
+tags: ["graphql", "scalar"]
+timestamp: "2026-07-25T00:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->

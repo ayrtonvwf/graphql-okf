@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasLoggableChanges, renderLogEntry } from "./log.js";
+import { hasLoggableChanges, LOG_HEADER, renderRunBlock, updateLog } from "./log.js";
 import type { BundlePlan } from "./plan.js";
 
 const T = "2026-07-24T09:00:00.000Z";
@@ -13,49 +13,82 @@ const plan: BundlePlan = {
   changed: [{ name: "User", path: "types/objects/User.md" }],
   removed: [{ name: "LegacyOrder", path: "types/objects/LegacyOrder.md" }],
   unchanged: 12,
+  indexes: 0,
 };
 
-describe("renderLogEntry", () => {
-  it("renders one dated section with a group per kind of change", () => {
-    expect(renderLogEntry(plan, T)).toBe(
+describe("renderRunBlock", () => {
+  it("heads the run with its time of day and groups by kind of change", () => {
+    expect(renderRunBlock(plan, T)).toBe(
       [
-        `## ${T}`,
+        "### 09:00:00.000Z",
         "",
         "**Added**",
         "",
-        "- [`Invoice`](types/objects/Invoice.md)",
-        "- [`invoices`](queries/invoices.md)",
+        "* [`Invoice`](types/objects/Invoice.md)",
+        "* [`invoices`](queries/invoices.md)",
         "",
         "**Changed**",
         "",
-        "- [`User`](types/objects/User.md)",
+        "* [`User`](types/objects/User.md)",
         "",
         "**Removed**",
         "",
-        "- [`LegacyOrder`](types/objects/LegacyOrder.md)",
-        "",
-        "",
+        "* [`LegacyOrder`](types/objects/LegacyOrder.md)",
       ].join("\n"),
     );
   });
 
   it("omits groups that are empty", () => {
-    const entry = renderLogEntry({ ...plan, changed: [], removed: [] }, T);
+    const block = renderRunBlock({ ...plan, changed: [], removed: [] }, T);
 
-    expect(entry).toContain("**Added**");
-    expect(entry).not.toContain("**Changed**");
-    expect(entry).not.toContain("**Removed**");
+    expect(block).toContain("**Added**");
+    expect(block).not.toContain("**Changed**");
+    expect(block).not.toContain("**Removed**");
+  });
+});
+
+describe("updateLog", () => {
+  it("creates the file with frontmatter, an H1 and an ISO date heading", () => {
+    const out = updateLog(null, plan, T);
+
+    expect(out.startsWith(`${LOG_HEADER}\n\n## 2026-07-24\n\n`)).toBe(true);
+    expect(out).toContain("---\ntype: Log\n---");
+    expect(out).toContain("# Update Log");
+    expect(out).toMatch(/\n$/);
   });
 
-  it("separates two consecutive entries with a blank line when appended back-to-back", () => {
-    const first = renderLogEntry(plan, T);
-    const second = renderLogEntry(plan, "2026-08-01T00:00:00.000Z");
+  it("uses an ISO 8601 date heading, never a full timestamp", () => {
+    expect(updateLog(null, plan, T)).not.toContain(`## ${T}`);
+  });
 
-    const combined = first + second;
+  it("adds a second run on the same day under the existing date heading", () => {
+    const first = updateLog(null, plan, T);
+    const second = updateLog(first, plan, "2026-07-24T17:30:00.000Z");
 
-    expect(combined).toContain(
-      "- [`LegacyOrder`](types/objects/LegacyOrder.md)\n\n## 2026-08-01T00:00:00.000Z",
-    );
+    expect(second.match(/^## 2026-07-24$/gm)).toHaveLength(1);
+    expect(second.indexOf("### 17:30:00.000Z")).toBeLessThan(second.indexOf("### 09:00:00.000Z"));
+  });
+
+  it("puts a new day above the previous one, newest first", () => {
+    const first = updateLog(null, plan, T);
+    const second = updateLog(first, plan, "2026-08-01T09:00:00.000Z");
+
+    expect(second.indexOf("## 2026-08-01")).toBeLessThan(second.indexOf("## 2026-07-24"));
+  });
+
+  it("keeps every earlier entry", () => {
+    const first = updateLog(null, plan, T);
+    const second = updateLog(first, plan, "2026-08-01T09:00:00.000Z");
+
+    expect(second).toContain("### 09:00:00.000Z");
+    expect(second.match(/^### /gm)).toHaveLength(2);
+  });
+
+  it("treats a header-only file as having no entries yet", () => {
+    const out = updateLog(`${LOG_HEADER}\n`, plan, T);
+
+    expect(out).toContain("## 2026-07-24");
+    expect(out.match(/^# Update Log$/gm)).toHaveLength(1);
   });
 });
 
@@ -67,6 +100,7 @@ describe("hasLoggableChanges", () => {
       changed: [],
       removed: [],
       unchanged: 3,
+      indexes: 1,
     };
 
     expect(hasLoggableChanges(indexOnly)).toBe(false);

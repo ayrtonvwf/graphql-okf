@@ -4,7 +4,8 @@ import { frontmatterValue } from "./frontmatter.js";
 import type { SplitFile } from "./parse.js";
 
 export function isTombstoned(split: SplitFile): boolean {
-  return frontmatterValue(split.parts.preamble, "status") === "removed";
+  const raw = frontmatterValue(split.parts.preamble, "status");
+  return raw === "removed" || raw === '"removed"';
 }
 
 export function titleOf(split: SplitFile, path: string): string {
@@ -29,14 +30,14 @@ function lastKnownBody(generated: string): string {
 export function renderTombstone(split: SplitFile, removedAt: string): FileParts {
   const preamble = split.parts.preamble.replace(
     /\n---\n(\s*)$/,
-    `\nstatus: removed\nremovedAt: ${removedAt}\n---\n$1`,
+    `\nstatus: "removed"\nremovedAt: ${JSON.stringify(removedAt)}\n---\n$1`,
   );
   const day = removedAt.slice(0, 10);
   const generated = [
     "",
     `> **Removed.** This element is no longer present in the schema as of ${day}.`,
     "",
-    "## Last known definition",
+    "# Last known definition",
     "",
     lastKnownBody(split.parts.generated),
     "",

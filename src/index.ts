@@ -20,6 +20,7 @@ export interface SyncResult {
   readonly changed: readonly string[];
   readonly removed: readonly string[];
   readonly unchanged: number;
+  readonly indexes: number;
 }
 
 export async function syncOkfBundle(options: SyncOkfBundleOptions): Promise<SyncResult> {
@@ -45,6 +46,7 @@ export async function syncOkfBundle(options: SyncOkfBundleOptions): Promise<Sync
     changed: plan.changed.map((change) => change.path),
     removed: plan.removed.map((change) => change.path),
     unchanged: plan.unchanged,
+    indexes: plan.indexes,
   };
 }
 

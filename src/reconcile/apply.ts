@@ -1,6 +1,6 @@
-import { appendFile, mkdir, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { hasLoggableChanges, renderLogEntry } from "./log.js";
+import { hasLoggableChanges, updateLog } from "./log.js";
 import type { BundlePlan } from "./plan.js";
 
 const LOG_FILE = "log.md";
@@ -26,7 +26,16 @@ export async function applyPlan(
   // the next run completes, rather than changes no log will ever record.
   if (hasLoggableChanges(plan)) {
     await mkdir(outDir, { recursive: true });
-    await appendFile(join(outDir, LOG_FILE), renderLogEntry(plan, timestamp), "utf8");
+    const logPath = join(outDir, LOG_FILE);
+    let existing: string | null = null;
+    try {
+      existing = await readFile(logPath, "utf8");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+        throw error;
+      }
+    }
+    await writeAtomic(logPath, updateLog(existing, plan, timestamp));
   }
 
   for (const action of plan.actions) {

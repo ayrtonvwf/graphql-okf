@@ -1,10 +1,10 @@
 ---
-type: mutation
+type: "GraphQL Mutation"
 title: "cancelOrder"
 description: "Cancels an order that has not yet shipped."
-resource: "https://shop.example/graphql"
-tags: [graphql, mutation]
-timestamp: 2026-01-15T09:00:00.000Z
+resource: "https://shop.example/graphql#Mutation.cancelOrder"
+tags: ["graphql", "mutation"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -18,10 +18,12 @@ Directives: [`@auth`](../directives/auth.md)(requires: CUSTOMER).
 
 **Returns** [`Order!`](../types/objects/Order.md)
 
-## Arguments
+# Schema
 
-- **`id`**: [`ID!`](../types/scalars/ID.md)
-- **`reason`**: [`String`](../types/scalars/String.md)
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `id` | [`ID!`](../types/scalars/ID.md) |  |  |
+| `reason` | [`String`](../types/scalars/String.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

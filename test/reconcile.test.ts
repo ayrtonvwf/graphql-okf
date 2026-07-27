@@ -79,10 +79,10 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
 
     const log = await readFile(join(outDir, "log.md"), "utf8");
 
-    expect(log).toContain(`## ${T2}`);
-    expect(log).toContain("- [`Invoice`](types/objects/Invoice.md)");
+    expect(log).toContain(`## ${T2.slice(0, 10)}`);
+    expect(log).toContain("* [`Invoice`](types/objects/Invoice.md)");
     expect(log).toContain("**Removed**");
-    expect(log.indexOf(`## ${T1}`)).toBeLessThan(log.indexOf(`## ${T2}`));
+    expect(log.indexOf(`## ${T2.slice(0, 10)}`)).toBeLessThan(log.indexOf(`## ${T1.slice(0, 10)}`));
   });
 
   it("preserves human prose in a concept it updates", async () => {
@@ -93,7 +93,7 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
     await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir, now: T2 });
 
     const after = await readFile(target, "utf8");
-    expect(after).toContain("status: removed");
+    expect(after).toContain('status: "removed"');
     expect(after).toContain("Billing team.");
   });
 
@@ -103,7 +103,7 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
 
     const index = await readFile(join(outDir, "types/objects/index.md"), "utf8");
 
-    expect(index).toContain("— (removed)");
+    expect(index).toContain("- (removed)");
   });
 
   it("leaves a stray human file untouched and unlisted", async () => {

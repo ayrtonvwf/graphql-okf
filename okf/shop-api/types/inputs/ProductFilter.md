@@ -1,10 +1,10 @@
 ---
-type: input
+type: "GraphQL Input Type"
 title: "ProductFilter"
-description: "Narrows a product listing. Every field is optional; omitted fields do not filter."
-resource: "https://shop.example/graphql"
-tags: [graphql, input]
-timestamp: 2026-01-15T09:00:00.000Z
+description: "Narrows a product listing."
+resource: "https://shop.example/graphql#ProductFilter"
+tags: ["graphql", "input"]
+timestamp: "2026-01-15T09:00:00.000Z"
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -14,14 +14,16 @@ timestamp: 2026-01-15T09:00:00.000Z
 
 Narrows a product listing. Every field is optional; omitted fields do not filter.
 
-## Fields
+# Schema
 
-- **`inStockOnly`**: [`Boolean`](../scalars/Boolean.md) = `false`
-- **`labels`**: [`[String!]`](../scalars/String.md) = `[]` — Only products carrying all of these labels.
-- **`maxPriceCents`**: [`Int`](../scalars/Int.md)
-- **`minPriceCents`**: [`Int`](../scalars/Int.md) = `0`
-- **`nameContains`**: [`String`](../scalars/String.md) = `""` — Case-insensitive substring match against the product name.
-- **`visibleTo`**: [`Role`](../enums/Role.md) = `GUEST` — Only products a caller of this role may see.
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `inStockOnly` | [`Boolean`](../scalars/Boolean.md) | `false` |  |
+| `labels` | [`[String!]`](../scalars/String.md) | `[]` | Only products carrying all of these labels. |
+| `maxPriceCents` | [`Int`](../scalars/Int.md) |  |  |
+| `minPriceCents` | [`Int`](../scalars/Int.md) | `0` |  |
+| `nameContains` | [`String`](../scalars/String.md) | `""` | Case-insensitive substring match against the product name. |
+| `visibleTo` | [`Role`](../enums/Role.md) | `GUEST` | Only products a caller of this role may see. |
 
 <!-- graphql-okf:generated:end -->
 
