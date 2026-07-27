@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import type { EnumTypeNode, ObjectTypeNode } from "../../model/ir.js";
 import { emitContext } from "../context.js";
-import { renderFrontmatter } from "./frontmatter.js";
+import { renderFrontmatter, renderProvenance } from "./frontmatter.js";
 
 const objectConcept: ObjectTypeNode = {
   kind: "object",
@@ -79,5 +79,34 @@ describe("renderFrontmatter", () => {
     const parsed = parse(out.replace(/^---\n/, "").replace(/---\n$/, ""), { version: "1.1" });
 
     expect(typeof (parsed as { timestamp: unknown }).timestamp).toBe("string");
+  });
+
+  it("carries generated instead of timestamp under v0.2", () => {
+    const out = renderFrontmatter(
+      objectConcept,
+      "https://api.test/graphql#Country",
+      emitContext("0.2", "2026-07-27T09:00:00.000Z"),
+    );
+
+    expect(out).toContain('generated: { by: "graphql-okf/0.1", at: "2026-07-27T09:00:00.000Z" }');
+    expect(out).not.toContain("timestamp:");
+  });
+});
+
+describe("renderProvenance", () => {
+  const T = "2026-07-27T09:00:00.000Z";
+
+  it("emits v0.1's flat timestamp", () => {
+    expect(renderProvenance(emitContext("0.1", T))).toBe(`timestamp: "${T}"`);
+  });
+
+  it("emits v0.2's generated mapping with the producer as the actor", () => {
+    expect(renderProvenance(emitContext("0.2", T))).toBe(
+      `generated: { by: "graphql-okf/0.1", at: "${T}" }`,
+    );
+  });
+
+  it("quotes the datetime, so YAML 1.1 cannot read it back as a date", () => {
+    expect(renderProvenance(emitContext("0.2", T))).toContain(`"${T}"`);
   });
 });

@@ -109,6 +109,12 @@ describe("buildBundle", () => {
     expect(bundle.get("types/objects/index.md")?.preamble).not.toContain("---");
   });
 
+  it("declares the emitted okf_version on the bundle-root index", () => {
+    const bundle = buildBundle(irWithOneObject, emitContext("0.2", TS));
+
+    expect(bundle.get("index.md")?.preamble).toContain('okf_version: "0.2"');
+  });
+
   it("has referential integrity: every intra-bundle link resolves to a real path", () => {
     const bundle = bundleFrom(`
       interface Node { id: ID! }

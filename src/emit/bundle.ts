@@ -8,9 +8,6 @@ import { type IndexEntry, renderDirectoryIndex } from "./render/directory-index.
 import { conceptResource } from "./render/resource.js";
 import type { FileParts } from "./render/seam.js";
 
-/** The OKF version this producer targets, declared on the bundle-root index (§11). */
-const OKF_VERSION = "0.1";
-
 const KIND_SUMMARY: Record<ConceptKind, string> = {
   object: "Object type.",
   interface: "Interface type.",
@@ -143,7 +140,7 @@ export function buildBundle(
     const frontmatter =
       dir === "."
         ? [
-            `okf_version: ${JSON.stringify(OKF_VERSION)}`,
+            `okf_version: ${JSON.stringify(ctx.okfVersion)}`,
             `resource: ${JSON.stringify(ir.resource)}`,
           ]
         : undefined;
