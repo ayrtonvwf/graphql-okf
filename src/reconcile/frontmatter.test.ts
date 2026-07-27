@@ -3,6 +3,7 @@ import {
   frontmatterValue,
   mergeFrontmatter,
   parseFrontmatterEntries,
+  replaceEntry,
   withoutProvenance,
 } from "./frontmatter.js";
 
@@ -173,5 +174,43 @@ describe("frontmatterValue", () => {
 
   it("returns null for an absent key", () => {
     expect(frontmatterValue(rendered, "status")).toBeNull();
+  });
+});
+
+describe("replaceEntry", () => {
+  it("swaps one pair and leaves every other byte alone", () => {
+    const before = [
+      "---",
+      'type: "object"',
+      "# a human's note",
+      'owner: "platform-team"',
+      'timestamp: "2026-01-01T00:00:00.000Z"',
+      'title: "Country"',
+      "---",
+      "",
+      "body text\n",
+    ].join("\n");
+
+    const after = replaceEntry(
+      before,
+      "timestamp",
+      'generated: { by: "graphql-okf/0.1", at: "2026-01-01T00:00:00.000Z" }',
+    );
+
+    expect(after).toContain('generated: { by: "graphql-okf/0.1", at: "2026-01-01T00:00:00.000Z" }');
+    expect(after).not.toContain("timestamp:");
+    expect(after).toContain("# a human's note");
+    expect(after).toContain('owner: "platform-team"');
+    expect(after).toContain("body text");
+    expect(after?.indexOf('type: "object"')).toBeLessThan(after?.indexOf("generated:") ?? -1);
+    expect(after?.indexOf("generated:")).toBeLessThan(after?.indexOf('title: "Country"') ?? -1);
+  });
+
+  it("returns null when the key is not there", () => {
+    expect(replaceEntry('---\ntype: "object"\n---\n', "timestamp", "x: 1")).toBeNull();
+  });
+
+  it("returns null when the block will not parse", () => {
+    expect(replaceEntry("no frontmatter here\n", "timestamp", "x: 1")).toBeNull();
   });
 });
