@@ -112,3 +112,50 @@ describe("hasLoggableChanges", () => {
     expect(hasLoggableChanges(plan)).toBe(true);
   });
 });
+
+describe("a migration run", () => {
+  const migrationPlan: BundlePlan = {
+    actions: [],
+    added: [],
+    changed: [],
+    removed: [],
+    unchanged: 0,
+    indexes: 0,
+    migrated: Array.from({ length: 4975 }, (_, index) => `types/objects/T${index}.md`),
+  };
+
+  it("is loggable even with no schema change", () => {
+    expect(hasLoggableChanges(migrationPlan)).toBe(true);
+  });
+
+  it("reports the format change and the count, not the concepts", () => {
+    const block = renderRunBlock(migrationPlan, "2026-07-27T09:00:00.000Z");
+
+    expect(block).toContain("**Migrated**");
+    expect(block).toContain(
+      "* OKF bundle format 0.1 → 0.2 (`timestamp` → `generated`) across 4975 concepts.",
+    );
+    expect(block).not.toContain("types/objects/T0.md");
+  });
+
+  it("writes the count with no locale separators, so runs stay deterministic", () => {
+    expect(renderRunBlock(migrationPlan, "2026-07-27T09:00:00.000Z")).not.toContain("4,975");
+  });
+
+  it("still reports genuine schema changes in the same entry", () => {
+    const block = renderRunBlock(
+      { ...migrationPlan, added: [{ name: "Country", path: "types/objects/Country.md" }] },
+      "2026-07-27T09:00:00.000Z",
+    );
+
+    expect(block).toContain("**Migrated**");
+    expect(block).toContain("**Added**");
+    expect(block.indexOf("**Migrated**")).toBeLessThan(block.indexOf("**Added**"));
+  });
+
+  it("emits no group when nothing was migrated", () => {
+    expect(
+      renderRunBlock({ ...migrationPlan, migrated: [] }, "2026-07-27T09:00:00.000Z"),
+    ).not.toContain("**Migrated**");
+  });
+});
