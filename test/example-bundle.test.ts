@@ -119,14 +119,36 @@ const HUMAN_SECTION =
  * human-authored section after v1. The injection is deliberate: it is what makes
  * GOAL-8.3 (human edits survive regeneration) verifiable by opening the committed
  * bundle rather than by trusting a test name.
+ *
+ * Pinned to okf-version 0.1: the committed bundle under okf/shop-api is still
+ * v0.1-shaped. Migrating that tracked bundle (and this test) to v0.2 is Task 12's
+ * job, not this one's — see the OKF v0.2 migration plan.
  */
 async function buildExampleBundle(): Promise<Map<string, string>> {
   const outDir = join(await mkdtemp(join(tmpdir(), "okf-shop-golden-")), "bundle");
 
-  await syncOkfBundle({ source: { kind: "sdl", path: V1 }, outDir, now: T1, resource: RESOURCE });
+  await syncOkfBundle({
+    source: { kind: "sdl", path: V1 },
+    outDir,
+    now: T1,
+    resource: RESOURCE,
+    okfVersion: "0.1",
+  });
   await appendFile(join(outDir, "types/objects/Product.md"), HUMAN_SECTION);
-  await syncOkfBundle({ source: { kind: "sdl", path: V2 }, outDir, now: T2, resource: RESOURCE });
-  await syncOkfBundle({ source: { kind: "sdl", path: V3 }, outDir, now: T3, resource: RESOURCE });
+  await syncOkfBundle({
+    source: { kind: "sdl", path: V2 },
+    outDir,
+    now: T2,
+    resource: RESOURCE,
+    okfVersion: "0.1",
+  });
+  await syncOkfBundle({
+    source: { kind: "sdl", path: V3 },
+    outDir,
+    now: T3,
+    resource: RESOURCE,
+    okfVersion: "0.1",
+  });
 
   return readTree(outDir);
 }
