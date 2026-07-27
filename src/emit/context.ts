@@ -3,7 +3,7 @@ import { PRODUCER } from "../version.js";
 /** The OKF spec versions this producer can emit. */
 export type OkfVersion = "0.1" | "0.2";
 
-export const OKF_VERSIONS: readonly OkfVersion[] = ["0.1", "0.2"];
+const OKF_VERSIONS: readonly OkfVersion[] = ["0.1", "0.2"];
 
 /** v0.2 supersedes v0.1; v0.1 stays reachable for anyone pinned to it. */
 export const DEFAULT_OKF_VERSION: OkfVersion = "0.2";

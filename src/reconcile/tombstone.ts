@@ -10,7 +10,7 @@ import type { SplitFile } from "./parse.js";
  * "deprecated" is the wrong word for it anyway, since GraphQL's own @deprecated
  * needs that meaning. Namespaced until M2 decides how to surface both.
  */
-export const TOMBSTONE_KEY = "graphql_okf_status";
+const TOMBSTONE_KEY = "graphql_okf_status";
 
 const REMOVED = "removed";
 
