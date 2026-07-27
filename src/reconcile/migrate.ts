@@ -1,7 +1,11 @@
 import type { EmitContext } from "../emit/context.js";
 import { frontmatterValue, replaceEntry } from "./frontmatter.js";
+import { isOwnedFile } from "./parse.js";
 
 const LOG_FILE = "log.md";
+const REMOVED = "removed";
+const LEGACY_TOMBSTONE_KEY = "status";
+const TOMBSTONE_KEY = "graphql_okf_status";
 
 export interface MigrationResult {
   readonly files: ReadonlyMap<string, string>;
@@ -24,7 +28,7 @@ function unquote(raw: string): string {
  * in a single pass. `by` is the current producer — we cannot know which release
  * originally wrote the file, and §5.1 requires `by` within the mapping.
  */
-function migrateConcept(text: string, ctx: EmitContext): string | null {
+function migrateProvenance(text: string, ctx: EmitContext): string | null {
   if (frontmatterValue(text, "generated") !== null) {
     return null;
   }
@@ -38,6 +42,42 @@ function migrateConcept(text: string, ctx: EmitContext): string | null {
     "timestamp",
     `generated: { by: ${JSON.stringify(ctx.producer)}, at: ${at} }`,
   );
+}
+
+function isLegacyRemoved(raw: string | null): boolean {
+  return raw === REMOVED || raw === `"${REMOVED}"`;
+}
+
+/**
+ * Legacy tombstone key for one file. Only the exact `"removed"` sentinel is
+ * ours to touch — `deprecated`/`draft`/`stable` are real §5.4 vocabulary that
+ * migration must leave alone.
+ */
+function migrateTombstoneKey(text: string): string | null {
+  if (!isLegacyRemoved(frontmatterValue(text, LEGACY_TOMBSTONE_KEY))) {
+    return null;
+  }
+  return replaceEntry(text, LEGACY_TOMBSTONE_KEY, `${TOMBSTONE_KEY}: "${REMOVED}"`);
+}
+
+/** Runs both v0.1 → v0.2 conversions for one file; either may fire independently. */
+function migrateConcept(text: string, ctx: EmitContext): string | null {
+  let current = text;
+  let changed = false;
+
+  const withProvenance = migrateProvenance(current, ctx);
+  if (withProvenance !== null) {
+    current = withProvenance;
+    changed = true;
+  }
+
+  const withTombstoneKey = migrateTombstoneKey(current);
+  if (withTombstoneKey !== null) {
+    current = withTombstoneKey;
+    changed = true;
+  }
+
+  return changed ? current : null;
 }
 
 /**
@@ -61,7 +101,7 @@ export function migrateBundle(
   const migrated: string[] = [];
 
   for (const [path, text] of existing) {
-    if (path === LOG_FILE) {
+    if (path === LOG_FILE || !isOwnedFile(path, text)) {
       continue;
     }
     const next = migrateConcept(text, ctx);

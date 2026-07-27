@@ -9,6 +9,10 @@ const v1Concept = [
   'timestamp: "2026-01-01T00:00:00.000Z"',
   "---",
   "",
+  "<!-- graphql-okf:generated:start -->",
+  "# Country",
+  "<!-- graphql-okf:generated:end -->",
+  "",
 ].join("\n");
 
 const v2Concept = [
@@ -17,6 +21,10 @@ const v2Concept = [
   'title: "Country"',
   'generated: { by: "graphql-okf/0.1", at: "2026-01-01T00:00:00.000Z" }',
   "---",
+  "",
+  "<!-- graphql-okf:generated:start -->",
+  "# Country",
+  "<!-- graphql-okf:generated:end -->",
   "",
 ].join("\n");
 
@@ -41,6 +49,19 @@ describe("v2Evidence", () => {
 
   it("reports the root index declaration", () => {
     expect(v2Evidence(new Map([["index.md", rootIndex("0.2")]]))).toContain("index.md");
+  });
+
+  it("ignores a hand-written stray file that happens to have a 'generated' key", () => {
+    const stray = ["---", 'generated: "by hand"', "---", ""].join("\n");
+    expect(
+      v2Evidence(
+        new Map([
+          ["index.md", rootIndex("0.1")],
+          ["types/objects/Country.md", v1Concept],
+          ["NOTE.md", stray],
+        ]),
+      ),
+    ).toBeNull();
   });
 
   it("reports a converted concept even when the index still says 0.1", () => {
@@ -72,6 +93,20 @@ describe("assertNoDowngrade", () => {
     expect(() =>
       assertNoDowngrade(new Map([["index.md", rootIndex("0.2")]]), "0.1", "okf/api"),
     ).toThrow(GraphqlOkfError);
+  });
+
+  it("allows a v0.1 run against a genuinely v0.1 bundle with a stray 'generated' file", () => {
+    const stray = ["---", 'generated: "by hand"', "---", ""].join("\n");
+    expect(() =>
+      assertNoDowngrade(
+        new Map([
+          ["index.md", rootIndex("0.1")],
+          ["NOTE.md", stray],
+        ]),
+        "0.1",
+        "okf/api",
+      ),
+    ).not.toThrow();
   });
 
   it("names the directory, both versions and what would be lost", () => {

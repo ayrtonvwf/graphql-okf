@@ -1,6 +1,7 @@
 import type { OkfVersion } from "../emit/context.js";
 import { GraphqlOkfError } from "../errors.js";
 import { frontmatterValue } from "./frontmatter.js";
+import { isOwnedFile } from "./parse.js";
 
 const ROOT_INDEX = "index.md";
 const LOG_FILE = "log.md";
@@ -29,7 +30,7 @@ export function v2Evidence(existing: ReadonlyMap<string, string>): string | null
     return `${ROOT_INDEX} declares okf_version "0.2"`;
   }
   for (const [path, text] of existing) {
-    if (path === LOG_FILE) {
+    if (path === LOG_FILE || !isOwnedFile(path, text)) {
       continue;
     }
     if (frontmatterValue(text, "generated") !== null) {

@@ -143,6 +143,49 @@ describe("migrateBundle", () => {
     expect(result.migrated).toEqual([]);
   });
 
+  it("never rewrites a stray, marker-less file even if it has a timestamp key (GOAL-8.3)", () => {
+    const stray = ["---", `timestamp: "${ORIGINAL}"`, "---", "", "Hand-written notes.", ""].join(
+      "\n",
+    );
+    const result = migrateBundle(new Map([["NOTES.md", stray]]), emitContext("0.2", T));
+
+    expect(result.migrated).toEqual([]);
+    expect(result.files.get("NOTES.md")).toBe(stray);
+  });
+
+  it("converts a legacy 'status: removed' tombstone key to graphql_okf_status", () => {
+    const legacyTombstone = concept(
+      `timestamp: "${ORIGINAL}"`,
+      'status: "removed"',
+      `removedAt: "${ORIGINAL}"`,
+    );
+    const result = migrateBundle(
+      new Map([["types/objects/Gone.md", legacyTombstone]]),
+      emitContext("0.2", T),
+    );
+
+    expect(result.migrated).toEqual(["types/objects/Gone.md"]);
+    const text = result.files.get("types/objects/Gone.md") ?? "";
+    const front = frontmatterOf(text);
+
+    expect(front.graphql_okf_status).toBe("removed");
+    expect(front.status).toBeUndefined();
+    expect(text).not.toMatch(/^status: "removed"$/m);
+    expect(front.generated).toEqual({ by: "graphql-okf/0.1", at: ORIGINAL });
+  });
+
+  it("leaves a non-removed 'status' value untouched (real spec vocabulary)", () => {
+    const draft = concept(`timestamp: "${ORIGINAL}"`, 'status: "deprecated"');
+    const result = migrateBundle(
+      new Map([["types/objects/Country.md", draft]]),
+      emitContext("0.2", T),
+    );
+
+    const front = frontmatterOf(result.files.get("types/objects/Country.md") ?? "");
+    expect(front.status).toBe("deprecated");
+    expect(front.graphql_okf_status).toBeUndefined();
+  });
+
   it("returns migrated paths in a deterministic order", () => {
     const result = migrateBundle(
       new Map([

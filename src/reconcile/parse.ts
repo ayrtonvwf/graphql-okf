@@ -14,6 +14,27 @@ function malformed(path: string, detail: string): GraphqlOkfError {
 }
 
 /**
+ * The bundle-root index is owned by its reserved name rather than by the
+ * generated-region markers: a legacy v0.1 index has no markers at all, and a
+ * freshly rendered one still needs to be recognised before it has ever been
+ * split.
+ */
+export function isIndexPath(path: string): boolean {
+  return path === "index.md" || path.endsWith("/index.md");
+}
+
+/**
+ * Whether graphql-okf owns this file — the single predicate migration,
+ * downgrade-detection, and reconciliation must all agree on. A file is owned
+ * when it is the (root or nested) index, or when it carries the
+ * generated-region markers; anything else is a human's, however its
+ * frontmatter happens to look, and must never be rewritten (GOAL-8.3).
+ */
+export function isOwnedFile(path: string, text: string): boolean {
+  return isIndexPath(path) || splitFile(text, path) !== null;
+}
+
+/**
  * Splits a file graphql-okf owns into its three regions. Returns null for a
  * stray — any file without the markers, which graphql-okf never touches.
  */

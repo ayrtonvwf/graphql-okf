@@ -4,7 +4,7 @@ import { assembleFile, EMPTY_HUMAN, type FileParts } from "../emit/render/seam.j
 import type { SchemaIr } from "../model/ir.js";
 import { mergeFrontmatter, withoutProvenance } from "./frontmatter.js";
 import { migrateBundle } from "./migrate.js";
-import { type SplitFile, splitFile } from "./parse.js";
+import { isIndexPath, type SplitFile, splitFile } from "./parse.js";
 import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
 
 export interface ConceptChange {
@@ -35,10 +35,6 @@ export interface BundlePlan {
    * as a count in log.md, not a list: naming five thousand paths is noise.
    */
   readonly migrated: readonly string[];
-}
-
-function isIndexPath(path: string): boolean {
-  return path === "index.md" || path.endsWith("/index.md");
 }
 
 /**

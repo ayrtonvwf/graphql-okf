@@ -152,6 +152,25 @@ describe("migrating a v0.1 bundle to v0.2", () => {
     ).rejects.toThrow(/OKF 0\.2 bundle/);
   });
 
+  it("never rewrites a stray file it does not own, even with timestamp-like frontmatter (GOAL-8.3)", async () => {
+    const outDir = await v1Bundle();
+    const strayPath = join(outDir, "NOTES.md");
+    const stray = [
+      "---",
+      'timestamp: "2020-01-01T00:00:00.000Z"',
+      "---",
+      "",
+      "Hand-written notes, not a graphql-okf concept.",
+      "",
+    ].join("\n");
+    await writeFile(strayPath, stray);
+
+    const result = await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir, now: T2 });
+
+    expect(await readFile(strayPath, "utf8")).toBe(stray);
+    expect(result.migrated).not.toContain("NOTES.md");
+  });
+
   it("stays deterministic: two v0.2 runs from scratch are identical", async () => {
     const first = join(await mkdtemp(join(tmpdir(), "okf-det-")), "bundle");
     const second = join(await mkdtemp(join(tmpdir(), "okf-det-")), "bundle");
