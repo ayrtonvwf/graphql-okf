@@ -11,7 +11,8 @@ export type GraphqlOkfErrorCode =
   | "NOT_A_BUNDLE"
   | "CLI_USAGE"
   | "INVALID_TIMESTAMP"
-  | "MALFORMED_CONCEPT";
+  | "MALFORMED_CONCEPT"
+  | "OKF_VERSION_DOWNGRADE";
 
 export class GraphqlOkfError extends Error {
   readonly code: GraphqlOkfErrorCode;
