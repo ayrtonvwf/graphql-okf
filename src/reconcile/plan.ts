@@ -3,6 +3,7 @@ import type { EmitContext } from "../emit/context.js";
 import { assembleFile, EMPTY_HUMAN, type FileParts } from "../emit/render/seam.js";
 import type { SchemaIr } from "../model/ir.js";
 import { mergeFrontmatter, withoutProvenance } from "./frontmatter.js";
+import { migrateBundle } from "./migrate.js";
 import { type SplitFile, splitFile } from "./parse.js";
 import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
 
@@ -12,7 +13,7 @@ export interface ConceptChange {
 }
 
 interface FileAction {
-  readonly kind: "create" | "update" | "tombstone" | "index";
+  readonly kind: "create" | "update" | "tombstone" | "index" | "migrate";
   readonly path: string;
   readonly contents: string;
 }
@@ -29,6 +30,11 @@ export interface BundlePlan {
    * the root index (which carries okf_version) is invisible.
    */
   readonly indexes: number;
+  /**
+   * Concepts whose frontmatter this run converted from v0.1 to v0.2. Reported
+   * as a count in log.md, not a list: naming five thousand paths is noise.
+   */
+  readonly migrated: readonly string[];
 }
 
 function isIndexPath(path: string): boolean {
@@ -68,7 +74,8 @@ export function reconcile(
   existing: ReadonlyMap<string, string>,
   ctx: EmitContext,
 ): BundlePlan {
-  const owned = ownedFiles(existing);
+  const { files, migrated } = migrateBundle(existing, ctx);
+  const owned = ownedFiles(files);
 
   const irPaths = new Set(ir.concepts.map((concept) => concept.path));
   const tombstones: TombstoneEntry[] = [];
@@ -150,5 +157,17 @@ export function reconcile(
     removed.push(change);
   }
 
-  return { actions, added, changed, removed, unchanged, indexes };
+  // Migration rewrites exactly the region sameContent ignores, so the loop above
+  // sees these files as unchanged. Their writes have to be added explicitly —
+  // and only where reconcile did not already write a newer version of the file.
+  const acted = new Set(actions.map((action) => action.path));
+  for (const path of migrated) {
+    const contents = files.get(path);
+    if (acted.has(path) || contents === undefined) {
+      continue;
+    }
+    actions.push({ kind: "migrate", path, contents });
+  }
+
+  return { actions, added, changed, removed, unchanged, indexes, migrated };
 }

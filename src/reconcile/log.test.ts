@@ -14,6 +14,7 @@ const plan: BundlePlan = {
   removed: [{ name: "LegacyOrder", path: "types/objects/LegacyOrder.md" }],
   unchanged: 12,
   indexes: 0,
+  migrated: [],
 };
 
 describe("renderRunBlock", () => {
@@ -101,6 +102,7 @@ describe("hasLoggableChanges", () => {
       removed: [],
       unchanged: 3,
       indexes: 1,
+      migrated: [],
     };
 
     expect(hasLoggableChanges(indexOnly)).toBe(false);

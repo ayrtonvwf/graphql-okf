@@ -201,6 +201,62 @@ describe("reconcile", () => {
   });
 });
 
+/** A bundle exactly as a v0.1 run would have left it. */
+function v1BundleOnDisk(source: SchemaIr, timestamp: string): Map<string, string> {
+  const files = new Map<string, string>();
+  for (const [path, parts] of buildBundle(source, emitContext("0.1", timestamp))) {
+    files.set(path, assembleFile(parts, EMPTY_HUMAN));
+  }
+  return files;
+}
+
+describe("reconcile migrating a v0.1 bundle", () => {
+  it("writes every migrated concept even though its content did not change", () => {
+    const plan = reconcile(ir, v1BundleOnDisk(ir, T1), emitContext("0.2", T2));
+
+    expect(plan.migrated).toEqual(["types/objects/Country.md"]);
+    const migrate = plan.actions.find((action) => action.kind === "migrate");
+    expect(migrate?.path).toBe("types/objects/Country.md");
+    expect(migrate?.contents).toContain(
+      'generated: { by: "graphql-okf/0.1", at: "2026-07-01T10:00:00.000Z" }',
+    );
+  });
+
+  it("does not double-count a concept the schema also changed", () => {
+    const disk = v1BundleOnDisk(ir, T1);
+    const [country] = ir.concepts;
+    if (country === undefined) throw new Error("fixture");
+    const evolved: SchemaIr = {
+      ...ir,
+      concepts: [{ ...country, description: "A sovereign state." }],
+    };
+
+    const plan = reconcile(evolved, disk, emitContext("0.2", T2));
+    const paths = plan.actions.map((action) => action.path);
+
+    expect(paths.filter((path) => path === "types/objects/Country.md")).toHaveLength(1);
+    expect(plan.changed.map((change) => change.path)).toEqual(["types/objects/Country.md"]);
+  });
+
+  it("reports nothing to migrate for a bundle it just wrote in v0.2", () => {
+    const files = new Map<string, string>();
+    for (const [path, parts] of buildBundle(ir, emitContext("0.2", T1))) {
+      files.set(path, assembleFile(parts, EMPTY_HUMAN));
+    }
+
+    const plan = reconcile(ir, files, emitContext("0.2", T2));
+
+    expect(plan.migrated).toEqual([]);
+    expect(plan.actions.filter((action) => action.kind === "migrate")).toEqual([]);
+  });
+
+  it("migrates nothing when the run targets v0.1", () => {
+    const plan = reconcile(ir, v1BundleOnDisk(ir, T1), emitContext("0.1", T2));
+
+    expect(plan.migrated).toEqual([]);
+  });
+});
+
 const emptyIr: SchemaIr = { resource: "schema.graphql", origin: "sdl", concepts: [] };
 
 describe("reconcile removals", () => {
