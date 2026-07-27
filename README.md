@@ -1,17 +1,24 @@
 # graphql-okf
 
-Generate and maintain an [Open Knowledge Format (OKF)][okf] bundle from a GraphQL
-API's schema.
+![graphql-okf project banner](docs/images/README_project_banner.png)
 
-> **Status: pre-alpha, but generation and updates work.** The published package
-> is still a `0.0.0` placeholder under the `next` tag. Bundle generation — from
-> an SDL file or a live introspection endpoint, via a library call or the CLI —
-> and reconciling an existing bundle against an evolved schema are both
+## 💡 What is `graphql-okf`?
+
+`graphql-okf` is an automated tool that turns a GraphQL blueprint into a Google's OKF compliant bundle of Markdown documentation that **AI agents** can easily read.
+
+Even better: whenever your API changes, running `graphql-okf` automatically updates the documentation **without overwriting your custom notes**, while keeping a log of what changed between versions so you AI agent don't get lost in time.
+
+## Project Status
+
+> **Status: pre-alpha, but generation and updates work.** The package is
+> published as `0.1.0` under the `next` tag. Bundle generation — from an SDL
+> file or a live introspection endpoint, via a library call or the CLI — and
+> reconciling an existing bundle against an evolved schema are both
 > implemented and tested end to end (see [Usage](#usage) and
 > [Examples](#examples) below). See [Status & roadmap](#status--roadmap) for
 > what's left.
 
-## What it does
+## How it works
 
 `graphql-okf` reads a GraphQL API's public interface — from an SDL file or a live
 introspection endpoint — and produces a conformant OKF bundle describing it: a
