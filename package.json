@@ -1,6 +1,6 @@
 {
   "name": "graphql-okf",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Generate and maintain an Open Knowledge Format (OKF) bundle from a GraphQL schema",
   "keywords": [
     "okf",
