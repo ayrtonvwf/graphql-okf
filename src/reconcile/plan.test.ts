@@ -204,7 +204,7 @@ describe("reconcile removals", () => {
 
     expect(plan.removed.map((change) => change.name)).toEqual(["Country"]);
     expect(action?.kind).toBe("tombstone");
-    expect(action?.contents).toContain('status: "removed"');
+    expect(action?.contents).toContain('graphql_okf_status: "removed"');
     expect(action?.contents).toContain(`removedAt: ${JSON.stringify(T2)}`);
     expect(action?.contents).toContain("# Last known definition");
   });

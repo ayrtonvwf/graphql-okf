@@ -20,7 +20,9 @@ const MACHINE_KEYS: ReadonlySet<string> = new Set([
   "resource",
   "tags",
   "timestamp",
+  "generated",
   "status",
+  "graphql_okf_status",
   "removedAt",
 ]);
 

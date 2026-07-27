@@ -5,7 +5,7 @@ description: "A prepaid gift card redeemed against an order."
 resource: "https://shop.example/graphql#GiftCard"
 tags: ["graphql", "object"]
 timestamp: "2026-01-15T09:00:00.000Z"
-status: "removed"
+graphql_okf_status: "removed"
 removedAt: "2026-05-20T09:00:00.000Z"
 ---
 

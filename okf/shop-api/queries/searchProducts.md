@@ -5,7 +5,7 @@ description: "Full-text search across the catalog."
 resource: "https://shop.example/graphql#Query.searchProducts"
 tags: ["graphql", "query"]
 timestamp: "2026-01-15T09:00:00.000Z"
-status: "removed"
+graphql_okf_status: "removed"
 removedAt: "2026-03-02T09:00:00.000Z"
 ---
 
