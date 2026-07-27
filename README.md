@@ -1,6 +1,6 @@
 # graphql-okf
 
-![graphql-okf project banner](docs/images/README_project_banner.png)
+![graphql-okf project banner](https://raw.githubusercontent.com/ayrtonvwf/graphql-okf/main/docs/images/README_project_banner.png)
 
 ## 💡 What is `graphql-okf`?
 
