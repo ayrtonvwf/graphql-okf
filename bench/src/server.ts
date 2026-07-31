@@ -25,8 +25,12 @@ export async function startMockServer(): Promise<MockServer> {
   const yoga = createYoga({ schema, graphqlEndpoint: "/graphql", logging: false });
   const server = createServer(yoga);
 
-  await new Promise<void>((resolve) => {
-    server.listen(0, "127.0.0.1", resolve);
+  await new Promise<void>((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      server.off("error", reject);
+      resolve();
+    });
   });
 
   const address = server.address();
