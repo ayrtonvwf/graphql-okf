@@ -30,7 +30,7 @@ describe("buildManifest", () => {
 describe("judge blinding", () => {
   it("does not import the scenario vocabulary", async () => {
     const source = await readFile(join(BENCH_ROOT, "src", "judge.ts"), "utf8");
-    expect(source).not.toMatch(/scenarios\.js/);
+    expect(source).not.toMatch(/scenarios\.(ts|js)\b/);
     expect(source).not.toMatch(/okf-bundle|graphql-mcp|baseline/);
   });
 });
