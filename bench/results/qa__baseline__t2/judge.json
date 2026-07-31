@@ -1,0 +1,43 @@
+{
+  "runId": "qa__baseline__t2",
+  "caseId": "qa",
+  "score": 0.29411764705882354,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The answer deliberately avoids naming any schema elements, stating \"I don't want to guess or invent details about a schema I can't see,\" so no fabricated fields, types, or directives appear."
+    },
+    {
+      "id": "auth-on-cancel-and-place",
+      "passed": false,
+      "justification": "It only restates the question (\"Whether cancelling/placing an order requires authentication\") without stating that both require CUSTOMER-role authentication."
+    },
+    {
+      "id": "product-filter-fields",
+      "passed": false,
+      "justification": "No ProductFilter fields are listed; the answer merely lists \"What fields products can be filtered by\" as an unanswered question."
+    },
+    {
+      "id": "price-subscription",
+      "passed": false,
+      "justification": "The answer does not mention productPriceChanged or its lack of arguments, only the unanswered question about a price-change subscription."
+    },
+    {
+      "id": "place-order-requirements",
+      "passed": false,
+      "justification": "No mention of PlaceOrderInput, productIds, shipTo, payWith, or identity coming from the authenticated context."
+    },
+    {
+      "id": "payment-oneof",
+      "passed": false,
+      "justification": "PaymentInput, @oneOf, and the three token/code options are never mentioned."
+    },
+    {
+      "id": "customer-email-staff-only",
+      "passed": false,
+      "justification": "The answer never identifies Customer.email or the STAFF role restriction, only asking whether \"any customer fields are restricted.\""
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

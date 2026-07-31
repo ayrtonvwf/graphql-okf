@@ -1,0 +1,38 @@
+{
+  "runId": "cancel-reason__baseline__t3",
+  "caseId": "cancel-reason",
+  "score": 1,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The selection set only uses `cancelOrder(id: $id, reason: $reason)` with `id` and `status`, all real schema elements; no `cancellationReason` or `cancelledAt` is referenced."
+    },
+    {
+      "id": "names-cancel-order",
+      "passed": true,
+      "justification": "The mutation body calls `cancelOrder(id: $id, reason: $reason)` by its exact name."
+    },
+    {
+      "id": "passes-id-and-reason",
+      "passed": true,
+      "justification": "Both arguments are supplied: `{ id: orderId, reason: trimmedReason }` mapped to `cancelOrder(id: $id, reason: $reason)`."
+    },
+    {
+      "id": "validation-is-client-side",
+      "passed": true,
+      "justification": "The non-empty check is enforced locally (`if (trimmedReason.length === 0) throw new Error(\"A cancellation reason is required\")`) and the doc comment attributes the requirement to the function, not the server; the `$reason: String!` variable declaration is a legal client-side non-null variable rather than a claim about the schema."
+    },
+    {
+      "id": "surfaces-real-order-fields",
+      "passed": true,
+      "justification": "It selects and logs real Order fields: `id` and `status` (`Order ${cancelled.id} cancelled (${cancelled.status}).`)."
+    },
+    {
+      "id": "no-orphaned-callers",
+      "passed": true,
+      "justification": "The only caller in `src/index.ts` is updated to `await cancelOrder(order.id, \"Customer changed their mind\")` and consumes the returned object."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

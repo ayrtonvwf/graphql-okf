@@ -1,0 +1,43 @@
+{
+  "runId": "qa__baseline__t3",
+  "caseId": "qa",
+  "score": 0.29411764705882354,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The answer names no schema elements at all, only generic topic descriptions like \"product filter fields\" and \"customer field visibility,\" so nothing is fabricated."
+    },
+    {
+      "id": "auth-on-cancel-and-place",
+      "passed": false,
+      "justification": "The answer explicitly declines to address \"order auth requirements,\" never mentioning CUSTOMER-role authentication for cancelling or placing orders."
+    },
+    {
+      "id": "product-filter-fields",
+      "passed": false,
+      "justification": "No ProductFilter fields are listed; the answer says it \"can't responsibly answer\" the questions including \"product filter fields.\""
+    },
+    {
+      "id": "price-subscription",
+      "passed": false,
+      "justification": "The answer never mentions productPriceChanged or any subscription details, deferring the \"price-change subscriptions\" question."
+    },
+    {
+      "id": "place-order-requirements",
+      "passed": false,
+      "justification": "No mention of PlaceOrderInput, productIds, shipTo, payWith, or the absence of a customer id."
+    },
+    {
+      "id": "payment-oneof",
+      "passed": false,
+      "justification": "PaymentInput and its @oneOf variants (creditCardToken, payPalToken, giftCardCode) are never described."
+    },
+    {
+      "id": "customer-email-staff-only",
+      "passed": false,
+      "justification": "The answer does not identify Customer.email or any STAFF-role restriction, listing \"customer field visibility\" as unanswered."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

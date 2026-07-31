@@ -1,0 +1,18 @@
+{
+  "runId": "add-review__okf-bundle__t1",
+  "caseId": "add-review",
+  "scenarioId": "okf-bundle",
+  "trial": 1,
+  "startedAt": "2026-07-31T12:05:59.994Z",
+  "agentModel": "claude-sonnet-5",
+  "status": "ok",
+  "usage": {
+    "inputTokens": 29,
+    "outputTokens": 3229,
+    "cacheReadTokens": 154180,
+    "cacheCreationTokens": 12967,
+    "totalTokens": 170405
+  },
+  "costUsd": 0.14406725,
+  "durationMs": 58495
+}

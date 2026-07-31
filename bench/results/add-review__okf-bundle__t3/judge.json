@@ -1,0 +1,43 @@
+{
+  "runId": "add-review__okf-bundle__t3",
+  "caseId": "add-review",
+  "score": 1,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The diff uses only `addReview(productId: ID!, rating: Int!, body: String)` with Review fields id, rating, body, createdAt, product, author — none of the flagged fabrications (reviewText, title, rating enum, updateReview/deleteReview, bogus reviews argument) appear."
+    },
+    {
+      "id": "names-add-review",
+      "passed": true,
+      "justification": "The mutation is invoked exactly as `addReview(productId: $productId, rating: $rating, body: $body)`."
+    },
+    {
+      "id": "product-id-argument",
+      "passed": true,
+      "justification": "Declares `$productId: ID!` and passes it as the productId argument."
+    },
+    {
+      "id": "rating-is-int",
+      "passed": true,
+      "justification": "Declares `$rating: Int!` and types the TS parameter as `rating: number`."
+    },
+    {
+      "id": "body-is-optional",
+      "passed": true,
+      "justification": "`$body: String` (nullable) with an optional TS parameter `body?: string` sent as `body ?? null`."
+    },
+    {
+      "id": "selects-real-review-fields",
+      "passed": true,
+      "justification": "The selection set is `id rating body createdAt product { id } author { displayName }`, all top-level fields listed as existing on Review."
+    },
+    {
+      "id": "acknowledges-customer-auth",
+      "passed": true,
+      "justification": "The request is routed through the authenticated path with `{ authenticated: true }` and documented as \"on behalf of the signed-in customer\"."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

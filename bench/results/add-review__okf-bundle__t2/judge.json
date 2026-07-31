@@ -1,0 +1,43 @@
+{
+  "runId": "add-review__okf-bundle__t2",
+  "caseId": "add-review",
+  "score": 1,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The operation uses only `addReview(productId: ID!, rating: Int!, body: String)` and Review fields `id, rating, body, createdAt, author`, with none of the flagged fabrications (no `reviewText`/`title`, no rating enum, no `updateReview`/`deleteReview`, no invented arguments)."
+    },
+    {
+      "id": "names-add-review",
+      "passed": true,
+      "justification": "The mutation body calls the operation by its exact name: `addReview(productId: $productId, rating: $rating, body: $body)`."
+    },
+    {
+      "id": "product-id-argument",
+      "passed": true,
+      "justification": "The variable declaration is `$productId: ID!` and it is passed as the `productId` argument identifying the product."
+    },
+    {
+      "id": "rating-is-int",
+      "passed": true,
+      "justification": "`$rating: Int!` is declared and typed as `rating: number` in TypeScript, not a string, enum, or float type."
+    },
+    {
+      "id": "body-is-optional",
+      "passed": true,
+      "justification": "`$body: String` is nullable and the wrapper takes `body?: string`, sending `body ?? null` when omitted."
+    },
+    {
+      "id": "selects-real-review-fields",
+      "passed": true,
+      "justification": "The selection set is `id, rating, body, createdAt, author { ... }`, all of which are listed Review fields."
+    },
+    {
+      "id": "acknowledges-customer-auth",
+      "passed": true,
+      "justification": "The request is made with `{ authenticated: true }` via the client's authenticated path, and the doc comment notes it acts \"on behalf of the signed-in customer.\""
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

@@ -1,0 +1,18 @@
+{
+  "runId": "qa__okf-bundle__t1",
+  "caseId": "qa",
+  "scenarioId": "okf-bundle",
+  "trial": 1,
+  "startedAt": "2026-07-31T11:51:20.535Z",
+  "agentModel": "claude-sonnet-5",
+  "status": "ok",
+  "usage": {
+    "inputTokens": 21,
+    "outputTokens": 5330,
+    "cacheReadTokens": 114878,
+    "cacheCreationTokens": 24576,
+    "totalTokens": 144805
+  },
+  "costUsd": 0.20735939999999997,
+  "durationMs": 66653
+}

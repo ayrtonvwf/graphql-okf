@@ -1,0 +1,43 @@
+{
+  "runId": "qa__graphql-mcp__t3",
+  "caseId": "qa",
+  "score": 0.7647058823529411,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The answer's named elements (`placeOrder`, `cancelOrder(id: ID!, reason: String)`, `ProductFilter` fields, `productPriceChanged`, `PaymentInput` fields, `Order.paidWith`, `OrderLine.quantity`, `Role` enum values) are all consistent with the schema as reflected in the rubric, and no clearly invented names appear — though it omits the `@oneOf` directive when reprinting `PaymentInput`."
+    },
+    {
+      "id": "auth-on-cancel-and-place",
+      "passed": true,
+      "justification": "It concludes \"**yes, both require authentication** (at least `CUSTOMER`); there's no anonymous/guest path for either,\" covering both `placeOrder` and `cancelOrder`."
+    },
+    {
+      "id": "product-filter-fields",
+      "passed": true,
+      "justification": "All six fields are listed — \"nameContains\", \"minPriceCents / maxPriceCents\", \"inStockOnly\", \"labels\", \"visibleTo\" — with no extraneous filter fields (the `first` arg is correctly noted as pagination, not a filter)."
+    },
+    {
+      "id": "price-subscription",
+      "passed": true,
+      "justification": "It states \"`Subscription.productPriceChanged: Product!`\" is \"a global stream of any product's price changes (no `productId` argument).\""
+    },
+    {
+      "id": "place-order-requirements",
+      "passed": true,
+      "justification": "It lists `productIds`, `shipTo`, `payWith` and notes \"`PlaceOrderInput` has no `customerId` field at all ... The only way the server can know *whose* order this is is from the authenticated session.\""
+    },
+    {
+      "id": "payment-oneof",
+      "passed": false,
+      "justification": "It conveys exactly-one semantics (\"a 'pick exactly one' input\", \"exactly one must be set\") but never states that `PaymentInput` is a `@oneOf` input — and in fact reprints the SDL without the `@oneOf` directive."
+    },
+    {
+      "id": "customer-email-staff-only",
+      "passed": false,
+      "justification": "It asserts the opposite: \"Nothing in the schema marks any of these as `STAFF`-only ... a signed-in customer can read every field the `Customer` type exposes,\" missing that `Customer.email` is STAFF-restricted."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

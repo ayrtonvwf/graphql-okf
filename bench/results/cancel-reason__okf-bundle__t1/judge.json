@@ -1,0 +1,38 @@
+{
+  "runId": "cancel-reason__okf-bundle__t1",
+  "caseId": "cancel-reason",
+  "score": 1,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The selection set only uses `id`, `status`, and `total { amountCents }`, all consistent with the existing `RawOrder`/`OrderSummary` mapping used by `placeOrder`, and no invented fields like `cancellationReason` or `cancelledAt` appear."
+    },
+    {
+      "id": "names-cancel-order",
+      "passed": true,
+      "justification": "The mutation body calls the field by its exact name: `cancelOrder(id: $id, reason: $reason)`."
+    },
+    {
+      "id": "passes-id-and-reason",
+      "passed": true,
+      "justification": "Both arguments are supplied — `cancelOrder(id: $id, reason: $reason)` with variables `{ id: orderId, reason }` and `$id: ID!`."
+    },
+    {
+      "id": "validation-is-client-side",
+      "passed": true,
+      "justification": "The client throws before sending (`if (reason === undefined || reason.trim() === \"\") throw new Error(...)`) and the doc comment explicitly says the client refuses \"rather than relying on the server to reject it\", making no claim of a server-side requirement."
+    },
+    {
+      "id": "surfaces-real-order-fields",
+      "passed": true,
+      "justification": "The result is surfaced via real Order fields — `console.log(\\`Order cancelled: ${cancelled.id} (${cancelled.status})\\`)` uses `id` and `status`."
+    },
+    {
+      "id": "no-orphaned-callers",
+      "passed": true,
+      "justification": "The only caller in `src/index.ts` is updated to the new signature and return value: `const cancelled = await cancelOrder(order.id, \"Customer changed their mind\");`."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}
