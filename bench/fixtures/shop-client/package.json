@@ -1,0 +1,10 @@
+{
+  "name": "shop-client",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A small client for the shop GraphQL API",
+  "scripts": {
+    "start": "node --experimental-strip-types src/index.ts"
+  }
+}
