@@ -2,3 +2,4 @@ results/*/workspace/
 results/*/artifact.txt
 results/*/artifact.diff
 results/*/transcript.jsonl
+.env
