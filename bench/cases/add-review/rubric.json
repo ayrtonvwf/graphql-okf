@@ -1,0 +1,39 @@
+{
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "weight": 5,
+      "statement": "Every field, argument, type, and operation named in the diff exists in the shop schema. Common fabrications to check for: a `reviewText` or `title` field on Review, a `rating` enum rather than an Int, an `updateReview` or `deleteReview` mutation, a `reviews` argument that does not exist."
+    },
+    {
+      "id": "names-add-review",
+      "weight": 3,
+      "statement": "The diff calls the mutation by its exact name, addReview."
+    },
+    {
+      "id": "product-id-argument",
+      "weight": 2,
+      "statement": "Passes productId as the ID! argument identifying the product being reviewed."
+    },
+    {
+      "id": "rating-is-int",
+      "weight": 2,
+      "statement": "Passes rating as a required integer (Int!) — not a string, not an enum, not a float."
+    },
+    {
+      "id": "body-is-optional",
+      "weight": 1,
+      "statement": "Treats body as an optional String rather than requiring it."
+    },
+    {
+      "id": "selects-real-review-fields",
+      "weight": 2,
+      "statement": "The selection set on the addReview result contains only fields that exist on the Review type (id, createdAt, updatedAt, product, author, rating, body)."
+    },
+    {
+      "id": "acknowledges-customer-auth",
+      "weight": 1,
+      "statement": "The change reflects that addReview requires an authenticated CUSTOMER — for example by routing through the client's existing authenticated request path, or by noting the requirement."
+    }
+  ]
+}

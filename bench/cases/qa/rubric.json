@@ -1,0 +1,39 @@
+{
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "weight": 5,
+      "statement": "The answer references no field, argument, type, operation, or directive that does not exist in the schema. Inventing plausible-sounding names is the failure this criterion catches."
+    },
+    {
+      "id": "auth-on-cancel-and-place",
+      "weight": 2,
+      "statement": "States that BOTH cancelling an order and placing an order require authentication at the CUSTOMER role."
+    },
+    {
+      "id": "product-filter-fields",
+      "weight": 2,
+      "statement": "Lists the ProductFilter fields: nameContains, minPriceCents, maxPriceCents, inStockOnly, labels, visibleTo. Naming at least five of the six, and no non-existent ones, passes."
+    },
+    {
+      "id": "price-subscription",
+      "weight": 2,
+      "statement": "States that price changes can be subscribed to via productPriceChanged, which takes no arguments."
+    },
+    {
+      "id": "place-order-requirements",
+      "weight": 2,
+      "statement": "States that PlaceOrderInput requires productIds, shipTo, and payWith, AND that no customer id is passed — the caller's identity comes from the authenticated CUSTOMER context."
+    },
+    {
+      "id": "payment-oneof",
+      "weight": 2,
+      "statement": "States that PaymentInput is a @oneOf input requiring exactly one of creditCardToken, payPalToken, or giftCardCode."
+    },
+    {
+      "id": "customer-email-staff-only",
+      "weight": 2,
+      "statement": "Identifies Customer.email as restricted to the STAFF role."
+    }
+  ]
+}
