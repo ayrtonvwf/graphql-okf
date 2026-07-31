@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildMatrix, filterPending, formatRunId, SCENARIO_IDS } from "./matrix.js";
+import { buildMatrix, filterPending, formatRunId, SCENARIO_IDS } from "./matrix.ts";
 
 describe("formatRunId", () => {
   it("builds the documented run id shape", () => {

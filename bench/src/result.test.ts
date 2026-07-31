@@ -5,8 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 let dir: string;
 
-vi.mock("./constants.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./constants.js")>();
+vi.mock("./constants.ts", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./constants.ts")>();
   return {
     ...actual,
     get RESULTS_DIR() {
@@ -16,7 +16,7 @@ vi.mock("./constants.js", async (importOriginal) => {
 });
 
 const { readJudgeResult, readRunResult, runResultExists, writeJudgeResult, writeRunResult } =
-  await import("./result.js");
+  await import("./result.ts");
 
 const sample = {
   runId: "qa__baseline__t1",

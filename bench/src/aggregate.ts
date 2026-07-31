@@ -1,6 +1,6 @@
-import { CASES, type CaseId } from "./cases.js";
-import { SCENARIO_IDS, type ScenarioId } from "./matrix.js";
-import type { JudgeResult, RunResult } from "./result.js";
+import { CASES, type CaseId } from "./cases.ts";
+import { SCENARIO_IDS, type ScenarioId } from "./matrix.ts";
+import type { JudgeResult, RunResult } from "./result.ts";
 
 export function median(values: readonly number[]): number {
   if (values.length === 0) throw new Error("Cannot take the median of an empty set");

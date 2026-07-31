@@ -8,8 +8,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const run = promisify(execFile);
 let dir: string;
 
-vi.mock("./constants.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./constants.js")>();
+vi.mock("./constants.ts", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./constants.ts")>();
   return {
     ...actual,
     get RESULTS_DIR() {
@@ -19,7 +19,7 @@ vi.mock("./constants.js", async (importOriginal) => {
 });
 
 const { captureDiff, commitPristine, generateBundle, prepareWorkspace } = await import(
-  "./workspace.js"
+  "./workspace.ts"
 );
 
 beforeEach(async () => {

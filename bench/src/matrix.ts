@@ -1,4 +1,4 @@
-import { CASES, type CaseId, caseById } from "./cases.js";
+import { CASES, type CaseId, caseById } from "./cases.ts";
 
 export type ScenarioId = "okf-bundle" | "graphql-mcp" | "baseline";
 

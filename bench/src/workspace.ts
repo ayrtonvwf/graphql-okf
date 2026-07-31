@@ -3,8 +3,8 @@ import { cp, mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { syncOkfBundle } from "graphql-okf";
-import { FIXED_NOW, FIXTURE_DIR, SCHEMA_PATH } from "./constants.js";
-import { runDir } from "./result.js";
+import { FIXED_NOW, FIXTURE_DIR, SCHEMA_PATH } from "./constants.ts";
+import { runDir } from "./result.ts";
 
 const exec = promisify(execFile);
 

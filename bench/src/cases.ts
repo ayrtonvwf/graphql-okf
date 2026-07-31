@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { CASES_DIR } from "./constants.js";
+import { CASES_DIR } from "./constants.ts";
 
 export type CaseId = "qa" | "add-review" | "cancel-reason";
 

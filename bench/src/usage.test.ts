@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeUsage } from "./usage.js";
+import { normalizeUsage } from "./usage.ts";
 
 describe("normalizeUsage", () => {
   it("reads a flat usage object", () => {

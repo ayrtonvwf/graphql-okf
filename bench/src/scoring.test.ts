@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Rubric } from "./cases.js";
-import { scoreRubric } from "./scoring.js";
+import type { Rubric } from "./cases.ts";
+import { scoreRubric } from "./scoring.ts";
 
 const rubric: Rubric = {
   criteria: [

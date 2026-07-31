@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { AGENT_MODEL, FIXED_NOW, JUDGE_MODEL, SCHEMA_PATH } from "./constants.js";
+import { AGENT_MODEL, FIXED_NOW, JUDGE_MODEL, SCHEMA_PATH } from "./constants.ts";
 
 describe("constants", () => {
   it("pins the exact model ids", () => {

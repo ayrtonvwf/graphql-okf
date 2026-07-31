@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { type MockServer, startMockServer } from "./server.js";
+import { type MockServer, startMockServer } from "./server.ts";
 
 let server: MockServer;
 

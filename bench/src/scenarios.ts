@@ -1,6 +1,6 @@
 import { fileURLToPath } from "node:url";
-import type { ScenarioId } from "./matrix.js";
-import { generateBundle } from "./workspace.js";
+import type { ScenarioId } from "./matrix.ts";
+import { generateBundle } from "./workspace.ts";
 
 /**
  * The GraphQL MCP product under test. Recorded in the run manifest so any
@@ -43,7 +43,10 @@ const MCP_GRAPHQL_ENTRYPOINT = fileURLToPath(import.meta.resolve("mcp-graphql/di
 export type McpServerEntry = {
   readonly type: "stdio";
   readonly command: string;
-  readonly args: readonly string[];
+  // Mutable, matching the SDK's `McpStdioServerConfig.args: string[]` exactly
+  // (see the comment above) — a `readonly` array here does not structurally
+  // satisfy the SDK's `Options["mcpServers"]` parameter type.
+  readonly args: string[];
   readonly env?: Record<string, string>;
 };
 

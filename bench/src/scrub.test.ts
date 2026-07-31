@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scrubArtifact } from "./scrub.js";
+import { scrubArtifact } from "./scrub.ts";
 
 describe("scrubArtifact", () => {
   it("redacts bundle file paths", () => {

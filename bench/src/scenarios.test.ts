@@ -2,7 +2,7 @@ import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { needsEndpoint, SCENARIOS, scenarioById } from "./scenarios.js";
+import { needsEndpoint, SCENARIOS, scenarioById } from "./scenarios.ts";
 
 let dir: string;
 

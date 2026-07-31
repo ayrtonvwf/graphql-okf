@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CASES, caseById, loadPrompt, loadRubric } from "./cases.js";
+import { CASES, caseById, loadPrompt, loadRubric } from "./cases.ts";
 
 describe("cases", () => {
   it("declares exactly the three specified cases", () => {

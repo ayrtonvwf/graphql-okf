@@ -1,5 +1,5 @@
-import type { Rubric } from "./cases.js";
-import type { CriterionOutcome } from "./result.js";
+import type { Rubric } from "./cases.ts";
+import type { CriterionOutcome } from "./result.ts";
 
 /**
  * Weighted pass fraction. A criterion the judge failed to report counts as

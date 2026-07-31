@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { aggregate, mean, median, renderSummary } from "./aggregate.js";
-import type { JudgeResult, RunResult } from "./result.js";
+import { aggregate, mean, median, renderSummary } from "./aggregate.ts";
+import type { JudgeResult, RunResult } from "./result.ts";
 
 function run(overrides: Partial<RunResult> & Pick<RunResult, "runId">): RunResult {
   return {

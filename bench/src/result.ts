@@ -1,7 +1,7 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { RESULTS_DIR } from "./constants.js";
-import type { TokenUsage } from "./usage.js";
+import { RESULTS_DIR } from "./constants.ts";
+import type { TokenUsage } from "./usage.ts";
 
 export type RunStatus = "ok" | "error";
 

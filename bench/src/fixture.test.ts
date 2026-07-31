@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { FIXTURE_DIR } from "./constants.js";
+import { FIXTURE_DIR } from "./constants.ts";
 
 async function fixtureFiles(dir: string = FIXTURE_DIR): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true });

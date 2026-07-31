@@ -3,7 +3,7 @@ import { createServer } from "node:http";
 import { addMocksToSchema } from "@graphql-tools/mock";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { createYoga } from "graphql-yoga";
-import { SCHEMA_PATH } from "./constants.js";
+import { SCHEMA_PATH } from "./constants.ts";
 
 export interface MockServer {
   /** The GraphQL endpoint an MCP server should be pointed at. */
