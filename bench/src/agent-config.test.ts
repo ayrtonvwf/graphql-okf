@@ -157,9 +157,32 @@ describe("createPreToolUseHook", () => {
     expect(permissionDecisionOf(result)).toBe("deny");
   });
 
-  it("allows a Glob call with no path argument (defaults to cwd)", async () => {
-    const result = await decide("Glob", { pattern: "**/*.ts" });
+  it("allows a Glob call with a relative, non-escaping pattern and no path argument (defaults to cwd)", async () => {
+    const result = await decide("Glob", { pattern: "*.ts" });
     expect(permissionDecisionOf(result)).toBeUndefined();
+  });
+
+  it("denies a Glob call whose pattern is absolute, even with no path argument", async () => {
+    const result = await decide("Glob", {
+      pattern: "/Users/weback/projects/**/schema.graphql",
+    });
+    expect(permissionDecisionOf(result)).toBe("deny");
+    expect(reasonOf(result)).toContain("Glob pattern escapes the assigned workspace");
+  });
+
+  it("denies a Glob call whose pattern is absolute (e.g. /etc/**), even with no path argument", async () => {
+    const result = await decide("Glob", { pattern: "/etc/**" });
+    expect(permissionDecisionOf(result)).toBe("deny");
+  });
+
+  it("denies a Glob call whose pattern escapes via .. segments, even with no path argument", async () => {
+    const result = await decide("Glob", { pattern: "../../**/*.md" });
+    expect(permissionDecisionOf(result)).toBe("deny");
+  });
+
+  it("denies a Glob call with a safe pattern but an unsafe explicit path", async () => {
+    const result = await decide("Glob", { pattern: "*.ts", path: "/some/outside/dir" });
+    expect(permissionDecisionOf(result)).toBe("deny");
   });
 
   it("allows a Grep call with no path argument (defaults to cwd)", async () => {

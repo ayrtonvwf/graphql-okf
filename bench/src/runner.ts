@@ -10,11 +10,17 @@ import type { RunContext, Scenario } from "./scenarios.ts";
 import { normalizeUsage } from "./usage.ts";
 import { captureDiff, commitPristine, prepareWorkspace } from "./workspace.ts";
 
-function textOf(message: unknown): string {
+export function textOf(message: unknown): string {
   // The SDK's assistant message wraps the Anthropic Messages API response
   // under `.message`; the block array lives at `.message.content`, not at
-  // the top level of the SDK envelope.
-  const content = (message as { message?: { content?: unknown } }).message?.content;
+  // the top level of the SDK envelope. An older SDK version put the block
+  // array directly at the top level (`.content`); fall back to that shape so
+  // a future SDK regression degrades to "might work" rather than "silently
+  // empty" artifact.txt output (see task-11 review — this exact regression
+  // has already happened once).
+  if (message === null || typeof message !== "object") return "";
+  const envelope = message as { message?: { content?: unknown }; content?: unknown };
+  const content = envelope.message?.content ?? envelope.content;
   if (!Array.isArray(content)) return "";
   return content
     .filter(

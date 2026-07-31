@@ -59,6 +59,30 @@ function isWithinCwd(resolved: string, cwd: string): boolean {
 }
 
 /**
+ * `Glob`'s `pattern` argument is not a plain path — it's a glob (wildcards,
+ * braces, etc.) — so it can't be `path.resolve`d and compared against `cwd`
+ * the way `file_path`/`path` can. But it can still be used to escape the
+ * workspace: an absolute pattern (e.g. "/etc" plus a wildcard) or one
+ * containing a ".." segment (e.g. "../../" plus a wildcard) walks outside
+ * `cwd` regardless of what the
+ * (optional, defaults-to-cwd) `path` argument says. `path`'s own escapes are
+ * already caught by the `extractPathArgument`/`isWithinCwd` check above; this
+ * is a second, Glob-specific check on `pattern` itself.
+ *
+ * Deliberately conservative: reject any absolute or `..`-containing pattern
+ * outright rather than trying to resolve it. That's strictly safe even
+ * though it will also reject some patterns that wouldn't have escaped (e.g.
+ * `..foo` is not actually a `..` segment) — false positives here just mean
+ * an extra denial, not a leak.
+ */
+function isUnsafeGlobPattern(pattern: string): boolean {
+  if (path.isAbsolute(pattern)) {
+    return true;
+  }
+  return pattern.split(/[\\/]/).some((segment) => segment === "..");
+}
+
+/**
  * Confines file-touching tool calls to the cell's workspace directory via a
  * `PreToolUse` hook. Every scenario shares this via {@link buildQueryOptions}
  * — see the module-level comment on `FILE_TOUCHING_TOOLS` for why it's
@@ -92,10 +116,25 @@ export function createPreToolUseHook(cwd: string): HookCallback {
       return {};
     }
 
-    const candidate =
+    const inputObject =
       toolInput !== null && typeof toolInput === "object"
-        ? extractPathArgument(toolInput as Record<string, unknown>)
+        ? (toolInput as Record<string, unknown>)
         : undefined;
+
+    if (toolName === "Glob") {
+      const pattern = inputObject?.pattern;
+      if (typeof pattern === "string" && isUnsafeGlobPattern(pattern)) {
+        return {
+          hookSpecificOutput: {
+            hookEventName: "PreToolUse",
+            permissionDecision: "deny",
+            permissionDecisionReason: `Glob pattern escapes the assigned workspace: "${pattern}" is absolute or contains a ".." segment`,
+          },
+        };
+      }
+    }
+
+    const candidate = inputObject !== undefined ? extractPathArgument(inputObject) : undefined;
     if (candidate === undefined) {
       // No path argument (e.g. a Glob/Grep call defaulting to cwd): safe.
       return {};
