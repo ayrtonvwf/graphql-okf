@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { readFile, rm, writeFile } from "node:fs/promises";
+import { readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
@@ -52,6 +52,16 @@ describe("prepareWorkspace", () => {
     const a = await prepareWorkspace("add-review__baseline__t1", false);
     const b = await prepareWorkspace("add-review__baseline__t1", false);
     expect(a).not.toBe(b);
+  });
+
+  it("returns an already-resolved path with no symlink component", async () => {
+    // os.tmpdir() can itself resolve through a symlink (e.g. macOS's
+    // /var -> /private/var). The confinement hook compares paths lexically,
+    // so an unresolved prefix here would risk a false-positive denial if the
+    // agent ever obtains an already-resolved form of the same path through
+    // another channel. The returned path must already be its own realpath.
+    const ws = await prepareWorkspace("qa__okf-bundle__t1", false);
+    expect(await realpath(ws)).toBe(ws);
   });
 });
 

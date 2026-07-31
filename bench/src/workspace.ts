@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { cp, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -44,7 +44,13 @@ export async function prepareWorkspace(_runId: string, needsFixture: boolean): P
   if (needsFixture) {
     await cp(FIXTURE_DIR, dir, { recursive: true });
   }
-  return dir;
+  // os.tmpdir() can itself resolve through a symlink (e.g. macOS's /var ->
+  // /private/var). The confinement hook in agent-config.ts does a lexical
+  // path.resolve + startsWith comparison against this cwd, so if the agent
+  // ever obtains an already-resolved absolute path through some other
+  // channel, an unresolved prefix here would cause a false-positive denial.
+  // Resolve once, up front, so every later comparison is apples-to-apples.
+  return await realpath(dir);
 }
 
 /**

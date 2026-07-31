@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { buildQueryOptions } from "./agent-config.ts";
@@ -81,6 +81,11 @@ export async function runCell(cell: Cell, scenario: Scenario, ctx: RunContext): 
     }
 
     const dir = runDir(cell.runId);
+    // mkdtemp-based workspaces (see workspace.ts) no longer create
+    // results/<runId>/ as a side effect, and this write happens after the
+    // (paid, real) agent query has already run — so this must exist before
+    // the first write into it in every path that reaches here.
+    await mkdir(dir, { recursive: true });
     await writeFile(
       join(dir, "transcript.jsonl"),
       `${transcript.map((m) => JSON.stringify(m)).join("\n")}\n`,
