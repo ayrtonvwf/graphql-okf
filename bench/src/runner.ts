@@ -8,7 +8,7 @@ import type { Cell } from "./matrix.ts";
 import { type RunResult, runDir, writeRunResult } from "./result.ts";
 import type { RunContext, Scenario } from "./scenarios.ts";
 import { normalizeUsage } from "./usage.ts";
-import { captureDiff, commitPristine, prepareWorkspace } from "./workspace.ts";
+import { captureDiff, cleanupWorkspace, commitPristine, prepareWorkspace } from "./workspace.ts";
 
 export function textOf(message: unknown): string {
   // The SDK's assistant message wraps the Anthropic Messages API response
@@ -53,8 +53,9 @@ export async function runCell(cell: Cell, scenario: Scenario, ctx: RunContext): 
     agentModel: AGENT_MODEL,
   };
 
+  let cwd: string | undefined;
   try {
-    const cwd = await prepareWorkspace(cell.runId, benchCase.needsFixture);
+    cwd = await prepareWorkspace(cell.runId, benchCase.needsFixture);
     await scenario.setupWorkspace(cwd, ctx);
     await commitPristine(cwd);
 
@@ -111,5 +112,12 @@ export async function runCell(cell: Cell, scenario: Scenario, ctx: RunContext): 
     };
     await writeRunResult(result);
     return result;
+  } finally {
+    // Runs after the artifact, transcript, and run result are already
+    // persisted to results/<runId>/ in every branch above — cleanup must
+    // never risk losing evidence.
+    if (cwd !== undefined) {
+      await cleanupWorkspace(cwd);
+    }
   }
 }

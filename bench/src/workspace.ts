@@ -1,10 +1,10 @@
 import { execFile } from "node:child_process";
-import { cp, mkdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { syncOkfBundle } from "graphql-okf";
 import { FIXED_NOW, FIXTURE_DIR, SCHEMA_PATH } from "./constants.ts";
-import { runDir } from "./result.ts";
 
 const exec = promisify(execFile);
 
@@ -30,22 +30,32 @@ async function git(dir: string, args: string[]): Promise<string> {
   return stdout;
 }
 
-export function workspaceDir(runId: string): string {
-  return join(runDir(runId), "workspace");
-}
-
 /**
- * A fresh directory per cell, always rebuilt from scratch: a botched run must
- * not be able to poison the next one.
+ * A fresh, opaque OS temp directory per cell, created via `mkdtemp` — never
+ * derived from `runId`. The run id encodes `<case>__<scenario>__t<trial>`, and
+ * the agent under test can read its own cwd (directly, or indirectly through
+ * error messages and the confinement hook's denial strings). A path built from
+ * `runId` would hand the agent the scenario it's running under, defeating the
+ * blinded comparison. `mkdtemp` also means there is never a *reused* path to
+ * clean up before use — each call is already a brand-new directory.
  */
-export async function prepareWorkspace(runId: string, needsFixture: boolean): Promise<string> {
-  const dir = workspaceDir(runId);
-  await rm(dir, { recursive: true, force: true });
-  await mkdir(dir, { recursive: true });
+export async function prepareWorkspace(_runId: string, needsFixture: boolean): Promise<string> {
+  const dir = await mkdtemp(join(tmpdir(), "okf-bench-ws-"));
   if (needsFixture) {
     await cp(FIXTURE_DIR, dir, { recursive: true });
   }
   return dir;
+}
+
+/**
+ * Removes a workspace created by `prepareWorkspace`. Call only after the
+ * cell's artifact and transcript have been captured and written to
+ * `results/<runId>/` — these are real OS temp directories outside the
+ * git-ignored `results/` tree and would otherwise accumulate indefinitely
+ * across repeated runs.
+ */
+export async function cleanupWorkspace(dir: string): Promise<void> {
+  await rm(dir, { recursive: true, force: true });
 }
 
 /**

@@ -35,4 +35,16 @@ describe("scrubArtifact", () => {
   it("returns an empty string unchanged", () => {
     expect(scrubArtifact("")).toBe("");
   });
+
+  it("redacts a results/<runId>/ path", () => {
+    expect(scrubArtifact("see results/qa__baseline__t3/artifact.txt for detail")).toBe(
+      "see [redacted] for detail",
+    );
+  });
+
+  it("redacts an okf-bench-ws temp directory name", () => {
+    expect(
+      scrubArtifact("the workspace was /tmp/okf-bench-ws-a1B2c3/src/reviews.ts apparently"),
+    ).toBe("the workspace was /tmp/[redacted]/src/reviews.ts apparently");
+  });
 });

@@ -1,33 +1,28 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import {
+  captureDiff,
+  cleanupWorkspace,
+  commitPristine,
+  generateBundle,
+  prepareWorkspace as prepareWorkspaceUntracked,
+} from "./workspace.ts";
 
 const run = promisify(execFile);
-let dir: string;
+const workspaces: string[] = [];
 
-vi.mock("./constants.ts", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./constants.ts")>();
-  return {
-    ...actual,
-    get RESULTS_DIR() {
-      return dir;
-    },
-  };
-});
-
-const { captureDiff, commitPristine, generateBundle, prepareWorkspace } = await import(
-  "./workspace.ts"
-);
-
-beforeEach(async () => {
-  dir = await mkdtemp(join(tmpdir(), "okf-bench-ws-"));
-});
+/** Tracks every workspace a test creates so `afterEach` can sweep them up. */
+async function prepareWorkspace(runId: string, needsFixture: boolean): Promise<string> {
+  const ws = await prepareWorkspaceUntracked(runId, needsFixture);
+  workspaces.push(ws);
+  return ws;
+}
 
 afterEach(async () => {
-  await rm(dir, { recursive: true, force: true });
+  await Promise.all(workspaces.splice(0).map((ws) => rm(ws, { recursive: true, force: true })));
 });
 
 describe("prepareWorkspace", () => {
@@ -42,12 +37,30 @@ describe("prepareWorkspace", () => {
     expect(await readFile(join(ws, "src", "orders.ts"), "utf8")).toMatch(/cancelOrder/);
   });
 
-  it("starts from a clean copy even if a previous run left files behind", async () => {
-    const ws = await prepareWorkspace("add-review__baseline__t1", true);
-    await writeFile(join(ws, "STALE.md"), "leftover", "utf8");
-    const again = await prepareWorkspace("add-review__baseline__t1", true);
-    const { readdir } = await import("node:fs/promises");
-    expect(await readdir(again)).not.toContain("STALE.md");
+  it("returns a path with no trace of the run id, case id, or scenario id", async () => {
+    // Regression test: the returned path must not leak which of the three
+    // scenarios (or which case) produced it — an agent reading its own cwd,
+    // an error message, or the confinement hook's denial string must not be
+    // able to infer which cell it is running in.
+    const ws = await prepareWorkspace("qa__okf-bundle__t1", false);
+    expect(ws).not.toContain("qa");
+    expect(ws).not.toContain("okf-bundle");
+    expect(ws).not.toContain("t1");
+  });
+
+  it("returns a different directory on every call, even for the same run id", async () => {
+    const a = await prepareWorkspace("add-review__baseline__t1", false);
+    const b = await prepareWorkspace("add-review__baseline__t1", false);
+    expect(a).not.toBe(b);
+  });
+});
+
+describe("cleanupWorkspace", () => {
+  it("removes the workspace directory and everything inside it", async () => {
+    const ws = await prepareWorkspaceUntracked("qa__baseline__t1", false);
+    await writeFile(join(ws, "note.txt"), "hello", "utf8");
+    await cleanupWorkspace(ws);
+    await expect(readFile(join(ws, "note.txt"), "utf8")).rejects.toThrow();
   });
 });
 
