@@ -19,6 +19,7 @@
     "graphql": "^16.11.0",
     "graphql-okf": "workspace:*",
     "graphql-yoga": "^5.10.0",
+    "mcp-graphql": "2.0.4",
     "zod": "^3.24.0"
   },
   "devDependencies": {
