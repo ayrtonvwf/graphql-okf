@@ -29,14 +29,7 @@ export function formatRunId(caseId: string, scenarioId: string, trial: number): 
   return `${caseId}__${scenarioId}__t${trial}`;
 }
 
-function resolveScenarios(
-  filter: string | undefined,
-  caseFilter: string | undefined,
-): readonly ScenarioId[] {
-  if (caseFilter !== undefined && filter === undefined) {
-    // When case is filtered but scenario is not, default to first scenario
-    return SCENARIO_IDS.slice(0, 1);
-  }
+function resolveScenarios(filter: string | undefined): readonly ScenarioId[] {
   if (filter === undefined) return SCENARIO_IDS;
   const found = SCENARIO_IDS.find((id) => id === filter);
   if (found === undefined) {
@@ -46,7 +39,7 @@ function resolveScenarios(
 }
 
 export function buildMatrix(filters: MatrixFilters): Cell[] {
-  const scenarios = resolveScenarios(filters.scenario, filters.case);
+  const scenarios = resolveScenarios(filters.scenario);
   const cases = filters.case === undefined ? CASES : [caseById(filters.case)];
   const trials = filters.trials ?? DEFAULT_TRIALS;
   if (!Number.isInteger(trials) || trials < 1) {

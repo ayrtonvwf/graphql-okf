@@ -35,7 +35,7 @@ describe("buildMatrix", () => {
 
   it("filters by case", () => {
     const cells = buildMatrix({ case: "qa" });
-    expect(cells.length).toBe(3);
+    expect(cells.length).toBe(9);
     expect(cells.every((c) => c.caseId === "qa")).toBe(true);
   });
 
