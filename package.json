@@ -64,6 +64,7 @@
     "lint": "biome ci .",
     "format": "biome check --write .",
     "knip": "knip",
+    "typecheck:bench": "pnpm --filter graphql-okf-bench run typecheck",
     "build": "tsdown",
     "prepack": "pnpm run build",
     "prepare": "lefthook install"

@@ -12,11 +12,9 @@
     "noImplicitOverride": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
-    "declaration": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
-    "outDir": "dist"
+    "noEmit": true
   },
-  "include": ["src", "test"],
-  "exclude": ["bench"]
+  "include": ["src"]
 }
