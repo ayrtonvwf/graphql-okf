@@ -11,7 +11,10 @@ import { normalizeUsage } from "./usage.ts";
 import { captureDiff, commitPristine, prepareWorkspace } from "./workspace.ts";
 
 function textOf(message: unknown): string {
-  const content = (message as { content?: unknown }).content;
+  // The SDK's assistant message wraps the Anthropic Messages API response
+  // under `.message`; the block array lives at `.message.content`, not at
+  // the top level of the SDK envelope.
+  const content = (message as { message?: { content?: unknown } }).message?.content;
   if (!Array.isArray(content)) return "";
   return content
     .filter(
