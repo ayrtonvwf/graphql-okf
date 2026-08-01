@@ -24,13 +24,19 @@ function deprecatedSuffix(deprecation: Deprecation | null): string {
   return deprecation.reason === null ? " (deprecated)" : ` (deprecated: ${deprecation.reason})`;
 }
 
-function appliedInline(applied: readonly AppliedDirective[], fromPath: string): string {
+function appliedInline(
+  applied: readonly AppliedDirective[],
+  fromPath: string,
+  escapeArgs: boolean,
+): string {
   return applied
     .map((directive) => {
       const args =
         directive.args.length === 0
           ? ""
-          : `(${directive.args.map((arg) => `${arg.name}: ${arg.value}`).join(", ")})`;
+          : `(${directive.args
+              .map((arg) => `${arg.name}: ${escapeArgs ? cell(arg.value) : arg.value}`)
+              .join(", ")})`;
       return `[\`@${directive.name}\`](${relLink(fromPath, directive.path)})${args}`;
     })
     .join(", ");
@@ -41,7 +47,9 @@ function descriptionLine(text: string | null): string[] {
 }
 
 function directivesLine(applied: readonly AppliedDirective[], fromPath: string): string[] {
-  return applied.length === 0 ? [] : ["", `Directives: ${appliedInline(applied, fromPath)}.`];
+  return applied.length === 0
+    ? []
+    : ["", `Directives: ${appliedInline(applied, fromPath, false)}.`];
 }
 
 function implementsLine(interfaces: readonly TypeRef[], fromPath: string): string[] {
@@ -69,7 +77,7 @@ function descriptionCell(
   const parts = [
     description === null ? "" : cell(description),
     deprecatedSuffix(deprecation).trim(),
-    appliedInline(applied, fromPath),
+    appliedInline(applied, fromPath, true),
   ];
   return parts.filter((part) => part !== "").join(" ");
 }

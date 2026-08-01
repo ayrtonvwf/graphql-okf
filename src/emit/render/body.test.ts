@@ -548,6 +548,79 @@ describe("applied directives on non-field rows", () => {
       "| `customerId` | [`ID`](../types/scalars/ID.md) |  | [`@auth`](../directives/auth.md)(requires: STAFF) |",
     );
   });
+
+  it("escapes a pipe in a directive argument value so the row survives", () => {
+    const body = renderEnumBody({
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: null,
+      appliedDirectives: [],
+      values: [
+        {
+          name: "STAFF",
+          description: null,
+          deprecation: null,
+          appliedDirectives: [
+            {
+              name: "note",
+              path: "directives/note.md",
+              args: [{ name: "text", value: '"a | b"' }],
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(body).toContain('| `STAFF` | [`@note`](../../directives/note.md)(text: "a \\| b") |');
+  });
+
+  it("collapses a newline in a directive argument value", () => {
+    const body = renderEnumBody({
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: null,
+      appliedDirectives: [],
+      values: [
+        {
+          name: "STAFF",
+          description: null,
+          deprecation: null,
+          appliedDirectives: [
+            {
+              name: "note",
+              path: "directives/note.md",
+              args: [{ name: "text", value: '"""\nmulti\nline\n"""' }],
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(body).toContain(
+      '| `STAFF` | [`@note`](../../directives/note.md)(text: """ multi line """) |',
+    );
+  });
+
+  it("leaves the concept-level Directives line unescaped", () => {
+    const body = renderEnumBody({
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: null,
+      appliedDirectives: [
+        {
+          name: "note",
+          path: "directives/note.md",
+          args: [{ name: "text", value: '"a | b"' }],
+        },
+      ],
+      values: [],
+    });
+
+    expect(body).toContain('Directives: [`@note`](../../directives/note.md)(text: "a | b").');
+  });
 });
 
 describe("# Schema sections", () => {
