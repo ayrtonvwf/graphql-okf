@@ -105,7 +105,7 @@ function argumentsTable(args: readonly InputValueNode[], fromPath: string): stri
       `\`${arg.name}\``,
       typeLink(fromPath, arg.type),
       defaultCell(arg.defaultValue),
-      descriptionCell(arg.description, arg.deprecation, [], fromPath),
+      descriptionCell(arg.description, arg.deprecation, arg.appliedDirectives, fromPath),
     ]),
   );
 }
@@ -149,7 +149,7 @@ function inputFieldsSchema(fields: readonly InputValueNode[], fromPath: string):
         `\`${value.name}\``,
         typeLink(fromPath, value.type),
         defaultCell(value.defaultValue),
-        descriptionCell(value.description, value.deprecation, [], fromPath),
+        descriptionCell(value.description, value.deprecation, value.appliedDirectives, fromPath),
       ]),
     ),
   );
@@ -217,7 +217,12 @@ export function renderEnumBody(node: EnumTypeNode): string {
             ["Value", "Description"],
             node.values.map((value) => [
               `\`${value.name}\``,
-              descriptionCell(value.description, value.deprecation, [], node.path),
+              descriptionCell(
+                value.description,
+                value.deprecation,
+                value.appliedDirectives,
+                node.path,
+              ),
             ]),
           ),
         );

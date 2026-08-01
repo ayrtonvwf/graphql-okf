@@ -440,6 +440,116 @@ describe("renderBody dispatcher", () => {
   });
 });
 
+describe("applied directives on non-field rows", () => {
+  const auth = {
+    name: "auth",
+    path: "directives/auth.md",
+    args: [{ name: "requires", value: "STAFF" }],
+  };
+
+  it("renders an argument's applied directives", () => {
+    const body = renderObjectBody({
+      kind: "object",
+      name: "Query",
+      path: "types/objects/Query.md",
+      description: null,
+      appliedDirectives: [],
+      interfaces: [],
+      fields: [
+        {
+          name: "orders",
+          description: null,
+          type: { wrappers: [], name: "Order", path: "types/objects/Order.md" },
+          args: [
+            {
+              name: "customerId",
+              description: "Whose orders.",
+              type: { wrappers: [], name: "ID", path: "types/scalars/ID.md" },
+              defaultValue: null,
+              deprecation: null,
+              appliedDirectives: [auth],
+            },
+          ],
+          deprecation: null,
+          appliedDirectives: [],
+        },
+      ],
+    });
+
+    expect(body).toContain(
+      "| `customerId` | [`ID`](../scalars/ID.md) |  | Whose orders. [`@auth`](../../directives/auth.md)(requires: STAFF) |",
+    );
+  });
+
+  it("renders an input field's applied directives", () => {
+    const body = renderInputBody({
+      kind: "input",
+      name: "OrderFilter",
+      path: "types/inputs/OrderFilter.md",
+      description: null,
+      appliedDirectives: [],
+      fields: [
+        {
+          name: "customerId",
+          description: null,
+          type: { wrappers: [], name: "ID", path: "types/scalars/ID.md" },
+          defaultValue: null,
+          deprecation: null,
+          appliedDirectives: [auth],
+        },
+      ],
+    });
+
+    expect(body).toContain(
+      "| `customerId` | [`ID`](../scalars/ID.md) |  | [`@auth`](../../directives/auth.md)(requires: STAFF) |",
+    );
+  });
+
+  it("renders an enum value's applied directives", () => {
+    const body = renderEnumBody({
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: null,
+      appliedDirectives: [],
+      values: [
+        { name: "STAFF", description: "Internal.", deprecation: null, appliedDirectives: [auth] },
+      ],
+    });
+
+    expect(body).toContain(
+      "| `STAFF` | Internal. [`@auth`](../../directives/auth.md)(requires: STAFF) |",
+    );
+  });
+
+  it("renders an operation argument's applied directives", () => {
+    const body = renderOperationBody({
+      kind: "query",
+      name: "orders",
+      rootTypeName: "Query",
+      path: "queries/orders.md",
+      description: null,
+      appliedDirectives: [],
+      deprecation: null,
+      type: { wrappers: [], name: "Order", path: "types/objects/Order.md" },
+      args: [
+        {
+          name: "customerId",
+          description: null,
+          type: { wrappers: [], name: "ID", path: "types/scalars/ID.md" },
+          defaultValue: null,
+          deprecation: null,
+          appliedDirectives: [auth],
+        },
+      ],
+    });
+
+    expect(body).toContain(
+      "| `customerId` | [`ID`](../types/scalars/ID.md) |  | [`@auth`](../directives/auth.md)(requires: STAFF) |",
+    );
+  });
+});
+
 describe("# Schema sections", () => {
   it("renders object fields as a table under a top-level # Schema", () => {
     const body = renderObjectBody({
