@@ -7,7 +7,7 @@ import { readSchema, syncOkfBundle } from "../src/index.js";
 import { applyPlan } from "../src/reconcile/apply.js";
 import { reconcile } from "../src/reconcile/plan.js";
 import { readExistingBundle } from "../src/reconcile/read.js";
-import { readTree as snapshot } from "./support/bundle-tree.js";
+import { readTree as snapshot, writeTree } from "./support/bundle-tree.js";
 
 const BASE = new URL("./fixtures/kitchen-sink.graphql", import.meta.url).pathname;
 const EVOLVED = new URL("./fixtures/kitchen-sink-evolved.graphql", import.meta.url).pathname;
@@ -155,6 +155,70 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
     const restored = await readFile(join(outDir, "types/objects/User_case.md"), "utf8");
     expect(restored).not.toContain("status: removed");
     expect(restored).not.toContain("Last known definition");
+  });
+});
+
+describe("a bundle written before absolute links", () => {
+  it("converts links, preserves human content, and logs the concepts as changed", async () => {
+    const outDir = await freshBundle(BASE);
+    const before = await snapshot(outDir);
+
+    // Rewrite every emitted link back to a relative form, standing in for a
+    // bundle written by an older release. The `../`-per-level spelling is not
+    // byte-identical to what the old emitter produced (it emitted the shortest
+    // relative path), but it resolves to the same file, which is all this test
+    // needs: the point is that the new run replaces whatever relative form it
+    // finds.
+    const legacy = new Map<string, string>();
+    for (const [path, text] of before) {
+      const prefix = "../".repeat(path.split("/").length - 1);
+      legacy.set(path, text.replaceAll("](/", `](${prefix}`));
+    }
+
+    // A human edit that must survive the conversion untouched, including its
+    // own relative link, which is the human's to maintain, not ours.
+    //
+    // User, not Post: Task 5 gave Post.author a description carrying a
+    // relative link, which GOAL-6.3 preserves verbatim into a generated table
+    // cell. The "nothing relative in the generated region" assertion below
+    // would rightly flag it, and this test is not the place to argue about it.
+    const concept = "types/objects/User.md";
+    expect(before.has(concept), `${concept} missing from the fixture bundle`).toBe(true);
+    const human = "\n## Ownership\n\nOwned by Catalog. See [runbook](../../runbook.md).\n";
+    legacy.set(concept, `${legacy.get(concept) ?? ""}${human}`);
+    await writeTree(outDir, legacy);
+
+    const result = await syncOkfBundle({
+      source: { kind: "sdl", path: BASE },
+      outDir,
+      now: T2,
+    });
+    const after = await snapshot(outDir);
+    const text = after.get(concept) ?? "";
+
+    // Links converted: nothing relative survives inside the generated region.
+    const generated = text.slice(
+      text.indexOf("<!-- graphql-okf:generated:start -->"),
+      text.indexOf("<!-- graphql-okf:generated:end -->"),
+    );
+    expect(generated).toContain("](/types/");
+    expect(generated).not.toContain("](../");
+
+    // The human region survived verbatim, relative link and all.
+    expect(text).toContain("See [runbook](../../runbook.md).");
+
+    // Logged as changed, not added; nothing removed.
+    expect(result.changed).toContain(concept);
+    expect(result.added).toHaveLength(0);
+    expect(result.removed).toHaveLength(0);
+
+    // No tombstone anywhere: no path moved.
+    for (const [path, contents] of after) {
+      expect(contents, `${path} was tombstoned`).not.toContain('graphql_okf_status: "removed"');
+    }
+
+    // Same file set, before and after.
+    expect([...after.keys()].sort()).toEqual([...before.keys()].sort());
   });
 });
 
