@@ -19,6 +19,12 @@ describe("internalLinkTargets", () => {
 
     expect(internalLinkTargets(text)).toEqual(["/types/A.md", "/types/B.md", "/types/A.md"]);
   });
+
+  it("cannot tell a preserved prose link from an emitted one", () => {
+    const text = "See the [ordering guide](../guides/ordering.md).";
+
+    expect(internalLinkTargets(text)).toEqual(["../guides/ordering.md"]);
+  });
 });
 
 describe("resolveBundleLink", () => {

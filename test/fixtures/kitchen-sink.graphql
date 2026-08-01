@@ -32,6 +32,7 @@ type User implements Node & Entity @auth(requires: ADMIN) {
 
 type Post implements Node {
   id: ID!
+  "See the [ordering guide](../guides/ordering.md) for how this is sequenced."
   author: User!
 }
 
