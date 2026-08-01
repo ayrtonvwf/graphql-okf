@@ -180,8 +180,19 @@ genuinely differentiated capability.
 - `GOAL-7.3` — Links to built-in scalars MAY be omitted or handled by a
   documented convention, but the convention MUST be consistent.
 - `GOAL-7.4` — Each directory, including the bundle root, MUST have an `index.md`
-  enumerating its contents with short descriptions, per OKF, to support
-  progressive disclosure by an agent traversing the bundle.
+  enumerating its contents with short descriptions, to support progressive
+  disclosure by an agent traversing the bundle. An emitted `index.md` MUST follow
+  the OKF §8 structure.
+  - This MUST is **graphql-okf's own, deliberately stricter than OKF**. The spec
+    makes index files optional — §8: "An `index.md` file MAY appear in any
+    directory, including the bundle root" — and §11 forbids a consumer from
+    rejecting a bundle over missing index files. Corrected per issue #22: this
+    requirement was previously attributed to OKF, which led to a design
+    conclusion being ruled out on false conformance grounds. Narrowing it is a
+    project trade-off about traversal cost, not a conformance question.
+  - The bundle-root `index.md` is load-bearing independent of this goal: OKF §12
+    makes it the only place `okf_version` may be declared, and §5's version
+    detection and in-place v0.1 migration depend on it.
 
 ---
 
