@@ -1,8 +1,9 @@
 import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, posix } from "node:path";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
+import { internalLinkTargets, resolveBundleLink } from "../test/support/bundle-links.js";
 import { buildBundle } from "./emit/bundle.js";
 import { emitContext } from "./emit/context.js";
 import { assembleFile, EMPTY_HUMAN } from "./emit/render/seam.js";
@@ -117,13 +118,8 @@ describe("OKF §9 conformance", () => {
     const broken: string[] = [];
 
     for (const [path, text] of files) {
-      for (const match of text.matchAll(/\]\(([^)]+)\)/g)) {
-        const target = match[1];
-        if (target === undefined || /^[a-z]+:/.test(target) || target.startsWith("#")) {
-          continue;
-        }
-        const resolved = posix.normalize(posix.join(posix.dirname(path), target));
-        if (!files.has(resolved)) {
+      for (const target of internalLinkTargets(text)) {
+        if (!files.has(resolveBundleLink(path, target))) {
           broken.push(`${path} -> ${target}`);
         }
       }
