@@ -1,3 +1,4 @@
+import { bundleLink } from "../emit/render/links.js";
 import type { BundlePlan, ConceptChange } from "./plan.js";
 
 /**
@@ -18,7 +19,7 @@ function group(heading: string, changes: readonly ConceptChange[]): string[] {
   return [
     `**${heading}**`,
     "",
-    ...changes.map((change) => `* [\`${change.name}\`](${change.path})`),
+    ...changes.map((change) => `* [\`${change.name}\`](${bundleLink(change.path)})`),
     "",
   ];
 }

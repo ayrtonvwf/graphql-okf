@@ -73,7 +73,7 @@ describe("applyPlan", () => {
 
     expect(log).toContain("## 2026-07-01");
     expect(log.indexOf("## 2026-07-24")).toBeLessThan(log.indexOf("## 2026-07-01"));
-    expect(log).toContain("* [`a`](queries/a.md)");
+    expect(log).toContain("* [`a`](/queries/a.md)");
   });
 
   it("rewrites log.md rather than appending, keeping one heading per day", async () => {
