@@ -99,6 +99,58 @@ describe("renderObjectBody", () => {
     );
   });
 
+  it("renders a field's applied directives in its description cell", () => {
+    const node: ObjectTypeNode = {
+      ...country,
+      fields: [
+        {
+          name: "email",
+          description: null,
+          type: scalarRef("EmailAddress", ["nonNull"]),
+          args: [],
+          deprecation: null,
+          appliedDirectives: [
+            {
+              name: "auth",
+              path: "directives/auth.md",
+              args: [{ name: "requires", value: "STAFF" }],
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(renderObjectBody(node)).toContain(
+      "| `email` | [`EmailAddress!`](../scalars/EmailAddress.md) | [`@auth`](../../directives/auth.md)(requires: STAFF) |",
+    );
+  });
+
+  it("orders a field cell as description, then deprecation, then directives", () => {
+    const node: ObjectTypeNode = {
+      ...country,
+      fields: [
+        {
+          name: "defaultAddress",
+          description: "Where orders are shipped.",
+          type: scalarRef("String"),
+          args: [],
+          deprecation: { reason: "use shippingAddress" },
+          appliedDirectives: [
+            {
+              name: "auth",
+              path: "directives/auth.md",
+              args: [{ name: "requires", value: "CUSTOMER" }],
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(renderObjectBody(node)).toContain(
+      "| `defaultAddress` | [`String`](../scalars/String.md) | Where orders are shipped. (deprecated: use shippingAddress) [`@auth`](../../directives/auth.md)(requires: CUSTOMER) |",
+    );
+  });
+
   it("omits the Fields section when a type has no fields", () => {
     const node: ObjectTypeNode = { ...country, fields: [] };
     const out = renderObjectBody(node);
@@ -385,6 +437,209 @@ describe("renderBody dispatcher", () => {
     expect(renderBody(mutation)).toContain("# addLanguage");
     expect(renderBody(subscription)).toContain("# languageAdded");
     expect(renderBody(directive)).toContain("# @deprecated");
+  });
+});
+
+describe("applied directives on non-field rows", () => {
+  const auth = {
+    name: "auth",
+    path: "directives/auth.md",
+    args: [{ name: "requires", value: "STAFF" }],
+  };
+
+  it("renders an argument's applied directives", () => {
+    const body = renderObjectBody({
+      kind: "object",
+      name: "Query",
+      path: "types/objects/Query.md",
+      description: null,
+      appliedDirectives: [],
+      interfaces: [],
+      fields: [
+        {
+          name: "orders",
+          description: null,
+          type: { wrappers: [], name: "Order", path: "types/objects/Order.md" },
+          args: [
+            {
+              name: "customerId",
+              description: "Whose orders.",
+              type: { wrappers: [], name: "ID", path: "types/scalars/ID.md" },
+              defaultValue: null,
+              deprecation: null,
+              appliedDirectives: [auth],
+            },
+          ],
+          deprecation: null,
+          appliedDirectives: [],
+        },
+      ],
+    });
+
+    expect(body).toContain(
+      "| `customerId` | [`ID`](../scalars/ID.md) |  | Whose orders. [`@auth`](../../directives/auth.md)(requires: STAFF) |",
+    );
+  });
+
+  it("renders an input field's applied directives", () => {
+    const body = renderInputBody({
+      kind: "input",
+      name: "OrderFilter",
+      path: "types/inputs/OrderFilter.md",
+      description: null,
+      appliedDirectives: [],
+      fields: [
+        {
+          name: "customerId",
+          description: null,
+          type: { wrappers: [], name: "ID", path: "types/scalars/ID.md" },
+          defaultValue: null,
+          deprecation: null,
+          appliedDirectives: [auth],
+        },
+      ],
+    });
+
+    expect(body).toContain(
+      "| `customerId` | [`ID`](../scalars/ID.md) |  | [`@auth`](../../directives/auth.md)(requires: STAFF) |",
+    );
+  });
+
+  it("renders an enum value's applied directives", () => {
+    const body = renderEnumBody({
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: null,
+      appliedDirectives: [],
+      values: [
+        { name: "STAFF", description: "Internal.", deprecation: null, appliedDirectives: [auth] },
+      ],
+    });
+
+    expect(body).toContain(
+      "| `STAFF` | Internal. [`@auth`](../../directives/auth.md)(requires: STAFF) |",
+    );
+  });
+
+  it("renders an operation argument's applied directives", () => {
+    const body = renderOperationBody({
+      kind: "query",
+      name: "orders",
+      rootTypeName: "Query",
+      path: "queries/orders.md",
+      description: null,
+      appliedDirectives: [],
+      deprecation: null,
+      type: { wrappers: [], name: "Order", path: "types/objects/Order.md" },
+      args: [
+        {
+          name: "customerId",
+          description: null,
+          type: { wrappers: [], name: "ID", path: "types/scalars/ID.md" },
+          defaultValue: null,
+          deprecation: null,
+          appliedDirectives: [auth],
+        },
+      ],
+    });
+
+    expect(body).toContain(
+      "| `customerId` | [`ID`](../types/scalars/ID.md) |  | [`@auth`](../directives/auth.md)(requires: STAFF) |",
+    );
+  });
+
+  it("escapes a pipe in a directive argument value so the row survives", () => {
+    const body = renderEnumBody({
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: null,
+      appliedDirectives: [],
+      values: [
+        {
+          name: "STAFF",
+          description: null,
+          deprecation: null,
+          appliedDirectives: [
+            {
+              name: "note",
+              path: "directives/note.md",
+              args: [{ name: "text", value: '"a | b"' }],
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(body).toContain('| `STAFF` | [`@note`](../../directives/note.md)(text: "a \\| b") |');
+  });
+
+  it("collapses a newline in a directive argument value", () => {
+    const body = renderEnumBody({
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: null,
+      appliedDirectives: [],
+      values: [
+        {
+          name: "STAFF",
+          description: null,
+          deprecation: null,
+          appliedDirectives: [
+            {
+              name: "note",
+              path: "directives/note.md",
+              args: [{ name: "text", value: '"""\nmulti\nline\n"""' }],
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(body).toContain(
+      '| `STAFF` | [`@note`](../../directives/note.md)(text: """ multi line """) |',
+    );
+  });
+
+  it("leaves the concept-level Directives line unescaped", () => {
+    const body = renderEnumBody({
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: null,
+      appliedDirectives: [
+        {
+          name: "note",
+          path: "directives/note.md",
+          args: [{ name: "text", value: '"a | b"' }],
+        },
+      ],
+      values: [],
+    });
+
+    expect(body).toContain('Directives: [`@note`](../../directives/note.md)(text: "a | b").');
+  });
+
+  it("escapes a pipe in a deprecation reason so the row survives", () => {
+    const body = renderEnumBody({
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: null,
+      appliedDirectives: [],
+      values: [
+        {
+          name: "STAFF",
+          description: null,
+          deprecation: { reason: "use ADMIN | SUPPORT instead" },
+          appliedDirectives: [],
+        },
+      ],
+    });
+
+    expect(body).toContain("| `STAFF` | (deprecated: use ADMIN \\| SUPPORT instead) |");
   });
 });
 

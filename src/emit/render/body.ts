@@ -21,16 +21,24 @@ function deprecatedSuffix(deprecation: Deprecation | null): string {
   if (deprecation === null) {
     return "";
   }
-  return deprecation.reason === null ? " (deprecated)" : ` (deprecated: ${deprecation.reason})`;
+  return deprecation.reason === null
+    ? " (deprecated)"
+    : ` (deprecated: ${cell(deprecation.reason)})`;
 }
 
-function appliedInline(applied: readonly AppliedDirective[], fromPath: string): string {
+function appliedInline(
+  applied: readonly AppliedDirective[],
+  fromPath: string,
+  escapeArgs: boolean,
+): string {
   return applied
     .map((directive) => {
       const args =
         directive.args.length === 0
           ? ""
-          : `(${directive.args.map((arg) => `${arg.name}: ${arg.value}`).join(", ")})`;
+          : `(${directive.args
+              .map((arg) => `${arg.name}: ${escapeArgs ? cell(arg.value) : arg.value}`)
+              .join(", ")})`;
       return `[\`@${directive.name}\`](${relLink(fromPath, directive.path)})${args}`;
     })
     .join(", ");
@@ -41,7 +49,9 @@ function descriptionLine(text: string | null): string[] {
 }
 
 function directivesLine(applied: readonly AppliedDirective[], fromPath: string): string[] {
-  return applied.length === 0 ? [] : ["", `Directives: ${appliedInline(applied, fromPath)}.`];
+  return applied.length === 0
+    ? []
+    : ["", `Directives: ${appliedInline(applied, fromPath, false)}.`];
 }
 
 function implementsLine(interfaces: readonly TypeRef[], fromPath: string): string[] {
@@ -60,10 +70,18 @@ function table(headers: readonly string[], rows: readonly (readonly string[])[])
   ];
 }
 
-function descriptionCell(description: string | null, deprecation: Deprecation | null): string {
-  const text = description === null ? "" : cell(description);
-  const suffix = deprecatedSuffix(deprecation);
-  return `${text}${suffix}`.trim();
+function descriptionCell(
+  description: string | null,
+  deprecation: Deprecation | null,
+  applied: readonly AppliedDirective[],
+  fromPath: string,
+): string {
+  const parts = [
+    description === null ? "" : cell(description),
+    deprecatedSuffix(deprecation).trim(),
+    appliedInline(applied, fromPath, true),
+  ];
+  return parts.filter((part) => part !== "").join(" ");
 }
 
 function defaultCell(defaultValue: string | null): string {
@@ -85,7 +103,7 @@ function fieldsTable(fields: readonly FieldNode[], fromPath: string): string[] {
     fields.map((field) => [
       `\`${field.name}\``,
       typeLink(fromPath, field.type),
-      descriptionCell(field.description, field.deprecation),
+      descriptionCell(field.description, field.deprecation, field.appliedDirectives, fromPath),
     ]),
   );
 }
@@ -97,7 +115,7 @@ function argumentsTable(args: readonly InputValueNode[], fromPath: string): stri
       `\`${arg.name}\``,
       typeLink(fromPath, arg.type),
       defaultCell(arg.defaultValue),
-      descriptionCell(arg.description, arg.deprecation),
+      descriptionCell(arg.description, arg.deprecation, arg.appliedDirectives, fromPath),
     ]),
   );
 }
@@ -141,7 +159,7 @@ function inputFieldsSchema(fields: readonly InputValueNode[], fromPath: string):
         `\`${value.name}\``,
         typeLink(fromPath, value.type),
         defaultCell(value.defaultValue),
-        descriptionCell(value.description, value.deprecation),
+        descriptionCell(value.description, value.deprecation, value.appliedDirectives, fromPath),
       ]),
     ),
   );
@@ -209,7 +227,12 @@ export function renderEnumBody(node: EnumTypeNode): string {
             ["Value", "Description"],
             node.values.map((value) => [
               `\`${value.name}\``,
-              descriptionCell(value.description, value.deprecation),
+              descriptionCell(
+                value.description,
+                value.deprecation,
+                value.appliedDirectives,
+                node.path,
+              ),
             ]),
           ),
         );
