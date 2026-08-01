@@ -53,7 +53,7 @@ Nothing in `src/model/` changes. The whole fix lives in
 | Position relative to `(deprecated: …)` | After it, space-separated |
 | Label | None — bare, like the deprecation suffix |
 | Scope of application | Object/interface fields, arguments, input fields, enum values |
-| Committed `okf/` bundles | Regenerate both in this PR |
+| Committed `okf/` bundles | Regenerate `okf/shop-api` only |
 
 The alternative shapes were a `Directives` column added only to tables that
 need one, and a `## Directives` subsection mirroring `## Arguments`. The inline
@@ -151,16 +151,25 @@ functions ≥ 90%, branches ≥ 85%, statements ≥ 90%.
 
 ## Bundle regeneration
 
-The committed bundles under `okf/countries-api` and `okf/shop-api` go stale the
-moment the renderer changes, so both are regenerated in this PR by running the
-CLI over `examples/`. This accepts the reconciler's normal churn: `updated:`
-frontmatter on every touched concept file and one `log.md` entry per bundle.
-That churn is the reconciler working as specified, not a determinism violation —
-re-running against an unchanged schema after this PR is still a no-op.
+`okf/shop-api` is regenerated in this PR. This is not optional:
+`test/example-bundle.test.ts:165` asserts the committed bundle byte-for-byte
+against a freshly built one, so `pnpm test` fails until it is updated.
+Regeneration is `UPDATE_EXAMPLE=1` over that same test, which replays v1 → v2 →
+v3 from local SDL at fixed `--now` timestamps. It needs no network, involves no
+wall clock, and produces no `updated:`/`log.md` churn beyond the concept files
+whose rendered content genuinely changed.
 
 The load-bearing result is `okf/shop-api/types/objects/Customer.md`, where
 `email` gains its `@auth(requires: STAFF)` annotation. That is the concrete fix
 for the failing bench criterion.
+
+**`okf/countries-api` is deliberately excluded.** It is generated from a live
+third-party introspection endpoint, and applied directives are present on the
+SDL path only (§5.3) — introspection does not expose them. The bundle contains
+zero `Directives:` lines today and this change cannot add one. No test asserts
+its contents. Regenerating it would therefore contribute nothing to this fix
+while requiring network access and risking unrelated upstream schema drift in
+the diff.
 
 ## Out of scope
 
