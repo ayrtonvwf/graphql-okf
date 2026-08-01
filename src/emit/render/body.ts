@@ -14,7 +14,7 @@ import type {
   TypeRef,
   UnionTypeNode,
 } from "../../model/ir.js";
-import { relLink, typeLink } from "./links.js";
+import { bundleLink, typeLink } from "./links.js";
 import { cell } from "./text.js";
 
 function deprecatedSuffix(deprecation: Deprecation | null): string {
@@ -26,11 +26,7 @@ function deprecatedSuffix(deprecation: Deprecation | null): string {
     : ` (deprecated: ${cell(deprecation.reason)})`;
 }
 
-function appliedInline(
-  applied: readonly AppliedDirective[],
-  fromPath: string,
-  escapeArgs: boolean,
-): string {
+function appliedInline(applied: readonly AppliedDirective[], escapeArgs: boolean): string {
   return applied
     .map((directive) => {
       const args =
@@ -39,7 +35,7 @@ function appliedInline(
           : `(${directive.args
               .map((arg) => `${arg.name}: ${escapeArgs ? cell(arg.value) : arg.value}`)
               .join(", ")})`;
-      return `[\`@${directive.name}\`](${relLink(fromPath, directive.path)})${args}`;
+      return `[\`@${directive.name}\`](${bundleLink(directive.path)})${args}`;
     })
     .join(", ");
 }
@@ -48,17 +44,15 @@ function descriptionLine(text: string | null): string[] {
   return text === null ? [] : ["", text];
 }
 
-function directivesLine(applied: readonly AppliedDirective[], fromPath: string): string[] {
-  return applied.length === 0
-    ? []
-    : ["", `Directives: ${appliedInline(applied, fromPath, false)}.`];
+function directivesLine(applied: readonly AppliedDirective[]): string[] {
+  return applied.length === 0 ? [] : ["", `Directives: ${appliedInline(applied, false)}.`];
 }
 
-function implementsLine(interfaces: readonly TypeRef[], fromPath: string): string[] {
+function implementsLine(interfaces: readonly TypeRef[]): string[] {
   if (interfaces.length === 0) {
     return [];
   }
-  const links = interfaces.map((ref) => typeLink(fromPath, ref)).join(", ");
+  const links = interfaces.map((ref) => typeLink(ref)).join(", ");
   return ["", `Implements ${links}.`];
 }
 
@@ -74,12 +68,11 @@ function descriptionCell(
   description: string | null,
   deprecation: Deprecation | null,
   applied: readonly AppliedDirective[],
-  fromPath: string,
 ): string {
   const parts = [
     description === null ? "" : cell(description),
     deprecatedSuffix(deprecation).trim(),
-    appliedInline(applied, fromPath, true),
+    appliedInline(applied, true),
   ];
   return parts.filter((part) => part !== "").join(" ");
 }
@@ -97,31 +90,31 @@ function schemaSection(lines: readonly string[]): string[] {
   return lines.length === 0 ? [] : ["", "# Schema", "", ...lines];
 }
 
-function fieldsTable(fields: readonly FieldNode[], fromPath: string): string[] {
+function fieldsTable(fields: readonly FieldNode[]): string[] {
   return table(
     ["Field", "Type", "Description"],
     fields.map((field) => [
       `\`${field.name}\``,
-      typeLink(fromPath, field.type),
-      descriptionCell(field.description, field.deprecation, field.appliedDirectives, fromPath),
+      typeLink(field.type),
+      descriptionCell(field.description, field.deprecation, field.appliedDirectives),
     ]),
   );
 }
 
-function argumentsTable(args: readonly InputValueNode[], fromPath: string): string[] {
+function argumentsTable(args: readonly InputValueNode[]): string[] {
   return table(
     ["Argument", "Type", "Default", "Description"],
     args.map((arg) => [
       `\`${arg.name}\``,
-      typeLink(fromPath, arg.type),
+      typeLink(arg.type),
       defaultCell(arg.defaultValue),
-      descriptionCell(arg.description, arg.deprecation, arg.appliedDirectives, fromPath),
+      descriptionCell(arg.description, arg.deprecation, arg.appliedDirectives),
     ]),
   );
 }
 
 /** Field arguments do not fit a flat table, so they get their own subsection. */
-function fieldArgumentsSection(fields: readonly FieldNode[], fromPath: string): string[] {
+function fieldArgumentsSection(fields: readonly FieldNode[]): string[] {
   const withArgs = fields.filter((field) => field.args.length > 0);
   if (withArgs.length === 0) {
     return [];
@@ -133,22 +126,19 @@ function fieldArgumentsSection(fields: readonly FieldNode[], fromPath: string): 
       "",
       `### \`${field.name}\``,
       "",
-      ...argumentsTable(field.args, fromPath),
+      ...argumentsTable(field.args),
     ]),
   ];
 }
 
-function fieldsSchema(fields: readonly FieldNode[], fromPath: string): string[] {
+function fieldsSchema(fields: readonly FieldNode[]): string[] {
   if (fields.length === 0) {
     return [];
   }
-  return [
-    ...schemaSection(fieldsTable(fields, fromPath)),
-    ...fieldArgumentsSection(fields, fromPath),
-  ];
+  return [...schemaSection(fieldsTable(fields)), ...fieldArgumentsSection(fields)];
 }
 
-function inputFieldsSchema(fields: readonly InputValueNode[], fromPath: string): string[] {
+function inputFieldsSchema(fields: readonly InputValueNode[]): string[] {
   if (fields.length === 0) {
     return [];
   }
@@ -157,25 +147,25 @@ function inputFieldsSchema(fields: readonly InputValueNode[], fromPath: string):
       ["Field", "Type", "Default", "Description"],
       fields.map((value) => [
         `\`${value.name}\``,
-        typeLink(fromPath, value.type),
+        typeLink(value.type),
         defaultCell(value.defaultValue),
-        descriptionCell(value.description, value.deprecation, value.appliedDirectives, fromPath),
+        descriptionCell(value.description, value.deprecation, value.appliedDirectives),
       ]),
     ),
   );
 }
 
-function argumentsSchema(args: readonly InputValueNode[], fromPath: string): string[] {
-  return args.length === 0 ? [] : schemaSection(argumentsTable(args, fromPath));
+function argumentsSchema(args: readonly InputValueNode[]): string[] {
+  return args.length === 0 ? [] : schemaSection(argumentsTable(args));
 }
 
 export function renderObjectBody(node: ObjectTypeNode): string {
   return [
     `# ${node.name}`,
     ...descriptionLine(node.description),
-    ...directivesLine(node.appliedDirectives, node.path),
-    ...implementsLine(node.interfaces, node.path),
-    ...fieldsSchema(node.fields, node.path),
+    ...directivesLine(node.appliedDirectives),
+    ...implementsLine(node.interfaces),
+    ...fieldsSchema(node.fields),
     "",
   ].join("\n");
 }
@@ -184,17 +174,14 @@ export function renderInterfaceBody(node: InterfaceTypeNode): string {
   const implementedBy =
     node.implementedBy.length === 0
       ? []
-      : [
-          "",
-          `Implemented by ${node.implementedBy.map((ref) => typeLink(node.path, ref)).join(", ")}.`,
-        ];
+      : ["", `Implemented by ${node.implementedBy.map((ref) => typeLink(ref)).join(", ")}.`];
   return [
     `# ${node.name}`,
     ...descriptionLine(node.description),
-    ...directivesLine(node.appliedDirectives, node.path),
-    ...implementsLine(node.interfaces, node.path),
+    ...directivesLine(node.appliedDirectives),
+    ...implementsLine(node.interfaces),
     ...implementedBy,
-    ...fieldsSchema(node.fields, node.path),
+    ...fieldsSchema(node.fields),
     "",
   ].join("\n");
 }
@@ -206,13 +193,13 @@ export function renderUnionBody(node: UnionTypeNode): string {
       : schemaSection(
           table(
             ["Member"],
-            node.members.map((ref) => [typeLink(node.path, ref)]),
+            node.members.map((ref) => [typeLink(ref)]),
           ),
         );
   return [
     `# ${node.name}`,
     ...descriptionLine(node.description),
-    ...directivesLine(node.appliedDirectives, node.path),
+    ...directivesLine(node.appliedDirectives),
     ...members,
     "",
   ].join("\n");
@@ -227,19 +214,14 @@ export function renderEnumBody(node: EnumTypeNode): string {
             ["Value", "Description"],
             node.values.map((value) => [
               `\`${value.name}\``,
-              descriptionCell(
-                value.description,
-                value.deprecation,
-                value.appliedDirectives,
-                node.path,
-              ),
+              descriptionCell(value.description, value.deprecation, value.appliedDirectives),
             ]),
           ),
         );
   return [
     `# ${node.name}`,
     ...descriptionLine(node.description),
-    ...directivesLine(node.appliedDirectives, node.path),
+    ...directivesLine(node.appliedDirectives),
     ...values,
     "",
   ].join("\n");
@@ -249,8 +231,8 @@ export function renderInputBody(node: InputObjectTypeNode): string {
   return [
     `# ${node.name}`,
     ...descriptionLine(node.description),
-    ...directivesLine(node.appliedDirectives, node.path),
-    ...inputFieldsSchema(node.fields, node.path),
+    ...directivesLine(node.appliedDirectives),
+    ...inputFieldsSchema(node.fields),
     "",
   ].join("\n");
 }
@@ -264,7 +246,7 @@ export function renderScalarBody(node: ScalarTypeNode): string {
   return [
     `# ${node.name}`,
     ...descriptionLine(node.description),
-    ...directivesLine(node.appliedDirectives, node.path),
+    ...directivesLine(node.appliedDirectives),
     "",
     note,
     "",
@@ -285,10 +267,10 @@ export function renderOperationBody(node: OperationNode): string {
     `# ${node.name}`,
     ...descriptionLine(node.description),
     ...deprecatedBlock(node.deprecation),
-    ...directivesLine(node.appliedDirectives, node.path),
+    ...directivesLine(node.appliedDirectives),
     "",
-    `**Returns** ${typeLink(node.path, node.type)}`,
-    ...argumentsSchema(node.args, node.path),
+    `**Returns** ${typeLink(node.type)}`,
+    ...argumentsSchema(node.args),
     "",
   ].join("\n");
 }
@@ -302,10 +284,10 @@ export function renderDirectiveBody(node: DirectiveDefinitionNode): string {
   return [
     `# @${node.name}`,
     ...descriptionLine(node.description),
-    ...directivesLine(node.appliedDirectives, node.path),
+    ...directivesLine(node.appliedDirectives),
     ...locations,
     ...repeatable,
-    ...argumentsSchema(node.args, node.path),
+    ...argumentsSchema(node.args),
     "",
   ].join("\n");
 }

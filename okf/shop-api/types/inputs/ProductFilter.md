@@ -18,12 +18,12 @@ Narrows a product listing. Every field is optional; omitted fields do not filter
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `inStockOnly` | [`Boolean`](../scalars/Boolean.md) | `false` |  |
-| `labels` | [`[String!]`](../scalars/String.md) | `[]` | Only products carrying all of these labels. |
-| `maxPriceCents` | [`Int`](../scalars/Int.md) |  |  |
-| `minPriceCents` | [`Int`](../scalars/Int.md) | `0` |  |
-| `nameContains` | [`String`](../scalars/String.md) | `""` | Case-insensitive substring match against the product name. |
-| `visibleTo` | [`Role`](../enums/Role.md) | `GUEST` | Only products a caller of this role may see. |
+| `inStockOnly` | [`Boolean`](/types/scalars/Boolean.md) | `false` |  |
+| `labels` | [`[String!]`](/types/scalars/String.md) | `[]` | Only products carrying all of these labels. |
+| `maxPriceCents` | [`Int`](/types/scalars/Int.md) |  |  |
+| `minPriceCents` | [`Int`](/types/scalars/Int.md) | `0` |  |
+| `nameContains` | [`String`](/types/scalars/String.md) | `""` | Case-insensitive substring match against the product name. |
+| `visibleTo` | [`Role`](/types/enums/Role.md) | `GUEST` | Only products a caller of this role may see. |
 
 <!-- graphql-okf:generated:end -->
 

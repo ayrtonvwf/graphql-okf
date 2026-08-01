@@ -14,14 +14,14 @@ generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 
 Replaces a customer's default shipping address.
 
-**Returns** [`Customer!`](../types/objects/Customer.md)
+**Returns** [`Customer!`](/types/objects/Customer.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `address` | [`AddressInput!`](../types/inputs/AddressInput.md) |  |  |
-| `customerId` | [`ID!`](../types/scalars/ID.md) |  |  |
+| `address` | [`AddressInput!`](/types/inputs/AddressInput.md) |  |  |
+| `customerId` | [`ID!`](/types/scalars/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

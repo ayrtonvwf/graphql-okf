@@ -20,7 +20,7 @@ Locations: `FIELD`, `FRAGMENT_SPREAD`, `INLINE_FRAGMENT`.
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `if` | [`Boolean!`](../types/scalars/Boolean.md) |  | Included when true. |
+| `if` | [`Boolean!`](/types/scalars/Boolean.md) |  | Included when true. |
 
 <!-- graphql-okf:generated:end -->
 

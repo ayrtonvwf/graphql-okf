@@ -14,15 +14,15 @@ generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 
 Places an order for the given products.
 
-Directives: [`@auth`](../directives/auth.md)(requires: CUSTOMER).
+Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
 
-**Returns** [`Order!`](../types/objects/Order.md)
+**Returns** [`Order!`](/types/objects/Order.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `input` | [`PlaceOrderInput!`](../types/inputs/PlaceOrderInput.md) |  |  |
+| `input` | [`PlaceOrderInput!`](/types/inputs/PlaceOrderInput.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

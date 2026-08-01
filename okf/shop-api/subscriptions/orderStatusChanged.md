@@ -14,15 +14,15 @@ generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 
 Emits the order each time its status changes.
 
-Directives: [`@auth`](../directives/auth.md)(requires: CUSTOMER).
+Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
 
-**Returns** [`Order!`](../types/objects/Order.md)
+**Returns** [`Order!`](/types/objects/Order.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `orderId` | [`ID!`](../types/scalars/ID.md) |  |  |
+| `orderId` | [`ID!`](/types/scalars/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

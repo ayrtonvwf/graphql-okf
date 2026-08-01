@@ -14,17 +14,17 @@ generated: { by: "graphql-okf/0.1", at: "2026-03-02T09:00:00.000Z" }
 
 Adds a review to a product.
 
-Directives: [`@auth`](../directives/auth.md)(requires: CUSTOMER).
+Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
 
-**Returns** [`Review!`](../types/objects/Review.md)
+**Returns** [`Review!`](/types/objects/Review.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `body` | [`String`](../types/scalars/String.md) |  |  |
-| `productId` | [`ID!`](../types/scalars/ID.md) |  |  |
-| `rating` | [`Int!`](../types/scalars/Int.md) |  |  |
+| `body` | [`String`](/types/scalars/String.md) |  |  |
+| `productId` | [`ID!`](/types/scalars/ID.md) |  |  |
+| `rating` | [`Int!`](/types/scalars/Int.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

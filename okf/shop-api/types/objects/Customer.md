@@ -16,18 +16,18 @@ A person who can place orders.
 
 A customer is created on first sign-in and is never hard-deleted.
 
-Implements [`Node`](../interfaces/Node.md), [`Timestamped`](../interfaces/Timestamped.md).
+Implements [`Node`](/types/interfaces/Node.md), [`Timestamped`](/types/interfaces/Timestamped.md).
 
 # Schema
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `createdAt` | [`DateTime!`](../scalars/DateTime.md) |  |
-| `defaultAddress` | [`Address`](Address.md) | Where orders are shipped by default. |
-| `displayName` | [`String!`](../scalars/String.md) |  |
-| `email` | [`EmailAddress!`](../scalars/EmailAddress.md) | [`@auth`](../../directives/auth.md)(requires: STAFF) |
-| `id` | [`ID!`](../scalars/ID.md) |  |
-| `updatedAt` | [`DateTime`](../scalars/DateTime.md) |  |
+| `createdAt` | [`DateTime!`](/types/scalars/DateTime.md) |  |
+| `defaultAddress` | [`Address`](/types/objects/Address.md) | Where orders are shipped by default. |
+| `displayName` | [`String!`](/types/scalars/String.md) |  |
+| `email` | [`EmailAddress!`](/types/scalars/EmailAddress.md) | [`@auth`](/directives/auth.md)(requires: STAFF) |
+| `id` | [`ID!`](/types/scalars/ID.md) |  |
+| `updatedAt` | [`DateTime`](/types/scalars/DateTime.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

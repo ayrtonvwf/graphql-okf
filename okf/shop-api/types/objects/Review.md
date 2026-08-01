@@ -14,19 +14,19 @@ generated: { by: "graphql-okf/0.1", at: "2026-03-02T09:00:00.000Z" }
 
 A customer's written opinion of a product.
 
-Implements [`Node`](../interfaces/Node.md), [`Timestamped`](../interfaces/Timestamped.md).
+Implements [`Node`](/types/interfaces/Node.md), [`Timestamped`](/types/interfaces/Timestamped.md).
 
 # Schema
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `author` | [`Customer!`](Customer.md) |  |
-| `body` | [`String`](../scalars/String.md) |  |
-| `createdAt` | [`DateTime!`](../scalars/DateTime.md) |  |
-| `id` | [`ID!`](../scalars/ID.md) |  |
-| `product` | [`Product!`](Product.md) |  |
-| `rating` | [`Int!`](../scalars/Int.md) | A rating from 1 to 5 inclusive. |
-| `updatedAt` | [`DateTime`](../scalars/DateTime.md) |  |
+| `author` | [`Customer!`](/types/objects/Customer.md) |  |
+| `body` | [`String`](/types/scalars/String.md) |  |
+| `createdAt` | [`DateTime!`](/types/scalars/DateTime.md) |  |
+| `id` | [`ID!`](/types/scalars/ID.md) |  |
+| `product` | [`Product!`](/types/objects/Product.md) |  |
+| `rating` | [`Int!`](/types/scalars/Int.md) | A rating from 1 to 5 inclusive. |
+| `updatedAt` | [`DateTime`](/types/scalars/DateTime.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

@@ -14,13 +14,13 @@ generated: { by: "graphql-okf/0.1", at: "2026-03-02T09:00:00.000Z" }
 
 Emits each new review as it is posted.
 
-**Returns** [`Review!`](../types/objects/Review.md)
+**Returns** [`Review!`](/types/objects/Review.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `productId` | [`ID!`](../types/scalars/ID.md) |  |  |
+| `productId` | [`ID!`](/types/scalars/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

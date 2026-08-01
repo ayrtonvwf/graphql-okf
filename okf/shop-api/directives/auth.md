@@ -20,7 +20,7 @@ Locations: `FIELD_DEFINITION`, `OBJECT`.
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `requires` | [`Role!`](../types/enums/Role.md) | `CUSTOMER` |  |
+| `requires` | [`Role!`](/types/enums/Role.md) | `CUSTOMER` |  |
 
 <!-- graphql-okf:generated:end -->
 
