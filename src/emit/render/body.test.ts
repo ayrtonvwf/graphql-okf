@@ -621,6 +621,26 @@ describe("applied directives on non-field rows", () => {
 
     expect(body).toContain('Directives: [`@note`](../../directives/note.md)(text: "a | b").');
   });
+
+  it("escapes a pipe in a deprecation reason so the row survives", () => {
+    const body = renderEnumBody({
+      kind: "enum",
+      name: "Role",
+      path: "types/enums/Role.md",
+      description: null,
+      appliedDirectives: [],
+      values: [
+        {
+          name: "STAFF",
+          description: null,
+          deprecation: { reason: "use ADMIN | SUPPORT instead" },
+          appliedDirectives: [],
+        },
+      ],
+    });
+
+    expect(body).toContain("| `STAFF` | (deprecated: use ADMIN \\| SUPPORT instead) |");
+  });
 });
 
 describe("# Schema sections", () => {

@@ -21,7 +21,9 @@ function deprecatedSuffix(deprecation: Deprecation | null): string {
   if (deprecation === null) {
     return "";
   }
-  return deprecation.reason === null ? " (deprecated)" : ` (deprecated: ${deprecation.reason})`;
+  return deprecation.reason === null
+    ? " (deprecated)"
+    : ` (deprecated: ${cell(deprecation.reason)})`;
 }
 
 function appliedInline(
