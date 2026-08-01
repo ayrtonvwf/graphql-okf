@@ -173,10 +173,18 @@ genuinely differentiated capability.
   a field returning `User` links to the `User` concept; an argument of type
   `OrderInput` links to the `OrderInput` concept; an object implementing an
   interface links to that interface; a union links to each member type.
+  - Links are emitted in OKF §6.1's **absolute bundle-relative** form —
+    `/types/objects/Product.md` — rather than relative to the linking file.
+    §6.1 recommends this form "because it is stable when documents are moved
+    within their subdirectory". Recorded per issue #22: this is the emitted
+    convention, not an additional requirement.
 - `GOAL-7.2` — Links MUST resolve to real paths within the bundle as produced by
   the naming scheme (§4). Referential integrity within a single emitted bundle
   MUST hold: no link points to a path the bundle did not create for an element it
   contains.
+  - A link target is resolved against the bundle root, not the linking file's
+    directory. Bundle paths themselves remain slash-free; the leading slash is
+    added at render time only.
 - `GOAL-7.3` — Links to built-in scalars MAY be omitted or handled by a
   documented convention, but the convention MUST be consistent.
 - `GOAL-7.4` — Each directory, including the bundle root, MUST have an `index.md`
