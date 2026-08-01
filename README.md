@@ -222,12 +222,6 @@ v0.2-only fields.
 Three bundles generated with the current build are checked into this repo /
 documented here:
 
-Links inside these bundles are **bundle-root-absolute** (`/types/objects/Product.md`),
-following OKF §6.1's recommendation. GitHub's file browser resolves a leading `/`
-against the repository root, so cross-links in the samples above will not resolve
-when clicked on github.com. Clone the repo, or point a tool at the bundle
-directory, to follow them.
-
 - [`okf/countries-api/`](okf/countries-api/) — the full generated bundle for
   the small, public [Countries GraphQL API][countries-api], committed as a
   real, browsable example. Start at
@@ -247,6 +241,12 @@ directory, to follow them.
   ```sh
   graphql-okf https://gitlab.com/api/graphql --out okf/gitlab-api
   ```
+
+Links inside these samples are **bundle-root-absolute** (`/types/objects/Product.md`),
+following OKF §6.1's recommendation. GitHub's file browser resolves a leading `/`
+against the repository root, so cross-links in these samples will not resolve
+when clicked on github.com. Clone the repo, or point a tool at the bundle
+directory, to follow them.
 
 Countries and GitLab were generated with the exact CLI invocations shown in
 [Usage](#usage) above, against each API's live introspection endpoint;

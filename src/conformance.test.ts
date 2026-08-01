@@ -145,7 +145,16 @@ describe("OKF §9 conformance", () => {
     const relative: string[] = [];
 
     for (const [path, text] of files) {
-      for (const target of internalLinkTargets(generatedRegionOf(text))) {
+      // `buildBundle` never emits log.md (it's written only by the reconciler
+      // on subsequent runs), so every file here is a concept file and is
+      // expected to carry the generated-region markers. A file that silently
+      // lost them would make `generatedRegionOf` return "", scanning zero
+      // links and vacuously passing the check below — assert the markers are
+      // present so that failure mode is caught here instead.
+      const region = generatedRegionOf(text);
+      expect(region, `${path} has no generated-region markers`).not.toBe("");
+
+      for (const target of internalLinkTargets(region)) {
         if (!target.startsWith("/")) {
           relative.push(`${path} -> ${target}`);
         }
