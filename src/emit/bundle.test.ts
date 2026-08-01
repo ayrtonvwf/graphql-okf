@@ -57,16 +57,18 @@ describe("buildBundle", () => {
 
   it("lists child directories in a grouping index and concepts in a leaf index", () => {
     const bundle = bundleFrom("type Query { hello: String }");
-    expect(assembled(bundle, "index.md")).toContain("* [types/](types/index.md)");
-    expect(assembled(bundle, "index.md")).toContain("* [queries/](queries/index.md)");
-    expect(assembled(bundle, "types/index.md")).toContain("* [scalars/](scalars/index.md)");
-    expect(assembled(bundle, "types/scalars/index.md")).toContain("* [String](String.md)");
+    expect(assembled(bundle, "index.md")).toContain("* [types/](/types/index.md)");
+    expect(assembled(bundle, "index.md")).toContain("* [queries/](/queries/index.md)");
+    expect(assembled(bundle, "types/index.md")).toContain("* [scalars/](/types/scalars/index.md)");
+    expect(assembled(bundle, "types/scalars/index.md")).toContain(
+      "* [String](/types/scalars/String.md)",
+    );
   });
 
   it("uses a structural fallback summary when a concept has no description", () => {
     const bundle = bundleFrom("type Query { hello: String }");
     expect(assembled(bundle, "queries/index.md")).toContain(
-      "* [hello](hello.md) - Query operation.",
+      "* [hello](/queries/hello.md) - Query operation.",
     );
   });
 
@@ -91,7 +93,7 @@ describe("buildBundle", () => {
     );
 
     expect(bundle.get("types/objects/index.md")?.generated).toContain(
-      "* [Product](Product.md) - A product spanning lines.",
+      "* [Product](/types/objects/Product.md) - A product spanning lines.",
     );
   });
 
@@ -148,7 +150,9 @@ describe("buildBundle with tombstones", () => {
     ]);
 
     const index = bundle.get("types/objects/index.md");
-    expect(index?.generated).toContain("* [LegacyOrder](LegacyOrder.md) - (removed)");
+    expect(index?.generated).toContain(
+      "* [LegacyOrder](/types/objects/LegacyOrder.md) - (removed)",
+    );
   });
 
   it("keeps a directory index alive when only tombstones remain in it", () => {
@@ -157,9 +161,11 @@ describe("buildBundle with tombstones", () => {
     ]);
 
     expect(bundle.get("types/inputs/index.md")?.generated).toContain(
-      "* [OldInput](OldInput.md) - (removed)",
+      "* [OldInput](/types/inputs/OldInput.md) - (removed)",
     );
-    expect(bundle.get("types/index.md")?.generated).toContain("* [inputs/](inputs/index.md)");
+    expect(bundle.get("types/index.md")?.generated).toContain(
+      "* [inputs/](/types/inputs/index.md)",
+    );
   });
 
   it("does not write a concept file for a tombstone", () => {
