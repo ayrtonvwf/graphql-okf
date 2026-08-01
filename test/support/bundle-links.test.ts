@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { internalLinkTargets, resolveBundleLink } from "./bundle-links.js";
+import { generatedRegionOf, internalLinkTargets, resolveBundleLink } from "./bundle-links.js";
 
 describe("internalLinkTargets", () => {
   it("finds bundle-internal targets", () => {
@@ -48,5 +48,26 @@ describe("resolveBundleLink", () => {
     expect(resolveBundleLink("types/objects/Product.md", "../scalars/ID.md")).toBe(
       "types/scalars/ID.md",
     );
+  });
+});
+
+describe("generatedRegionOf", () => {
+  it("returns the text between the seam markers", () => {
+    const text = [
+      "---",
+      "type: x",
+      "---",
+      "<!-- graphql-okf:generated:start -->",
+      "body [`X`](/types/X.md)",
+      "<!-- graphql-okf:generated:end -->",
+      "human [notes](../notes.md)",
+    ].join("\n");
+
+    expect(generatedRegionOf(text)).toContain("[`X`](/types/X.md)");
+    expect(generatedRegionOf(text)).not.toContain("../notes.md");
+  });
+
+  it("returns empty for a file with no generated region", () => {
+    expect(generatedRegionOf("# Update Log\n\nno markers here")).toBe("");
   });
 });

@@ -1,4 +1,5 @@
 import { posix } from "node:path";
+import { GENERATED_END, GENERATED_START } from "../../src/emit/render/seam.js";
 
 const LINK = /\]\(([^)]+)\)/g;
 
@@ -35,4 +36,17 @@ export function resolveBundleLink(fromPath: string, target: string): string {
     return posix.normalize(target.slice(1));
   }
   return posix.normalize(posix.join(posix.dirname(fromPath), target));
+}
+
+/**
+ * The machine-owned region of a bundle file. Human-authored content below the
+ * end marker is out of scope for any assertion about what graphql-okf emits.
+ */
+export function generatedRegionOf(text: string): string {
+  const start = text.indexOf(GENERATED_START);
+  const end = text.indexOf(GENERATED_END);
+  if (start === -1 || end === -1 || end < start) {
+    return "";
+  }
+  return text.slice(start + GENERATED_START.length, end);
 }
