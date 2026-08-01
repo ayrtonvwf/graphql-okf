@@ -3,7 +3,7 @@ type: "GraphQL Object Type"
 title: "Language"
 resource: "https://countries.trevorblades.com/graphql#Language"
 tags: ["graphql", "object"]
-generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -15,11 +15,11 @@ generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `code` | [`ID!`](../scalars/ID.md) |  |
-| `countries` | [`[Country!]!`](Country.md) |  |
-| `name` | [`String!`](../scalars/String.md) |  |
-| `native` | [`String!`](../scalars/String.md) |  |
-| `rtl` | [`Boolean!`](../scalars/Boolean.md) |  |
+| `code` | [`ID!`](/types/scalars/ID.md) |  |
+| `countries` | [`[Country!]!`](/types/objects/Country.md) |  |
+| `name` | [`String!`](/types/scalars/String.md) |  |
+| `native` | [`String!`](/types/scalars/String.md) |  |
+| `rtl` | [`Boolean!`](/types/scalars/Boolean.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

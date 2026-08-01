@@ -4,6 +4,32 @@ type: Log
 
 # Update Log
 
+## 2026-08-01
+
+### 16:30:39.323Z
+
+**Changed**
+
+* [`deprecated`](/directives/deprecated.md)
+* [`include`](/directives/include.md)
+* [`skip`](/directives/skip.md)
+* [`specifiedBy`](/directives/specifiedBy.md)
+* [`continent`](/queries/continent.md)
+* [`continents`](/queries/continents.md)
+* [`countries`](/queries/countries.md)
+* [`country`](/queries/country.md)
+* [`language`](/queries/language.md)
+* [`languages`](/queries/languages.md)
+* [`ContinentFilterInput`](/types/inputs/ContinentFilterInput.md)
+* [`CountryFilterInput`](/types/inputs/CountryFilterInput.md)
+* [`LanguageFilterInput`](/types/inputs/LanguageFilterInput.md)
+* [`StringQueryOperatorInput`](/types/inputs/StringQueryOperatorInput.md)
+* [`Continent`](/types/objects/Continent.md)
+* [`Country`](/types/objects/Country.md)
+* [`Language`](/types/objects/Language.md)
+* [`State`](/types/objects/State.md)
+* [`Subdivision`](/types/objects/Subdivision.md)
+
 ## 2026-07-27
 
 ### 14:21:35.106Z

@@ -3,7 +3,7 @@ type: "GraphQL Query"
 title: "countries"
 resource: "https://countries.trevorblades.com/graphql#Query.countries"
 tags: ["graphql", "query"]
-generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -11,13 +11,13 @@ generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
 
 # countries
 
-**Returns** [`[Country!]!`](../types/objects/Country.md)
+**Returns** [`[Country!]!`](/types/objects/Country.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `filter` | [`CountryFilterInput`](../types/inputs/CountryFilterInput.md) | `{}` |  |
+| `filter` | [`CountryFilterInput`](/types/inputs/CountryFilterInput.md) | `{}` |  |
 
 <!-- graphql-okf:generated:end -->
 

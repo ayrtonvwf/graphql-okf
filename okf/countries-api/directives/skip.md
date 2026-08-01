@@ -4,7 +4,7 @@ title: "skip"
 description: "Directs the executor to skip this field or fragment when the `if` argument is true."
 resource: "https://countries.trevorblades.com/graphql#@skip"
 tags: ["graphql", "directive"]
-generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -20,7 +20,7 @@ Locations: `FIELD`, `FRAGMENT_SPREAD`, `INLINE_FRAGMENT`.
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `if` | [`Boolean!`](../types/scalars/Boolean.md) |  | Skipped when true. |
+| `if` | [`Boolean!`](/types/scalars/Boolean.md) |  | Skipped when true. |
 
 <!-- graphql-okf:generated:end -->
 

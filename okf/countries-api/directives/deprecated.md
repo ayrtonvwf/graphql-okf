@@ -4,7 +4,7 @@ title: "deprecated"
 description: "Marks an element of a GraphQL schema as no longer supported."
 resource: "https://countries.trevorblades.com/graphql#@deprecated"
 tags: ["graphql", "directive"]
-generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -20,7 +20,7 @@ Locations: `ARGUMENT_DEFINITION`, `ENUM_VALUE`, `FIELD_DEFINITION`, `INPUT_FIELD
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `reason` | [`String`](../types/scalars/String.md) | `"No longer supported"` | Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax, as specified by [CommonMark](https://commonmark.org/). |
+| `reason` | [`String`](/types/scalars/String.md) | `"No longer supported"` | Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax, as specified by [CommonMark](https://commonmark.org/). |
 
 <!-- graphql-okf:generated:end -->
 

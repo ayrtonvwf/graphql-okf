@@ -4,7 +4,7 @@ title: "specifiedBy"
 description: "Exposes a URL that specifies the behavior of this scalar."
 resource: "https://countries.trevorblades.com/graphql#@specifiedBy"
 tags: ["graphql", "directive"]
-generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -20,7 +20,7 @@ Locations: `SCALAR`.
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `url` | [`String!`](../types/scalars/String.md) |  | The URL that specifies the behavior of this scalar. |
+| `url` | [`String!`](/types/scalars/String.md) |  | The URL that specifies the behavior of this scalar. |
 
 <!-- graphql-okf:generated:end -->
 
