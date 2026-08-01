@@ -1,0 +1,43 @@
+{
+  "runId": "qa__okf-bundle__t3",
+  "caseId": "qa",
+  "score": 0.7647058823529411,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The answer quotes concrete doc content (e.g., \"A customer is created on first sign-in and is never hard-deleted\") and every name it cites — `cancelOrder`, `placeOrder`, `ProductFilter` fields, `PlaceOrderInput`, `PaymentInput`, `productPriceChanged`, `Order.paidWith` — is consistent with the schema; its error about Customer is a wrong attribute claim, not an invented name."
+    },
+    {
+      "id": "auth-on-cancel-and-place",
+      "passed": true,
+      "justification": "It states both \"`cancelOrder` — `Directives: @auth(requires: CUSTOMER)`\" and \"`placeOrder` — `Directives: @auth(requires: CUSTOMER)`\" and concludes \"both need a `CUSTOMER`-level token.\""
+    },
+    {
+      "id": "product-filter-fields",
+      "passed": true,
+      "justification": "All six fields are listed correctly: \"nameContains\", \"minPriceCents\", \"maxPriceCents\", \"inStockOnly\", \"labels\", \"visibleTo\" with no extras."
+    },
+    {
+      "id": "price-subscription",
+      "passed": false,
+      "justification": "It names the subscription (\"`subscriptions/productPriceChanged.md` defines `productPriceChanged`... returns `Product!`\") but never states that it takes no arguments."
+    },
+    {
+      "id": "place-order-requirements",
+      "passed": true,
+      "justification": "It lists exactly \"`productIds: [ID!]!`\", \"`shipTo: AddressInput!`\", \"`payWith: PaymentInput!`\" as required with no customer id, and ties identity to auth: \"Since `placeOrder` requires `@auth(requires: CUSTOMER)`, simply signing in is enough.\""
+    },
+    {
+      "id": "payment-oneof",
+      "passed": true,
+      "justification": "It states `PaymentInput` \"is tagged with `@oneOf`, meaning you must supply **exactly one** of\" `creditCardToken`, `payPalToken`, `giftCardCode`."
+    },
+    {
+      "id": "customer-email-staff-only",
+      "passed": false,
+      "justification": "It asserts the opposite: \"a signed-in customer can read every exposed field, including `email`\" and claims Customer has \"no `@auth` directive\" on any field."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

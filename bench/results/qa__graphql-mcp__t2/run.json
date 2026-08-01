@@ -1,0 +1,18 @@
+{
+  "runId": "qa__graphql-mcp__t2",
+  "caseId": "qa",
+  "scenarioId": "graphql-mcp",
+  "trial": 2,
+  "startedAt": "2026-07-31T11:57:02.383Z",
+  "agentModel": "claude-sonnet-5",
+  "status": "ok",
+  "usage": {
+    "inputTokens": 19,
+    "outputTokens": 10531,
+    "cacheReadTokens": 87370,
+    "cacheCreationTokens": 10623,
+    "totalTokens": 108543
+  },
+  "costUsd": 0.22478725000000002,
+  "durationMs": 136271
+}

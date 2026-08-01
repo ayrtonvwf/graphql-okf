@@ -1,0 +1,18 @@
+{
+  "runId": "cancel-reason__graphql-mcp__t1",
+  "caseId": "cancel-reason",
+  "scenarioId": "graphql-mcp",
+  "trial": 1,
+  "startedAt": "2026-07-31T12:17:48.423Z",
+  "agentModel": "claude-sonnet-5",
+  "status": "ok",
+  "usage": {
+    "inputTokens": 25,
+    "outputTokens": 2689,
+    "cacheReadTokens": 113221,
+    "cacheCreationTokens": 14909,
+    "totalTokens": 130844
+  },
+  "costUsd": 0.13096105,
+  "durationMs": 51456
+}

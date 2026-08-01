@@ -1,0 +1,43 @@
+{
+  "runId": "add-review__graphql-mcp__t1",
+  "caseId": "add-review",
+  "score": 0.6875,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": false,
+      "justification": "While the mutation name and its arguments are correct, the selection `author { displayName }` invents a `displayName` field on the author (customer) type, which is not part of the shop schema's customer fields."
+    },
+    {
+      "id": "names-add-review",
+      "passed": true,
+      "justification": "The document uses the exact mutation name: `addReview(productId: $productId, rating: $rating, body: $body)`."
+    },
+    {
+      "id": "product-id-argument",
+      "passed": true,
+      "justification": "It declares `$productId: ID!` and passes it as the `productId` argument identifying the product."
+    },
+    {
+      "id": "rating-is-int",
+      "passed": true,
+      "justification": "The variable is declared `$rating: Int!` and typed as `rating: number` in TypeScript, not a string, enum, or float."
+    },
+    {
+      "id": "body-is-optional",
+      "passed": true,
+      "justification": "`$body: String` is nullable and the function signature uses `body?: string` with `body: body ?? null`."
+    },
+    {
+      "id": "selects-real-review-fields",
+      "passed": true,
+      "justification": "The top-level selection on `addReview` is limited to `id`, `rating`, `body`, `product`, and `author` — all real Review fields."
+    },
+    {
+      "id": "acknowledges-customer-auth",
+      "passed": true,
+      "justification": "The request is issued through the client's authenticated path via `{ authenticated: true }`, which the README describes as \"for operations that need a signed-in customer\"."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

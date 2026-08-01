@@ -8,3 +8,6 @@ pre-commit:
     typecheck:
       glob: "*.{ts,tsx}"
       run: pnpm run typecheck
+    typecheck-bench:
+      glob: "bench/**/*.ts"
+      run: pnpm --filter graphql-okf-bench run typecheck

@@ -1,0 +1,8 @@
+{
+  "agentModel": "claude-sonnet-5",
+  "judgeModel": "claude-opus-5",
+  "graphqlOkfCommit": "78853bc58f19b0d659dffc103e1ddd3980985996",
+  "mcpServerPackage": "mcp-graphql",
+  "mcpServerVersion": "2.0.4",
+  "runDate": "2026-07-31T12:33:28.117Z"
+}

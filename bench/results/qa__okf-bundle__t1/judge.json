@@ -1,0 +1,43 @@
+{
+  "runId": "qa__okf-bundle__t1",
+  "caseId": "qa",
+  "score": 0.8823529411764706,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The answer's named elements (fields, inputs, directives such as `@auth`, `@oneOf`, `ProductFilter` fields, `PlaceOrderInput` fields, `PaymentMethod` union) are all consistent with the schema as described by the rubric ground truth; no invented names appear, though its claim that Customer fields carry no `@auth` is a misreading rather than a fabricated name."
+    },
+    {
+      "id": "auth-on-cancel-and-place",
+      "passed": true,
+      "justification": "It states \"Yes to both. Both mutations carry `@auth(requires: CUSTOMER)`\" for `cancelOrder` and `placeOrder`."
+    },
+    {
+      "id": "product-filter-fields",
+      "passed": true,
+      "justification": "All six fields are listed — `inStockOnly`, `labels`, `minPriceCents`, `maxPriceCents`, `nameContains`, `visibleTo` — with no extras."
+    },
+    {
+      "id": "price-subscription",
+      "passed": true,
+      "justification": "It says \"`Subscription.productPriceChanged` returns `Product!` ... No arguments\"."
+    },
+    {
+      "id": "place-order-requirements",
+      "passed": true,
+      "justification": "It lists the required `productIds`, `shipTo`, and `payWith` with no customer id, and explains the caller must be signed in as `CUSTOMER` with the record \"provisioned automatically by the sign-in/auth process itself\"."
+    },
+    {
+      "id": "payment-oneof",
+      "passed": true,
+      "justification": "It states \"`PaymentInput` is a `@oneOf` input — you must supply **exactly one** of\" `creditCardToken`, `payPalToken`, `giftCardCode`."
+    },
+    {
+      "id": "customer-email-staff-only",
+      "passed": false,
+      "justification": "It wrongly concludes \"no\" and claims \"none of its individual fields (`id`, `email`, ...) carry an `@auth` directive\", missing the STAFF restriction on `Customer.email`."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

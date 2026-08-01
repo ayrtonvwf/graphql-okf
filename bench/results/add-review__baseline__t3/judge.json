@@ -1,0 +1,43 @@
+{
+  "runId": "add-review__baseline__t3",
+  "caseId": "add-review",
+  "score": 0.375,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": false,
+      "justification": "The diff invents a `submitReview(input: $input)` mutation and a `SubmitReviewInput!` input type, neither of which exists in the shop schema (the real operation is `addReview` with flat arguments)."
+    },
+    {
+      "id": "names-add-review",
+      "passed": false,
+      "justification": "The operation is written as `submitReview` (`mutation SubmitReview($input: SubmitReviewInput!) { submitReview(input: $input) ... }`) rather than the exact name `addReview`."
+    },
+    {
+      "id": "product-id-argument",
+      "passed": false,
+      "justification": "`productId` is nested inside a fabricated input object (`{ input: { productId, rating, body } }`) rather than being passed as the mutation's `ID!` argument."
+    },
+    {
+      "id": "rating-is-int",
+      "passed": true,
+      "justification": "`rating: number` is required and validated with `Number.isInteger(rating) && 1..5`, so it is sent as a required integer, not a string, enum, or float."
+    },
+    {
+      "id": "body-is-optional",
+      "passed": true,
+      "justification": "The parameter is declared `body?: string` and coerced to `null` when omitted, treating it as an optional String."
+    },
+    {
+      "id": "selects-real-review-fields",
+      "passed": true,
+      "justification": "The selection set requests only `id`, `rating`, `body`, and `product { id }`, all of which are genuine Review fields."
+    },
+    {
+      "id": "acknowledges-customer-auth",
+      "passed": true,
+      "justification": "The request routes through the existing authenticated path with `{ authenticated: true }`, which the README documents as \"for operations that need a signed-in customer\"."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

@@ -1,0 +1,38 @@
+{
+  "runId": "cancel-reason__okf-bundle__t3",
+  "caseId": "cancel-reason",
+  "score": 1,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The selection set uses only `id`, `status`, and `total { amountCents }` — fields already relied on by the existing `OrderSummary`/`RawOrder` mapping — and never mentions `cancellationReason` or `cancelledAt`."
+    },
+    {
+      "id": "names-cancel-order",
+      "passed": true,
+      "justification": "The mutation body calls `cancelOrder(id: $id, reason: $reason)` by its exact name."
+    },
+    {
+      "id": "passes-id-and-reason",
+      "passed": true,
+      "justification": "Variables are declared as `CancelOrder($id: ID!, $reason: String)` and both are passed: `{ id: orderId, reason }`."
+    },
+    {
+      "id": "validation-is-client-side",
+      "passed": true,
+      "justification": "Validation happens in the client (`if (reason.trim().length === 0) throw ...`) and the doc comment explicitly frames it as client-side auditing — \"an empty or missing reason is rejected before any request is sent\" — without claiming the server requires it."
+    },
+    {
+      "id": "surfaces-real-order-fields",
+      "passed": true,
+      "justification": "The response is surfaced via `id` and `status` (returned as `cancelled.status` and logged as \"Order cancelled (status: ...)\")."
+    },
+    {
+      "id": "no-orphaned-callers",
+      "passed": true,
+      "justification": "The sole caller in `src/index.ts` is updated to `await cancelOrder(order.id, \"Customer changed their mind\")` and consumes the new return value."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

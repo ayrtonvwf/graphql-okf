@@ -1,0 +1,18 @@
+{
+  "runId": "cancel-reason__okf-bundle__t2",
+  "caseId": "cancel-reason",
+  "scenarioId": "okf-bundle",
+  "trial": 2,
+  "startedAt": "2026-07-31T12:15:38.795Z",
+  "agentModel": "claude-sonnet-5",
+  "status": "ok",
+  "usage": {
+    "inputTokens": 27,
+    "outputTokens": 3673,
+    "cacheReadTokens": 127980,
+    "cacheCreationTokens": 11764,
+    "totalTokens": 143444
+  },
+  "costUsd": 0.13836099999999998,
+  "durationMs": 69836
+}

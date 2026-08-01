@@ -1,0 +1,38 @@
+{
+  "runId": "cancel-reason__okf-bundle__t2",
+  "caseId": "cancel-reason",
+  "score": 1,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The diff only selects `id`, `status`, and `total { amountCents }` on the cancelOrder payload — consistent with the existing OrderSummary/RawOrder mapping — and never references non-existent fields like `cancellationReason` or `cancelledAt`."
+    },
+    {
+      "id": "names-cancel-order",
+      "passed": true,
+      "justification": "The mutation body invokes the field exactly as `cancelOrder(id: $id, reason: $reason)`."
+    },
+    {
+      "id": "passes-id-and-reason",
+      "passed": true,
+      "justification": "Variables are declared `($id: ID!, $reason: String)` and both are passed in the request payload `{ id: orderId, reason }`."
+    },
+    {
+      "id": "validation-is-client-side",
+      "passed": true,
+      "justification": "The doc comment states the request is \"rejected locally (without contacting the API) if it is missing or blank\" and the guard throws before `request` is called, with no claim that the server requires reason."
+    },
+    {
+      "id": "surfaces-real-order-fields",
+      "passed": true,
+      "justification": "It returns `status` (and `id`) from the mutation result and logs `Order cancelled (${cancelled.status})`, using real Order fields."
+    },
+    {
+      "id": "no-orphaned-callers",
+      "passed": true,
+      "justification": "The only caller in `src/index.ts` is updated to `await cancelOrder(order.id, \"Customer changed their mind\")` and consumes the new return value."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}
