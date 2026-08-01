@@ -60,10 +60,18 @@ function table(headers: readonly string[], rows: readonly (readonly string[])[])
   ];
 }
 
-function descriptionCell(description: string | null, deprecation: Deprecation | null): string {
-  const text = description === null ? "" : cell(description);
-  const suffix = deprecatedSuffix(deprecation);
-  return `${text}${suffix}`.trim();
+function descriptionCell(
+  description: string | null,
+  deprecation: Deprecation | null,
+  applied: readonly AppliedDirective[],
+  fromPath: string,
+): string {
+  const parts = [
+    description === null ? "" : cell(description),
+    deprecatedSuffix(deprecation).trim(),
+    appliedInline(applied, fromPath),
+  ];
+  return parts.filter((part) => part !== "").join(" ");
 }
 
 function defaultCell(defaultValue: string | null): string {
@@ -85,7 +93,7 @@ function fieldsTable(fields: readonly FieldNode[], fromPath: string): string[] {
     fields.map((field) => [
       `\`${field.name}\``,
       typeLink(fromPath, field.type),
-      descriptionCell(field.description, field.deprecation),
+      descriptionCell(field.description, field.deprecation, field.appliedDirectives, fromPath),
     ]),
   );
 }
@@ -97,7 +105,7 @@ function argumentsTable(args: readonly InputValueNode[], fromPath: string): stri
       `\`${arg.name}\``,
       typeLink(fromPath, arg.type),
       defaultCell(arg.defaultValue),
-      descriptionCell(arg.description, arg.deprecation),
+      descriptionCell(arg.description, arg.deprecation, [], fromPath),
     ]),
   );
 }
@@ -141,7 +149,7 @@ function inputFieldsSchema(fields: readonly InputValueNode[], fromPath: string):
         `\`${value.name}\``,
         typeLink(fromPath, value.type),
         defaultCell(value.defaultValue),
-        descriptionCell(value.description, value.deprecation),
+        descriptionCell(value.description, value.deprecation, [], fromPath),
       ]),
     ),
   );
@@ -209,7 +217,7 @@ export function renderEnumBody(node: EnumTypeNode): string {
             ["Value", "Description"],
             node.values.map((value) => [
               `\`${value.name}\``,
-              descriptionCell(value.description, value.deprecation),
+              descriptionCell(value.description, value.deprecation, [], node.path),
             ]),
           ),
         );

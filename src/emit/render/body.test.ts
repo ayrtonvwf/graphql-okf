@@ -99,6 +99,58 @@ describe("renderObjectBody", () => {
     );
   });
 
+  it("renders a field's applied directives in its description cell", () => {
+    const node: ObjectTypeNode = {
+      ...country,
+      fields: [
+        {
+          name: "email",
+          description: null,
+          type: scalarRef("EmailAddress", ["nonNull"]),
+          args: [],
+          deprecation: null,
+          appliedDirectives: [
+            {
+              name: "auth",
+              path: "directives/auth.md",
+              args: [{ name: "requires", value: "STAFF" }],
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(renderObjectBody(node)).toContain(
+      "| `email` | [`EmailAddress!`](../scalars/EmailAddress.md) | [`@auth`](../../directives/auth.md)(requires: STAFF) |",
+    );
+  });
+
+  it("orders a field cell as description, then deprecation, then directives", () => {
+    const node: ObjectTypeNode = {
+      ...country,
+      fields: [
+        {
+          name: "defaultAddress",
+          description: "Where orders are shipped.",
+          type: scalarRef("String"),
+          args: [],
+          deprecation: { reason: "use shippingAddress" },
+          appliedDirectives: [
+            {
+              name: "auth",
+              path: "directives/auth.md",
+              args: [{ name: "requires", value: "CUSTOMER" }],
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(renderObjectBody(node)).toContain(
+      "| `defaultAddress` | [`String`](../scalars/String.md) | Where orders are shipped. (deprecated: use shippingAddress) [`@auth`](../../directives/auth.md)(requires: CUSTOMER) |",
+    );
+  });
+
   it("omits the Fields section when a type has no fields", () => {
     const node: ObjectTypeNode = { ...country, fields: [] };
     const out = renderObjectBody(node);
