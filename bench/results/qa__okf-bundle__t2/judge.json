@@ -1,0 +1,43 @@
+{
+  "runId": "qa__okf-bundle__t2",
+  "caseId": "qa",
+  "score": 0.8823529411764706,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The named fields, inputs, and operations cited (`placeOrder`, `cancelOrder`, `ProductFilter` fields, `productPriceChanged`, `PlaceOrderInput`, `PaymentInput`, `PaymentMethod` union, `Customer` fields) all appear to be genuine schema elements; the answer's error about `Customer.email` is a missing directive claim rather than an invented name."
+    },
+    {
+      "id": "auth-on-cancel-and-place",
+      "passed": true,
+      "justification": "It states \"Both require authentication\" with `placeOrder` and `cancelOrder` each carrying \"@auth(requires: CUSTOMER)\"."
+    },
+    {
+      "id": "product-filter-fields",
+      "passed": true,
+      "justification": "All six fields are listed: \"nameContains\", \"minPriceCents\", \"maxPriceCents\", \"inStockOnly\", \"labels\", \"visibleTo\" with no invented extras (the `first` arg is correctly described as pagination, not part of the filter)."
+    },
+    {
+      "id": "price-subscription",
+      "passed": true,
+      "justification": "It says there is a \"`productPriceChanged` subscription that 'emits a product each time its price changes'\" with \"No arguments\"."
+    },
+    {
+      "id": "place-order-requirements",
+      "passed": true,
+      "justification": "It lists exactly the three required fields \"productIds\", \"shipTo\", \"payWith\" and explains no customer record/id need be supplied since \"you just need to be signed in as a `CUSTOMER`\" per \"@auth(requires: CUSTOMER)\"."
+    },
+    {
+      "id": "payment-oneof",
+      "passed": true,
+      "justification": "It states \"`PaymentInput` is a `@oneOf` input — you must supply exactly one of\" `creditCardToken`, `payPalToken`, `giftCardCode`."
+    },
+    {
+      "id": "customer-email-staff-only",
+      "passed": false,
+      "justification": "It explicitly denies any STAFF restriction, claiming \"none of its individual fields carry a documented `@auth` restriction (e.g., requiring `STAFF`)\" and \"there isn't a restricted field on `Customer`\"."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

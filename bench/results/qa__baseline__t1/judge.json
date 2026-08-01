@@ -1,0 +1,43 @@
+{
+  "runId": "qa__baseline__t1",
+  "caseId": "qa",
+  "score": 0.29411764705882354,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The answer invents no schema elements at all — it explicitly declines to \"guess or invent details about an API I can't actually inspect,\" mentioning only question topics rather than field/type names."
+    },
+    {
+      "id": "auth-on-cancel-and-place",
+      "passed": false,
+      "justification": "No statement about authentication or the CUSTOMER role is made; the artifact only lists \"auth requirements for cancelling/placing orders\" as an unanswered question."
+    },
+    {
+      "id": "product-filter-fields",
+      "passed": false,
+      "justification": "No ProductFilter fields are named; the artifact says it cannot \"determine real answers\" including \"product filter fields.\""
+    },
+    {
+      "id": "price-subscription",
+      "passed": false,
+      "justification": "The subscription `productPriceChanged` is never mentioned, only the unanswered topic \"price-change subscriptions.\""
+    },
+    {
+      "id": "place-order-requirements",
+      "passed": false,
+      "justification": "No mention of productIds, shipTo, payWith, or identity from authenticated context — \"order-placement requirements\" is left unanswered."
+    },
+    {
+      "id": "payment-oneof",
+      "passed": false,
+      "justification": "PaymentInput's @oneOf structure and its three token fields are never described; \"payment input shape\" is listed as unresolved."
+    },
+    {
+      "id": "customer-email-staff-only",
+      "passed": false,
+      "justification": "Customer.email and the STAFF restriction are not identified; only \"customer field visibility\" is flagged as unanswerable."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

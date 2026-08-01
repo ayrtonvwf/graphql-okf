@@ -1,0 +1,34 @@
+{
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "weight": 5,
+      "statement": "Every field, argument, type, and operation named in the diff exists in the shop schema. Order in particular has NO cancellationReason and NO cancelledAt field — referencing either is a fabrication."
+    },
+    {
+      "id": "names-cancel-order",
+      "weight": 2,
+      "statement": "The diff calls the mutation by its exact name, cancelOrder."
+    },
+    {
+      "id": "passes-id-and-reason",
+      "weight": 2,
+      "statement": "Passes both the order id (ID!) and reason (String) as arguments to cancelOrder."
+    },
+    {
+      "id": "validation-is-client-side",
+      "weight": 3,
+      "statement": "The non-empty-reason requirement is enforced in the client. The diff must NOT claim or imply that the server requires reason — it is an optional String in the schema. Asserting a server-side requirement is a fabrication and fails this criterion."
+    },
+    {
+      "id": "surfaces-real-order-fields",
+      "weight": 2,
+      "statement": "The response is surfaced using fields that exist on Order — for example status (an OrderStatus, whose CANCELLED member is the meaningful one here), id, or updatedAt."
+    },
+    {
+      "id": "no-orphaned-callers",
+      "weight": 1,
+      "statement": "Existing callers of the cancel function are updated consistently with its new signature, so the change is internally coherent."
+    }
+  ]
+}

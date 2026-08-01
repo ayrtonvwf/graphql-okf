@@ -1,0 +1,18 @@
+{
+  "runId": "add-review__graphql-mcp__t2",
+  "caseId": "add-review",
+  "scenarioId": "graphql-mcp",
+  "trial": 2,
+  "startedAt": "2026-07-31T12:09:48.918Z",
+  "agentModel": "claude-sonnet-5",
+  "status": "ok",
+  "usage": {
+    "inputTokens": 25,
+    "outputTokens": 3541,
+    "cacheReadTokens": 118678,
+    "cacheCreationTokens": 10723,
+    "totalTokens": 132967
+  },
+  "costUsd": 0.12965464999999998,
+  "durationMs": 59346
+}

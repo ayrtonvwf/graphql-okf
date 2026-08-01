@@ -1,0 +1,43 @@
+{
+  "runId": "add-review__graphql-mcp__t2",
+  "caseId": "add-review",
+  "score": 1,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The diff uses only `addReview(productId: ID!, rating: Int!, body: String)` and Review fields `id`, `rating`, `body`, `product`, `author`, avoiding all the listed fabrications (no `reviewText`/`title`, no rating enum, no update/delete mutations, no invented `reviews` argument)."
+    },
+    {
+      "id": "names-add-review",
+      "passed": true,
+      "justification": "The operation is `addReview(productId: $productId, rating: $rating, body: $body)`, the exact mutation name."
+    },
+    {
+      "id": "product-id-argument",
+      "passed": true,
+      "justification": "The mutation is declared with `$productId: ID!` and passes it as the `productId` argument."
+    },
+    {
+      "id": "rating-is-int",
+      "passed": true,
+      "justification": "`$rating: Int!` is declared and a numeric TS `rating: number` is supplied (e.g. `addReview(first.id, 5, ...)`)."
+    },
+    {
+      "id": "body-is-optional",
+      "passed": true,
+      "justification": "`$body: String` is nullable and the TS parameter is `body?: string`, with the demo handling `review.body ?? \"(no comment)\"`."
+    },
+    {
+      "id": "selects-real-review-fields",
+      "passed": true,
+      "justification": "The selection set contains only `id`, `rating`, `body`, `product`, and `author`, all of which are listed Review fields."
+    },
+    {
+      "id": "acknowledges-customer-auth",
+      "passed": true,
+      "justification": "The request is routed through the authenticated path with `{ authenticated: true }` and documented as \"on behalf of the signed-in customer\"."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

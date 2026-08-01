@@ -1,4 +1,10 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "project": ["src/**/*.ts"]
+  "project": ["src/**/*.ts"],
+  "workspaces": {
+    ".": {
+      "project": ["src/**/*.ts"]
+    }
+  },
+  "ignoreWorkspaces": ["bench"]
 }

@@ -1,0 +1,43 @@
+{
+  "runId": "qa__graphql-mcp__t2",
+  "caseId": "qa",
+  "score": 0.7058823529411765,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": false,
+      "justification": "The answer invents schema details beyond what exists — e.g. a `reason: String` argument on `cancelOrder`, per-field default values for every `ProductFilter` field, and an `@auth`/STAFF gate on `Customer.createdAt`, `Customer.updatedAt` and `Product.createdAt` (\"timestamp/contact-info fields are broadly staff-only across the schema\"), where only `Customer.email` is role-restricted."
+    },
+    {
+      "id": "auth-on-cancel-and-place",
+      "passed": true,
+      "justification": "It states \"Both require the caller to be signed in as a customer\" and that neither `placeOrder` nor `cancelOrder` is exposed to `GUEST`, identifying `Role.CUSTOMER`."
+    },
+    {
+      "id": "product-filter-fields",
+      "passed": true,
+      "justification": "All six fields are listed — `nameContains`, `minPriceCents`, `maxPriceCents`, `inStockOnly`, `labels`, `visibleTo` — with no extraneous filter fields."
+    },
+    {
+      "id": "price-subscription",
+      "passed": true,
+      "justification": "It names `Subscription.productPriceChanged: Product!` and explicitly notes \"there's no `productId` argument,\" i.e. it takes no arguments."
+    },
+    {
+      "id": "place-order-requirements",
+      "passed": true,
+      "justification": "It lists `productIds`, `shipTo`, and `payWith` as required and states \"the order is attached to it implicitly (no `customerId` field exists on the input)\" with identity from the authenticated caller."
+    },
+    {
+      "id": "payment-oneof",
+      "passed": true,
+      "justification": "It states `payWith: PaymentInput` is \"a GraphQL **`@oneOf` input** — you must supply *exactly one* of\" `creditCardToken`, `payPalToken`, `giftCardCode`."
+    },
+    {
+      "id": "customer-email-staff-only",
+      "passed": true,
+      "justification": "It lists `email` as not readable by an ordinary customer and \"gated behind a higher role (`STAFF`) via the `@auth` directive.\""
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

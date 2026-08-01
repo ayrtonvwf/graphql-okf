@@ -1,0 +1,18 @@
+{
+  "runId": "cancel-reason__baseline__t3",
+  "caseId": "cancel-reason",
+  "scenarioId": "baseline",
+  "trial": 3,
+  "startedAt": "2026-07-31T12:22:43.694Z",
+  "agentModel": "claude-sonnet-5",
+  "status": "ok",
+  "usage": {
+    "inputTokens": 27,
+    "outputTokens": 3231,
+    "cacheReadTokens": 110751,
+    "cacheCreationTokens": 8778,
+    "totalTokens": 122787
+  },
+  "costUsd": 0.1153698,
+  "durationMs": 67242
+}

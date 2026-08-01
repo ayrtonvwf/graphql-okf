@@ -1,0 +1,38 @@
+{
+  "runId": "cancel-reason__graphql-mcp__t3",
+  "caseId": "cancel-reason",
+  "score": 1,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The diff only selects `id`, `status`, and `total { amountCents }` (the latter already mirrored by the existing `RawOrder`/`OrderSummary` mapping used by `placeOrder`) and never touches invented fields like `cancellationReason` or `cancelledAt`."
+    },
+    {
+      "id": "names-cancel-order",
+      "passed": true,
+      "justification": "The mutation body uses the exact field name: `cancelOrder(id: $id, reason: $reason)`."
+    },
+    {
+      "id": "passes-id-and-reason",
+      "passed": true,
+      "justification": "It declares `mutation CancelOrder($id: ID!, $reason: String)` and passes variables `{ id: orderId, reason }`."
+    },
+    {
+      "id": "validation-is-client-side",
+      "passed": true,
+      "justification": "Validation is done locally (`if (reason.trim().length === 0) throw ...`) and the comment says empty reasons are \"rejected before the request is sent\", without claiming the server requires it."
+    },
+    {
+      "id": "surfaces-real-order-fields",
+      "passed": true,
+      "justification": "The response is surfaced via real Order fields, returning `status` and `id` and logging `Order cancelled (${cancelled.status})`."
+    },
+    {
+      "id": "no-orphaned-callers",
+      "passed": true,
+      "justification": "The only caller in `src/index.ts` is updated to `await cancelOrder(order.id, \"Customer changed their mind\")` and consumes the new return value."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

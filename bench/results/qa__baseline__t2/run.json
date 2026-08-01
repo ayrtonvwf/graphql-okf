@@ -1,0 +1,18 @@
+{
+  "runId": "qa__baseline__t2",
+  "caseId": "qa",
+  "scenarioId": "baseline",
+  "trial": 2,
+  "startedAt": "2026-07-31T12:03:49.359Z",
+  "agentModel": "claude-sonnet-5",
+  "status": "ok",
+  "usage": {
+    "inputTokens": 17,
+    "outputTokens": 3425,
+    "cacheReadTokens": 49854,
+    "cacheCreationTokens": 4147,
+    "totalTokens": 57443
+  },
+  "costUsd": 0.08265144999999999,
+  "durationMs": 57346
+}

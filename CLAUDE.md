@@ -28,6 +28,15 @@ specs win over this file.
   code: **knip**. Build: **tsdown** (dual ESM/CJS + declarations). Git hooks:
   **lefthook**.
 
+## The benchmark workspace
+
+`bench/` is a **separate, private pnpm workspace** (`graphql-okf-bench`) holding the
+benchmark harness from issue #12. It is deliberately excluded from the root
+package's Vitest, coverage, knip, and tsconfig, and **never runs in CI** — it makes
+paid, nondeterministic model calls, which the shipped package must never do.
+Nothing in `bench/` is part of the published package or subject to `M1/GOAL-8.1`.
+See `bench/README.md`.
+
 ## Key conventions
 
 - **Single public entry point:** everything exported flows through `src/index.ts`.

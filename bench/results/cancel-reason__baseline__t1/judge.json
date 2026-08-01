@@ -1,0 +1,38 @@
+{
+  "runId": "cancel-reason__baseline__t1",
+  "caseId": "cancel-reason",
+  "score": 0.8,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "Only `cancelOrder(id: $id, reason: $reason)` with selections `id` and `status` are used — all real schema elements, with no `cancellationReason` or `cancelledAt`."
+    },
+    {
+      "id": "names-cancel-order",
+      "passed": true,
+      "justification": "The operation calls `cancelOrder(id: $id, reason: $reason)` by its exact name."
+    },
+    {
+      "id": "passes-id-and-reason",
+      "passed": true,
+      "justification": "Both arguments are supplied: `{ id: orderId, reason }` against `mutation CancelOrder($id: ID!, $reason: String!)`."
+    },
+    {
+      "id": "validation-is-client-side",
+      "passed": false,
+      "justification": "Although the throw is client-side, the doc comment fabricates a server requirement: \"the server requires one for its records\", and the variable is declared `$reason: String!` reinforcing that claim."
+    },
+    {
+      "id": "surfaces-real-order-fields",
+      "passed": true,
+      "justification": "It selects and returns `id` and `status`, logging `Order cancelled (status: ${cancelled.status})`."
+    },
+    {
+      "id": "no-orphaned-callers",
+      "passed": true,
+      "justification": "The sole caller in `src/index.ts` is updated to `await cancelOrder(order.id, \"Customer changed their mind\")` and uses the returned value."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

@@ -1,0 +1,18 @@
+{
+  "runId": "add-review__baseline__t1",
+  "caseId": "add-review",
+  "scenarioId": "baseline",
+  "trial": 1,
+  "startedAt": "2026-07-31T12:12:00.795Z",
+  "agentModel": "claude-sonnet-5",
+  "status": "ok",
+  "usage": {
+    "inputTokens": 17,
+    "outputTokens": 3074,
+    "cacheReadTokens": 69883,
+    "cacheCreationTokens": 7175,
+    "totalTokens": 80149
+  },
+  "costUsd": 0.09469715,
+  "durationMs": 44352
+}

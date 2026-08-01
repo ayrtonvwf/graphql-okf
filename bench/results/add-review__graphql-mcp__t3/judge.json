@@ -1,0 +1,43 @@
+{
+  "runId": "add-review__graphql-mcp__t3",
+  "caseId": "add-review",
+  "score": 1,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "The operation uses only `addReview(productId: $productId, rating: $rating, body: $body)` with selections `id`, `rating`, `body`, and `product { id }` — no invented fields like `reviewText`/`title`, no rating enum, and no update/delete mutations."
+    },
+    {
+      "id": "names-add-review",
+      "passed": true,
+      "justification": "The mutation body invokes the field exactly as `addReview(productId: ..., rating: ..., body: ...)`."
+    },
+    {
+      "id": "product-id-argument",
+      "passed": true,
+      "justification": "The operation declares `$productId: ID!` and passes it as `addReview(productId: $productId, ...)`."
+    },
+    {
+      "id": "rating-is-int",
+      "passed": true,
+      "justification": "Declared as `$rating: Int!` and typed as `rating: number` in TypeScript, passed as the literal `5`."
+    },
+    {
+      "id": "body-is-optional",
+      "passed": true,
+      "justification": "`$body: String` is nullable, the TS parameter is `body?: string`, and it is coerced with `body: body ?? null`."
+    },
+    {
+      "id": "selects-real-review-fields",
+      "passed": true,
+      "justification": "The selection set contains only `id`, `rating`, `body`, and `product { id }`, all of which exist on Review."
+    },
+    {
+      "id": "acknowledges-customer-auth",
+      "passed": true,
+      "justification": "The request is issued through the client with `{ authenticated: true }`, routing it via the authenticated request path."
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}

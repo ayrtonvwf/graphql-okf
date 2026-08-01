@@ -1,0 +1,43 @@
+{
+  "runId": "qa__graphql-mcp__t1",
+  "caseId": "qa",
+  "score": 0.8823529411764706,
+  "criteria": [
+    {
+      "id": "no-fabricated-schema-elements",
+      "passed": true,
+      "justification": "Every named element (e.g. `cancelOrder(id: ID!, reason: String)`, `ProductFilter` fields, `orderStatusChanged(orderId: ID!)`, `Order.paidWith: PaymentMethod` as `CreditCard | PayPalAccount`, `AddressInput` fields) is internally consistent and no obviously invented field/type/operation names appear; the only defect is an omission (not showing `@oneOf` on `PaymentInput`) rather than a fabrication."
+    },
+    {
+      "id": "auth-on-cancel-and-place",
+      "passed": true,
+      "justification": "It reaches the conclusion for both mutations — \"**yes, both almost certainly require at least CUSTOMER-level auth** (the `@auth` directive's default role)\" — though it hedges by wrongly claiming the applied directive is unverifiable."
+    },
+    {
+      "id": "product-filter-fields",
+      "passed": true,
+      "justification": "It lists all six correctly: `nameContains`, `minPriceCents`, `maxPriceCents`, `inStockOnly`, `labels`, `visibleTo`, with no invented extras."
+    },
+    {
+      "id": "price-subscription",
+      "passed": true,
+      "justification": "It states `Subscription.productPriceChanged: Product!` and emphasizes \"**`productPriceChanged` takes no arguments**\"."
+    },
+    {
+      "id": "place-order-requirements",
+      "passed": true,
+      "justification": "It shows `PlaceOrderInput` with required `productIds`, `shipTo`, `payWith`, and notes \"no `customerId` — the resulting `Order.customer: Customer!` must come from the caller's session,\" i.e. the authenticated customer context."
+    },
+    {
+      "id": "payment-oneof",
+      "passed": true,
+      "justification": "It states the payment input requires \"exactly one field; supplying zero or more than one is an error\" among `creditCardToken`, `payPalToken`, `giftCardCode`, conveying the @oneOf semantics (though it never names the `@oneOf` directive)."
+    },
+    {
+      "id": "customer-email-staff-only",
+      "passed": false,
+      "justification": "It refuses to identify `email` as STAFF-only, saying only that \"It would be reasonable/expected for PII fields like `email` and `defaultAddress` to be gated to 'self or STAFF'... I can't confirm this from the schema with certainty.\""
+    }
+  ],
+  "judgeModel": "claude-opus-5"
+}
