@@ -25,7 +25,7 @@ Implements [`Node`](../interfaces/Node.md), [`Timestamped`](../interfaces/Timest
 | `createdAt` | [`DateTime!`](../scalars/DateTime.md) |  |
 | `defaultAddress` | [`Address`](Address.md) | Where orders are shipped by default. |
 | `displayName` | [`String!`](../scalars/String.md) |  |
-| `email` | [`EmailAddress!`](../scalars/EmailAddress.md) |  |
+| `email` | [`EmailAddress!`](../scalars/EmailAddress.md) | [`@auth`](../../directives/auth.md)(requires: STAFF) |
 | `id` | [`ID!`](../scalars/ID.md) |  |
 | `updatedAt` | [`DateTime`](../scalars/DateTime.md) |  |
 
