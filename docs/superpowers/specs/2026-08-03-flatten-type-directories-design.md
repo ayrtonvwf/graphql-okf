@@ -109,7 +109,6 @@ significant.
 # Types
 
 <!-- graphql-okf:generated:start -->
-
 ## Object types
 
 * [Address](/types/Address.md) - A postal address.
@@ -306,9 +305,13 @@ the log count and the write-back list. It splits:
 ```ts
 readonly migrated: {
   readonly frontmatter: readonly string[];
-  readonly relayout: readonly string[];
+  readonly relocated: readonly string[];
 };
 ```
+
+`SyncResult` — public API, `src/index.ts` — keeps `migrated` meaning the
+frontmatter conversion, so no consumer breaks, and gains a sibling
+`relocated: readonly string[]` holding the new paths of moved concepts.
 
 `hasLoggableChanges` sums both. `migrationGroup` emits up to two bullets:
 
@@ -386,18 +389,32 @@ behavioural changes.
 
 ## 8. Regenerating the committed bundles
 
-`okf/shop-api/` and `okf/countries-api/` are regenerated **through the migration
-path** — running the tool against the existing committed bundles, not deleting
-and re-emitting them — so their `log.md` files carry the real `Migrated` entry a
-user would see. The implementation plan pins the exact CLI invocations, `--now`
-timestamps and resource values so the diff is reproducible.
+The two committed bundles are maintained differently, and the flatten reaches
+them by different routes.
 
-Expect, for `shop-api`: 27 type concepts moved and 6 kind indexes deleted. For
-`countries-api`: 14 type concepts moved and 3 kind indexes deleted (it has no
-interfaces, unions or enums, so only three kind directories exist) — which makes
-it the fixture that proves the pre-pass does not assume all six directories are
-present. Both also get a rewritten `types/index.md`, link-text changes in every
-file referencing a type, and one `log.md` entry.
+**`okf/shop-api/` is a golden fixture**, rebuilt from scratch by
+`test/example-bundle.test.ts`: `buildExampleBundle()` replays v1 → v2 → v3 with
+pinned timestamps, and `UPDATE_EXAMPLE=1` writes the result over the committed
+tree. It therefore **cannot** exercise the relayout pre-pass — the emitter it
+replays no longer knows how to produce a legacy layout. It is regenerated flat
+from its first historical run onward, `log.md` included, and its four dated
+entries link to the new paths. That is self-consistent and is the only option a
+from-scratch golden allows.
+
+**`okf/countries-api/` is reconciled in place** against a live endpoint, with no
+test guarding it. It is the one committed bundle that actually runs the
+migration, and it is where the `Migrated` layout log entry appears for real. It
+is regenerated last, after the pre-pass is wired in.
+
+Expect, for `shop-api`: 27 type concepts at new paths, 6 kind indexes gone. For
+`countries-api`: 14 type concepts moved and 3 kind indexes deleted — it has no
+interfaces, unions or enums, so only three kind directories exist, which makes it
+the fixture proving the pre-pass does not assume all six are present. Both get a
+rewritten `types/index.md` and link-text changes in every file referencing a type.
+
+The consequence worth stating: **the end-to-end migration is proven by the
+integration test in §6, not by either committed bundle.** `shop-api` cannot reach
+it and `countries-api` will only pass through it once, in this PR, never again.
 
 ## 9. Documentation
 
