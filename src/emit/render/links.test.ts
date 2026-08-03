@@ -45,3 +45,15 @@ describe("typeLink", () => {
     expect(typeLink(t)).toBe("[`[Language!]!`](/types/Language.md)");
   });
 });
+
+describe("a reference with no concept file", () => {
+  it("renders plain code instead of a link", () => {
+    expect(typeLink({ wrappers: ["nonNull"], name: "ID", path: null })).toBe("`ID!`");
+  });
+
+  it("keeps every wrapper on the plain-code form", () => {
+    expect(typeLink({ wrappers: ["nonNull", "list", "nonNull"], name: "String", path: null })).toBe(
+      "`[String!]!`",
+    );
+  });
+});

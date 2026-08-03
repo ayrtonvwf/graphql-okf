@@ -641,6 +641,48 @@ describe("applied directives on non-field rows", () => {
   });
 });
 
+describe("rendering an element that has no concept file", () => {
+  it("renders an unlinked type in a field table", () => {
+    const body = renderObjectBody({
+      kind: "object",
+      name: "Product",
+      path: "types/Product.md",
+      description: null,
+      appliedDirectives: [],
+      interfaces: [],
+      fields: [
+        {
+          name: "id",
+          description: null,
+          type: { wrappers: ["nonNull"], name: "ID", path: null },
+          args: [],
+          deprecation: null,
+          appliedDirectives: [],
+        },
+      ],
+    });
+
+    expect(body).toContain("| `id` | `ID!` |");
+    expect(body).not.toContain("](/types/ID.md)");
+  });
+
+  it("renders an unlinked applied directive, arguments intact", () => {
+    const body = renderInputBody({
+      kind: "input",
+      name: "PaymentInput",
+      path: "types/PaymentInput.md",
+      description: null,
+      fields: [],
+      appliedDirectives: [
+        { name: "oneOf", path: null, args: [] },
+        { name: "tag", path: "directives/tag.md", args: [{ name: "name", value: '"beta"' }] },
+      ],
+    });
+
+    expect(body).toContain('Directives: `@oneOf`, [`@tag`](/directives/tag.md)(name: "beta").');
+  });
+});
+
 describe("# Schema sections", () => {
   it("renders object fields as a table under a top-level # Schema", () => {
     const body = renderObjectBody({
