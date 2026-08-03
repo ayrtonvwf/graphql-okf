@@ -164,6 +164,14 @@ describe("OKF §9 conformance", () => {
     expect(relative).toEqual([]);
   });
 
+  it("puts no concept file under a kind subdirectory of types/", async () => {
+    const files = await bundleFor("examples/shop-api/v3.graphql");
+
+    const nested = [...files.keys()].filter((path) => /^types\/[^/]+\//.test(path));
+
+    expect(nested).toEqual([]);
+  });
+
   it("emits a top-level # Schema section the reference tooling can parse", async () => {
     const files = await bundleFor("examples/shop-api/v1.graphql");
     const product = files.get("types/Product.md");
