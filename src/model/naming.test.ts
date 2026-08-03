@@ -1,10 +1,13 @@
 import { createHash } from "node:crypto";
+import { buildSchema, isScalarType, isSpecifiedDirective, isSpecifiedScalarType } from "graphql";
 import { describe, expect, it } from "vitest";
 import {
   DIRECTORY_BY_KIND,
   elementId,
+  hasConceptFile,
   KIND_ORDER,
   resolvePaths,
+  SPEC_DEFINED_PATHS,
   TYPE_LABEL_BY_KIND,
 } from "./naming.js";
 
@@ -227,5 +230,65 @@ describe("the flattened types directory", () => {
 
     expect(paths.get("object:Product")).toBe("types/Product.md");
     expect(paths.get("query:product")).toBe("queries/product.md");
+  });
+});
+
+describe("hasConceptFile", () => {
+  it("denies a concept file to every specified scalar and directive", () => {
+    for (const name of ["Boolean", "Float", "ID", "Int", "String"]) {
+      expect(hasConceptFile({ kind: "scalar", name })).toBe(false);
+    }
+    for (const name of ["deprecated", "include", "oneOf", "skip", "specifiedBy"]) {
+      expect(hasConceptFile({ kind: "directive", name })).toBe(false);
+    }
+  });
+
+  it("grants one to custom scalars, custom directives, and every other kind", () => {
+    expect(hasConceptFile({ kind: "scalar", name: "DateTime" })).toBe(true);
+    expect(hasConceptFile({ kind: "directive", name: "auth" })).toBe(true);
+    // GraphQL names are case-sensitive: `type id` is not the built-in `ID`.
+    expect(hasConceptFile({ kind: "object", name: "id" })).toBe(true);
+    expect(hasConceptFile({ kind: "enum", name: "String" })).toBe(true);
+    expect(hasConceptFile({ kind: "query", name: "skip" })).toBe(true);
+  });
+
+  it("agrees with graphql-js about what the specification defines", () => {
+    const schema = buildSchema(`
+      scalar DateTime
+      directive @auth(role: String) on FIELD_DEFINITION
+      type Query { at: DateTime, id: ID, n: Int, f: Float, s: String, b: Boolean }
+    `);
+
+    for (const type of Object.values(schema.getTypeMap())) {
+      if (!isScalarType(type)) {
+        continue;
+      }
+      expect(hasConceptFile({ kind: "scalar", name: type.name })).toBe(
+        !isSpecifiedScalarType(type),
+      );
+    }
+
+    for (const directive of schema.getDirectives()) {
+      expect(hasConceptFile({ kind: "directive", name: directive.name })).toBe(
+        !isSpecifiedDirective(directive),
+      );
+    }
+  });
+});
+
+describe("SPEC_DEFINED_PATHS", () => {
+  it("lists the ten paths spec-defined concepts occupied, sorted", () => {
+    expect([...SPEC_DEFINED_PATHS]).toEqual([
+      "directives/deprecated.md",
+      "directives/include.md",
+      "directives/oneOf.md",
+      "directives/skip.md",
+      "directives/specifiedBy.md",
+      "types/Boolean.md",
+      "types/Float.md",
+      "types/ID.md",
+      "types/Int.md",
+      "types/String.md",
+    ]);
   });
 });
