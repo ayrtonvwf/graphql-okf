@@ -16,15 +16,15 @@ Exactly one payment instrument.
 
 Supply exactly one field; supplying zero or more than one is an error.
 
-Directives: [`@oneOf`](/directives/oneOf.md).
+Directives: `@oneOf`.
 
 # Schema
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `creditCardToken` | [`String`](/types/String.md) |  |  |
-| `giftCardCode` | [`String`](/types/String.md) |  |  |
-| `payPalToken` | [`String`](/types/String.md) |  |  |
+| `creditCardToken` | `String` |  |  |
+| `giftCardCode` | `String` |  |  |
+| `payPalToken` | `String` |  |  |
 
 <!-- graphql-okf:generated:end -->
 

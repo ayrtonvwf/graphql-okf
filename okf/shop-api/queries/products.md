@@ -21,7 +21,7 @@ Lists products, most recently created first.
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
 | `filter` | [`ProductFilter`](/types/ProductFilter.md) |  |  |
-| `first` | [`Int`](/types/Int.md) | `20` | Maximum number of products to return. |
+| `first` | `Int` | `20` | Maximum number of products to return. |
 
 <!-- graphql-okf:generated:end -->
 

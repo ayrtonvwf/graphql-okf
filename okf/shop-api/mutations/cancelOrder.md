@@ -22,8 +22,8 @@ Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `id` | [`ID!`](/types/ID.md) |  |  |
-| `reason` | [`String`](/types/String.md) |  |  |
+| `id` | `ID!` |  |  |
+| `reason` | `String` |  |  |
 
 <!-- graphql-okf:generated:end -->
 

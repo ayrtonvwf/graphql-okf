@@ -20,7 +20,7 @@ Emits each new review as it is posted.
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `productId` | [`ID!`](/types/ID.md) |  |  |
+| `productId` | `ID!` |  |  |
 
 <!-- graphql-okf:generated:end -->
 

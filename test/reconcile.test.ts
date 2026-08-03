@@ -336,7 +336,7 @@ describe("migrating a bundle from the nested types layout", () => {
     expect(result.relocated.length).toBeGreaterThan(0);
 
     // A type that links to nothing still reached its new path — the sameContent trap.
-    expect(after.has("types/Boolean.md")).toBe(true);
+    expect(after.has("types/DateTime.md")).toBe(true);
 
     // Human text survived both moves.
     expect(after.get("types/Post.md")).toContain("Ping #catalog.");

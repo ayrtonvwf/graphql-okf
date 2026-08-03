@@ -24,7 +24,7 @@ Implemented by [`Product`](/types/Product.md).
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `id` | [`ID!`](/types/ID.md) |  |
+| `id` | `ID!` |  |
 | `price` | [`Money!`](/types/Money.md) | The price, including the currency it is denominated in. |
 
 <!-- graphql-okf:generated:end -->

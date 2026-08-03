@@ -20,8 +20,6 @@ import {
   isNonNullType,
   isObjectType,
   isScalarType,
-  isSpecifiedDirective,
-  isSpecifiedScalarType,
   isUnionType,
   print,
 } from "graphql";
@@ -48,6 +46,7 @@ import {
   DIRECTORY_BY_KIND,
   type ElementName,
   elementId,
+  hasConceptFile,
   resolvePaths,
 } from "./naming.js";
 
@@ -69,7 +68,7 @@ type HasAstNode = {
 
 function appliedDirectivesOf(
   holder: HasAstNode,
-  pathFor: (element: ElementName) => string,
+  pathFor: (element: ElementName) => string | null,
 ): readonly AppliedDirective[] {
   const nodes = holder.astNode?.directives;
   if (!nodes) {
@@ -115,7 +114,7 @@ function printDefaultValue(input: GraphQLArgument | GraphQLInputField): string |
 
 function toTypeRef(
   type: GraphQLType,
-  pathFor: (element: ElementName) => string,
+  pathFor: (element: ElementName) => string | null,
   rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): TypeRef {
   const wrappers: ("nonNull" | "list")[] = [];
@@ -140,7 +139,7 @@ function toTypeRef(
 
 function argNode(
   arg: GraphQLArgument,
-  pathFor: (element: ElementName) => string,
+  pathFor: (element: ElementName) => string | null,
   rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): InputValueNode {
   return {
@@ -155,7 +154,7 @@ function argNode(
 
 function inputFieldNode(
   field: GraphQLInputField,
-  pathFor: (element: ElementName) => string,
+  pathFor: (element: ElementName) => string | null,
   rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): InputValueNode {
   return {
@@ -170,7 +169,7 @@ function inputFieldNode(
 
 function fieldNode(
   field: GraphQLField<unknown, unknown>,
-  pathFor: (element: ElementName) => string,
+  pathFor: (element: ElementName) => string | null,
   rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): FieldNode {
   return {
@@ -208,7 +207,7 @@ export function project(loaded: LoadedSchema): SchemaIr {
   const elements: ElementName[] = [];
   for (const type of namedTypes) {
     const kind = kindOfNamedType(type);
-    if (kind !== null) {
+    if (kind !== null && hasConceptFile({ kind, name: type.name })) {
       elements.push({ kind, name: type.name });
     }
   }
@@ -221,11 +220,17 @@ export function project(loaded: LoadedSchema): SchemaIr {
     }
   }
   for (const directive of schema.getDirectives()) {
-    elements.push({ kind: "directive", name: directive.name });
+    const element: ElementName = { kind: "directive", name: directive.name };
+    if (hasConceptFile(element)) {
+      elements.push(element);
+    }
   }
 
   const paths = resolvePaths(elements);
-  const pathFor = (element: ElementName): string => {
+  const pathFor = (element: ElementName): string | null => {
+    if (!hasConceptFile(element)) {
+      return null;
+    }
     const path = paths.get(elementId(element));
     if (path === undefined) {
       throw new Error(`no path resolved for ${elementId(element)}`);
@@ -253,47 +258,34 @@ export function project(loaded: LoadedSchema): SchemaIr {
   const concepts: ConceptNode[] = [];
 
   for (const type of namedTypes) {
+    const kind = kindOfNamedType(type);
+    if (kind === null) {
+      continue;
+    }
+    const path = pathFor({ kind, name: type.name });
+    if (path === null) {
+      continue;
+    }
     if (isScalarType(type)) {
-      concepts.push(scalarConcept(type, pathFor({ kind: "scalar", name: type.name }), pathFor));
+      concepts.push(scalarConcept(type, path, pathFor));
     } else if (isEnumType(type)) {
-      concepts.push(enumConcept(type, pathFor({ kind: "enum", name: type.name }), pathFor));
+      concepts.push(enumConcept(type, path, pathFor));
     } else if (isObjectType(type)) {
-      concepts.push(
-        objectConcept(
-          type,
-          pathFor({ kind: "object", name: type.name }),
-          pathFor,
-          rootDirectoryByTypeName,
-        ),
-      );
+      concepts.push(objectConcept(type, path, pathFor, rootDirectoryByTypeName));
     } else if (isInterfaceType(type)) {
       concepts.push(
         interfaceConcept(
           type,
-          pathFor({ kind: "interface", name: type.name }),
+          path,
           pathFor,
           implementorsByInterface.get(type.name) ?? [],
           rootDirectoryByTypeName,
         ),
       );
     } else if (isUnionType(type)) {
-      concepts.push(
-        unionConcept(
-          type,
-          pathFor({ kind: "union", name: type.name }),
-          pathFor,
-          rootDirectoryByTypeName,
-        ),
-      );
+      concepts.push(unionConcept(type, path, pathFor, rootDirectoryByTypeName));
     } else if (isInputObjectType(type)) {
-      concepts.push(
-        inputConcept(
-          type,
-          pathFor({ kind: "input", name: type.name }),
-          pathFor,
-          rootDirectoryByTypeName,
-        ),
-      );
+      concepts.push(inputConcept(type, path, pathFor, rootDirectoryByTypeName));
     }
   }
 
@@ -302,11 +294,19 @@ export function project(loaded: LoadedSchema): SchemaIr {
       continue;
     }
     for (const field of Object.values(root.type.getFields())) {
+      const element: ElementName = { kind: root.kind, name: field.name };
+      const path = pathFor(element);
+      if (path === null) {
+        // Root operation fields always have a concept file: hasConceptFile only
+        // withholds one from spec-defined scalars and directives, neither of
+        // which root.kind can ever be.
+        throw new Error(`no path resolved for ${elementId(element)}`);
+      }
       concepts.push({
         kind: root.kind,
         name: field.name,
         rootTypeName: root.type.name,
-        path: pathFor({ kind: root.kind, name: field.name }),
+        path,
         description: normalizeDescription(field.description),
         appliedDirectives: appliedDirectivesOf(field, pathFor),
         args: byName(field.args).map((arg) => argNode(arg, pathFor, rootDirectoryByTypeName)),
@@ -317,7 +317,11 @@ export function project(loaded: LoadedSchema): SchemaIr {
   }
 
   for (const directive of schema.getDirectives()) {
-    concepts.push(directiveConcept(directive, pathFor, rootDirectoryByTypeName));
+    const path = pathFor({ kind: "directive", name: directive.name });
+    if (path === null) {
+      continue;
+    }
+    concepts.push(directiveConcept(directive, path, pathFor, rootDirectoryByTypeName));
   }
 
   concepts.sort((left, right) => (left.path < right.path ? -1 : left.path > right.path ? 1 : 0));
@@ -328,7 +332,7 @@ export function project(loaded: LoadedSchema): SchemaIr {
 function scalarConcept(
   type: GraphQLScalarType,
   path: string,
-  pathFor: (element: ElementName) => string,
+  pathFor: (element: ElementName) => string | null,
 ): ScalarTypeNode {
   return {
     kind: "scalar",
@@ -337,14 +341,13 @@ function scalarConcept(
     description: normalizeDescription(type.description),
     appliedDirectives: appliedDirectivesOf(type, pathFor),
     specifiedByUrl: type.specifiedByURL ?? null,
-    isBuiltIn: isSpecifiedScalarType(type),
   };
 }
 
 function enumConcept(
   type: GraphQLEnumType,
   path: string,
-  pathFor: (element: ElementName) => string,
+  pathFor: (element: ElementName) => string | null,
 ): EnumTypeNode {
   return {
     kind: "enum",
@@ -364,7 +367,7 @@ function enumConcept(
 function objectConcept(
   type: GraphQLObjectType,
   path: string,
-  pathFor: (element: ElementName) => string,
+  pathFor: (element: ElementName) => string | null,
   rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): ObjectTypeNode {
   return {
@@ -385,7 +388,7 @@ function objectConcept(
 function interfaceConcept(
   type: GraphQLInterfaceType,
   path: string,
-  pathFor: (element: ElementName) => string,
+  pathFor: (element: ElementName) => string | null,
   implementors: readonly ElementName[],
   rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): InterfaceTypeNode {
@@ -412,7 +415,7 @@ function interfaceConcept(
 function unionConcept(
   type: GraphQLUnionType,
   path: string,
-  pathFor: (element: ElementName) => string,
+  pathFor: (element: ElementName) => string | null,
   rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): UnionTypeNode {
   return {
@@ -430,7 +433,7 @@ function unionConcept(
 function inputConcept(
   type: GraphQLInputObjectType,
   path: string,
-  pathFor: (element: ElementName) => string,
+  pathFor: (element: ElementName) => string | null,
   rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): InputObjectTypeNode {
   return {
@@ -447,18 +450,18 @@ function inputConcept(
 
 function directiveConcept(
   directive: GraphQLDirective,
-  pathFor: (element: ElementName) => string,
+  path: string,
+  pathFor: (element: ElementName) => string | null,
   rootDirectoryByTypeName: ReadonlyMap<string, string>,
 ): DirectiveDefinitionNode {
   return {
     kind: "directive",
     name: directive.name,
-    path: pathFor({ kind: "directive", name: directive.name }),
+    path,
     description: normalizeDescription(directive.description),
     appliedDirectives: [],
     locations: [...directive.locations].sort(),
     args: byName(directive.args).map((arg) => argNode(arg, pathFor, rootDirectoryByTypeName)),
     isRepeatable: directive.isRepeatable,
-    isBuiltIn: isSpecifiedDirective(directive),
   };
 }

@@ -12,6 +12,7 @@ import type {
   ScalarTypeNode,
   UnionTypeNode,
 } from "./ir.js";
+import { SPEC_DEFINED_PATHS } from "./naming.js";
 import { project } from "./project.js";
 
 function loadedFrom(sdl: string): LoadedSchema {
@@ -34,14 +35,6 @@ describe("project", () => {
     expect(ir.origin).toBe("sdl");
   });
 
-  it("emits built-in scalars as concepts", () => {
-    const ir = project(loadedFrom("type Query { hello: String }"));
-    const scalar = conceptAt(ir.concepts, "types/String.md") as ScalarTypeNode;
-
-    expect(scalar.kind).toBe("scalar");
-    expect(scalar.isBuiltIn).toBe(true);
-  });
-
   it("emits custom scalars with their specifiedBy url", () => {
     const ir = project(
       loadedFrom(`
@@ -51,7 +44,6 @@ describe("project", () => {
     );
     const scalar = conceptAt(ir.concepts, "types/DateTime.md") as ScalarTypeNode;
 
-    expect(scalar.isBuiltIn).toBe(false);
     expect(scalar.specifiedByUrl).toBe("https://scalars.test/datetime");
     expect(scalar.appliedDirectives).toEqual([]);
   });
@@ -96,7 +88,8 @@ describe("project object and interface types", () => {
   it("records wrappers outermost-first and links to the named type", () => {
     const ir = project(
       loadedFrom(`
-        type User { tags: [[String!]]!, label: [String]! }
+        scalar Tag
+        type User { tags: [[Tag!]]!, label: [Tag]! }
         type Query { user: User }
       `),
     );
@@ -104,16 +97,16 @@ describe("project object and interface types", () => {
 
     expect(user.fields.find((field) => field.name === "tags")?.type).toEqual({
       wrappers: ["nonNull", "list", "list", "nonNull"],
-      name: "String",
-      path: "types/String.md",
+      name: "Tag",
+      path: "types/Tag.md",
     });
-    // [String]! is asymmetric under reversal, unlike [[String!]]! above: this
+    // [Tag]! is asymmetric under reversal, unlike [[Tag!]]! above: this
     // catches an implementation that records wrappers innermost-first instead
     // of outermost-first.
     expect(user.fields.find((field) => field.name === "label")?.type).toEqual({
       wrappers: ["nonNull", "list"],
-      name: "String",
-      path: "types/String.md",
+      name: "Tag",
+      path: "types/Tag.md",
     });
   });
 
@@ -208,7 +201,8 @@ describe("project unions, inputs, and default values", () => {
   it("projects input object fields with links", () => {
     const ir = project(
       loadedFrom(`
-        input OrderInput { sku: String!, quantity: Int }
+        scalar Sku
+        input OrderInput { sku: Sku!, quantity: Int }
         type Query { order(input: OrderInput): String }
       `),
     );
@@ -217,8 +211,8 @@ describe("project unions, inputs, and default values", () => {
     expect(input.fields.map((field) => field.name)).toEqual(["quantity", "sku"]);
     expect(input.fields[1]?.type).toEqual({
       wrappers: ["nonNull"],
-      name: "String",
-      path: "types/String.md",
+      name: "Sku",
+      path: "types/Sku.md",
     });
   });
 
@@ -364,28 +358,9 @@ describe("project directives", () => {
 
     expect(auth.description).toBe("Requires a role.");
     expect(auth.isRepeatable).toBe(true);
-    expect(auth.isBuiltIn).toBe(false);
     expect(auth.locations).toEqual(["FIELD_DEFINITION", "OBJECT"]);
     expect(auth.args[0]?.name).toBe("requires");
     expect(auth.args[0]?.defaultValue).toBe('"USER"');
-  });
-
-  it("emits built-in directives flagged as such", () => {
-    const ir = project(loadedFrom("type Query { hello: String }"));
-    const deprecated = conceptAt(
-      ir.concepts,
-      "directives/deprecated.md",
-    ) as DirectiveDefinitionNode;
-
-    expect(deprecated.isBuiltIn).toBe(true);
-    // Strengthened: the brief's assertion above only checks isBuiltIn on one directive.
-    // Also assert a custom directive definition is flagged false and that appliedDirectives
-    // is always empty on directive definitions themselves (they can't carry directives),
-    // so a bug that always returns true or that copies applied directives onto the
-    // definition itself would still be caught.
-    expect(deprecated.appliedDirectives).toEqual([]);
-    const skip = conceptAt(ir.concepts, "directives/skip.md") as DirectiveDefinitionNode;
-    expect(skip.isBuiltIn).toBe(true);
   });
 
   it("records applied custom directives with printed argument values", () => {
@@ -465,5 +440,55 @@ describe("project directives", () => {
       { name: "alpha", path: "directives/alpha.md", args: [] },
       { name: "zed", path: "directives/zed.md", args: [] },
     ]);
+  });
+});
+
+describe("spec-defined elements", () => {
+  it("emits no concept for a specified scalar or directive, but keeps custom ones", () => {
+    const ir = project(
+      loadedFrom(`
+        scalar DateTime
+        directive @auth(role: String) on FIELD_DEFINITION
+        type Query { at: DateTime, id: ID, n: Int, f: Float, s: String, b: Boolean }
+      `),
+    );
+    const paths = new Set(ir.concepts.map((concept) => concept.path));
+
+    for (const path of SPEC_DEFINED_PATHS) {
+      expect(paths.has(path), `${path} should not be emitted`).toBe(false);
+    }
+    expect(paths.has("types/DateTime.md")).toBe(true);
+    expect(paths.has("directives/auth.md")).toBe(true);
+  });
+
+  it("gives a reference to a built-in scalar a null path", () => {
+    const ir = project(loadedFrom("type Product { id: ID! }\ntype Query { p: Product }"));
+    const product = conceptAt(ir.concepts, "types/Product.md") as ObjectTypeNode;
+
+    expect(product.fields[0]?.type.name).toBe("ID");
+    expect(product.fields[0]?.type.path).toBeNull();
+  });
+
+  it("gives an applied spec directive a null path and a custom one its real path", () => {
+    const ir = project(
+      loadedFrom(`
+        directive @tag(name: String!) on INPUT_OBJECT
+        input PaymentInput @oneOf @tag(name: "beta") { card: String, paypal: String }
+        type Query { hello: String }
+      `),
+    );
+    const input = conceptAt(ir.concepts, "types/PaymentInput.md") as InputObjectTypeNode;
+    const pathByName = new Map(input.appliedDirectives.map((each) => [each.name, each.path]));
+
+    expect(pathByName.get("oneOf")).toBeNull();
+    expect(pathByName.get("tag")).toBe("directives/tag.md");
+  });
+
+  it("frees a clean path for a custom type that used to case-collide with a built-in", () => {
+    const ir = project(loadedFrom("type id { value: String! }\ntype Query { thing: id }"));
+    const paths = ir.concepts.map((concept) => concept.path);
+
+    expect(paths).toContain("types/id.md");
+    expect(paths.some((path) => path.startsWith("types/id-"))).toBe(false);
   });
 });

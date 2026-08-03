@@ -35,7 +35,6 @@ const deprecated: DirectiveDefinitionNode = {
   locations: [],
   args: [],
   isRepeatable: false,
-  isBuiltIn: true,
 };
 
 describe("conceptResource", () => {

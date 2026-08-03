@@ -22,8 +22,8 @@ A prepaid gift card redeemed against an order.
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `balanceCents` | [`Int!`](/types/Int.md) |  |
-| `code` | [`String!`](/types/String.md) |  |
+| `balanceCents` | `Int!` |  |
+| `code` | `String!` |  |
 
 <!-- graphql-okf:generated:end -->
 

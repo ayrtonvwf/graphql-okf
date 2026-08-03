@@ -20,7 +20,7 @@ Looks up a single product.
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `id` | [`ID!`](/types/ID.md) |  |  |
+| `id` | `ID!` |  |  |
 
 <!-- graphql-okf:generated:end -->
 

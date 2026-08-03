@@ -23,14 +23,14 @@ Implements [`Node`](/types/Node.md), [`Purchasable`](/types/Purchasable.md), [`T
 | Field | Type | Description |
 | --- | --- | --- |
 | `createdAt` | [`DateTime!`](/types/DateTime.md) |  |
-| `description` | [`String`](/types/String.md) | A long-form description. May contain Markdown, including **bold** text and [links](https://example.test). |
-| `id` | [`ID!`](/types/ID.md) |  |
-| `inStock` | [`Boolean!`](/types/Boolean.md) | Whether the product can currently be ordered. |
-| `labels` | [`[String!]!`](/types/String.md) | Free-form merchandising labels. |
-| `name` | [`String!`](/types/String.md) | The customer-facing name. |
+| `description` | `String` | A long-form description. May contain Markdown, including **bold** text and [links](https://example.test). |
+| `id` | `ID!` |  |
+| `inStock` | `Boolean!` | Whether the product can currently be ordered. |
+| `labels` | `[String!]!` | Free-form merchandising labels. |
+| `name` | `String!` | The customer-facing name. |
 | `price` | [`Money!`](/types/Money.md) |  |
 | `reviews` | [`[Review!]!`](/types/Review.md) | Reviews left by customers, newest first. |
-| `sku` | [`String`](/types/String.md) | The internal SKU. Not stable across catalog migrations. (deprecated: No longer supported) |
+| `sku` | `String` | The internal SKU. Not stable across catalog migrations. (deprecated: No longer supported) |
 | `updatedAt` | [`DateTime`](/types/DateTime.md) |  |
 
 <!-- graphql-okf:generated:end -->

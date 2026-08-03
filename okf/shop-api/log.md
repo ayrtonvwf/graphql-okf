@@ -10,7 +10,7 @@ type: Log
 
 **Migrated**
 
-* OKF bundle format 0.1 → 0.2 (`timestamp` → `generated`) across 47 concepts.
+* OKF bundle format 0.1 → 0.2 (`timestamp` → `generated`) across 38 concepts.
 
 ## 2026-05-20
 
@@ -61,11 +61,6 @@ type: Log
 **Added**
 
 * [`auth`](/directives/auth.md)
-* [`deprecated`](/directives/deprecated.md)
-* [`include`](/directives/include.md)
-* [`oneOf`](/directives/oneOf.md)
-* [`skip`](/directives/skip.md)
-* [`specifiedBy`](/directives/specifiedBy.md)
 * [`tag`](/directives/tag.md)
 * [`cancelOrder`](/mutations/cancelOrder.md)
 * [`placeOrder`](/mutations/placeOrder.md)
@@ -80,15 +75,12 @@ type: Log
 * [`productPriceChanged`](/subscriptions/productPriceChanged.md)
 * [`Address`](/types/Address.md)
 * [`AddressInput`](/types/AddressInput.md)
-* [`Boolean`](/types/Boolean.md)
 * [`CreditCard`](/types/CreditCard.md)
 * [`Currency`](/types/Currency.md)
 * [`Customer`](/types/Customer.md)
 * [`DateTime`](/types/DateTime.md)
 * [`EmailAddress`](/types/EmailAddress.md)
 * [`GiftCard`](/types/GiftCard.md)
-* [`ID`](/types/ID.md)
-* [`Int`](/types/Int.md)
 * [`Node`](/types/Node.md)
 * [`Order`](/types/Order.md)
 * [`OrderLine`](/types/OrderLine.md)
@@ -101,5 +93,4 @@ type: Log
 * [`ProductFilter`](/types/ProductFilter.md)
 * [`Purchasable`](/types/Purchasable.md)
 * [`Role`](/types/Role.md)
-* [`String`](/types/String.md)
 * [`Timestamped`](/types/Timestamped.md)

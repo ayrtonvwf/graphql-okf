@@ -18,10 +18,10 @@ A payment card.
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `brand` | [`String!`](/types/String.md) |  |
-| `expiryMonth` | [`Int!`](/types/Int.md) |  |
-| `expiryYear` | [`Int!`](/types/Int.md) |  |
-| `last4` | [`String!`](/types/String.md) | The last four digits of the card number. |
+| `brand` | `String!` |  |
+| `expiryMonth` | `Int!` |  |
+| `expiryYear` | `Int!` |  |
+| `last4` | `String!` | The last four digits of the card number. |
 
 <!-- graphql-okf:generated:end -->
 

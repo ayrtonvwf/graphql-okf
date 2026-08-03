@@ -18,7 +18,7 @@ An amount of money in a specific currency.
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `amountCents` | [`Int!`](/types/Int.md) | The amount in the smallest unit of the currency, e.g. cents. |
+| `amountCents` | `Int!` | The amount in the smallest unit of the currency, e.g. cents. |
 | `currency` | [`Currency!`](/types/Currency.md) |  |
 
 <!-- graphql-okf:generated:end -->

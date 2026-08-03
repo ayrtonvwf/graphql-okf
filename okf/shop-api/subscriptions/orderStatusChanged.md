@@ -22,7 +22,7 @@ Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `orderId` | [`ID!`](/types/ID.md) |  |  |
+| `orderId` | `ID!` |  |  |
 
 <!-- graphql-okf:generated:end -->
 

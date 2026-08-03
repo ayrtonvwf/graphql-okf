@@ -268,25 +268,11 @@ describe("renderScalarBody", () => {
       description: "An ISO-8601 timestamp.",
       appliedDirectives: [],
       specifiedByUrl: "https://scalars.test/datetime",
-      isBuiltIn: false,
     };
     const out = renderScalarBody(node);
     expect(out).toContain("# DateTime");
     expect(out).toContain("An ISO-8601 timestamp.");
     expect(out).toContain("Custom scalar. Specified by <https://scalars.test/datetime>.");
-  });
-
-  it("notes a built-in scalar", () => {
-    const node: ScalarTypeNode = {
-      kind: "scalar",
-      name: "String",
-      path: "types/String.md",
-      description: null,
-      appliedDirectives: [],
-      specifiedByUrl: null,
-      isBuiltIn: true,
-    };
-    expect(renderScalarBody(node)).toContain("Built-in GraphQL scalar.");
   });
 });
 
@@ -347,7 +333,6 @@ describe("renderDirectiveBody", () => {
       appliedDirectives: [],
       locations: ["ARGUMENT_DEFINITION", "ENUM_VALUE", "FIELD_DEFINITION"],
       isRepeatable: false,
-      isBuiltIn: true,
       args: [
         {
           name: "reason",
@@ -407,7 +392,6 @@ describe("renderBody dispatcher", () => {
       description: null,
       appliedDirectives: [],
       specifiedByUrl: null,
-      isBuiltIn: true,
     };
     const mutation: OperationNode = { ...languages, kind: "mutation", name: "addLanguage" };
     const subscription: OperationNode = {
@@ -423,7 +407,6 @@ describe("renderBody dispatcher", () => {
       appliedDirectives: [],
       locations: [],
       isRepeatable: false,
-      isBuiltIn: true,
       args: [],
     };
 

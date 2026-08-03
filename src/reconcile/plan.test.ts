@@ -178,7 +178,6 @@ describe("reconcile", () => {
           locations: ["FIELD"],
           args: [],
           isRepeatable: false,
-          isBuiltIn: false,
         } as never,
       ],
     };

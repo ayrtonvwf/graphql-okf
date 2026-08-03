@@ -80,7 +80,6 @@ export type InputObjectTypeNode = ConceptBase & {
 export type ScalarTypeNode = ConceptBase & {
   readonly kind: "scalar";
   readonly specifiedByUrl: string | null;
-  readonly isBuiltIn: boolean;
 };
 
 export type OperationNode = ConceptBase & {
@@ -97,7 +96,6 @@ export type DirectiveDefinitionNode = ConceptBase & {
   readonly locations: readonly string[];
   readonly args: readonly InputValueNode[];
   readonly isRepeatable: boolean;
-  readonly isBuiltIn: boolean;
 };
 
 export type ConceptNode =

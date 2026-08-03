@@ -240,9 +240,8 @@ export function renderInputBody(node: InputObjectTypeNode): string {
 }
 
 export function renderScalarBody(node: ScalarTypeNode): string {
-  const note = node.isBuiltIn
-    ? "Built-in GraphQL scalar."
-    : node.specifiedByUrl === null
+  const note =
+    node.specifiedByUrl === null
       ? "Custom scalar."
       : `Custom scalar. Specified by <${node.specifiedByUrl}>.`;
   return [

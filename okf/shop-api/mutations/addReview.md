@@ -22,9 +22,9 @@ Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `body` | [`String`](/types/String.md) |  |  |
-| `productId` | [`ID!`](/types/ID.md) |  |  |
-| `rating` | [`Int!`](/types/Int.md) |  |  |
+| `body` | `String` |  |  |
+| `productId` | `ID!` |  |  |
+| `rating` | `Int!` |  |  |
 
 <!-- graphql-okf:generated:end -->
 

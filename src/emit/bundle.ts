@@ -50,6 +50,19 @@ const KIND_SECTION_LABELS: Record<ConceptKind, string> = {
   directive: "Directives",
 };
 
+/**
+ * `GOAL-7.3` permits omitting links to built-in scalars "by a documented
+ * convention"; this is that document, on the bundle's own entry point, where an
+ * agent walking the tree reads it before it can notice anything missing. A
+ * constant rather than a per-schema list: a fixed string is trivially
+ * deterministic (`GOAL-8.1`), and the convention holds of the bundle whether or
+ * not a given schema happens to exercise it.
+ */
+export const SPEC_DEFINED_NOTE =
+  "Built-in scalars (`Boolean`, `Float`, `ID`, `Int`, `String`) and spec directives " +
+  "(`@deprecated`, `@include`, `@oneOf`, `@skip`, `@specifiedBy`) have no concept files: " +
+  "they are defined by the GraphQL specification and appear as plain code, not links.";
+
 function sortByLabel(entries: IndexEntry[]): IndexEntry[] {
   return entries.sort((left, right) =>
     left.label < right.label ? -1 : left.label > right.label ? 1 : 0,
@@ -172,7 +185,14 @@ export function buildBundle(
             `resource: ${JSON.stringify(ir.resource)}`,
           ]
         : undefined;
-    bundle.set(indexPath, renderDirectoryIndex(title, sections, { frontmatter }));
+    bundle.set(
+      indexPath,
+      renderDirectoryIndex(
+        title,
+        sections,
+        dir === "." ? { frontmatter, note: SPEC_DEFINED_NOTE } : { frontmatter },
+      ),
+    );
   }
 
   return bundle;

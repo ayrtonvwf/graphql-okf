@@ -6,6 +6,8 @@ resource: "https://shop.example/graphql"
 # API interface
 
 <!-- graphql-okf:generated:start -->
+Built-in scalars (`Boolean`, `Float`, `ID`, `Int`, `String`) and spec directives (`@deprecated`, `@include`, `@oneOf`, `@skip`, `@specifiedBy`) have no concept files: they are defined by the GraphQL specification and appear as plain code, not links.
+
 * [directives/](/directives/index.md) - Directives
 * [mutations/](/mutations/index.md) - Mutation operations
 * [queries/](/queries/index.md) - Query operations

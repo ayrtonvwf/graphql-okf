@@ -20,7 +20,7 @@ Looks up any node by its globally unique identifier.
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `id` | [`ID!`](/types/ID.md) |  |  |
+| `id` | `ID!` |  |  |
 
 <!-- graphql-okf:generated:end -->
 
