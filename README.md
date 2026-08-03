@@ -242,7 +242,7 @@ documented here:
   graphql-okf https://gitlab.com/api/graphql --out okf/gitlab-api
   ```
 
-Links inside these samples are **bundle-root-absolute** (`/types/objects/Product.md`),
+Links inside these samples are **bundle-root-absolute** (`/types/Product.md`),
 following OKF §6.1's recommendation. GitHub's file browser resolves a leading `/`
 against the repository root, so cross-links in these samples will not resolve
 when clicked on github.com. Clone the repo, or point a tool at the bundle
