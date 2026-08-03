@@ -16,13 +16,13 @@ Looks up a single order.
 
 Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
 
-**Returns** [`Order`](/types/objects/Order.md)
+**Returns** [`Order`](/types/Order.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `id` | [`ID!`](/types/scalars/ID.md) |  |  |
+| `id` | [`ID!`](/types/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

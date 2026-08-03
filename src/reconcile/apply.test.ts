@@ -1,4 +1,4 @@
-import { mkdtemp, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -14,7 +14,7 @@ const empty: BundlePlan = {
   removed: [],
   unchanged: 4,
   indexes: 0,
-  migrated: [],
+  migrated: { frontmatter: [], relocated: [] },
 };
 
 async function workspace(): Promise<string> {
@@ -34,14 +34,14 @@ describe("applyPlan", () => {
     const dir = await workspace();
     const plan: BundlePlan = {
       ...empty,
-      actions: [{ kind: "create", path: "types/objects/Country.md", contents: "country\n" }],
-      added: [{ name: "Country", path: "types/objects/Country.md" }],
+      actions: [{ kind: "create", path: "types/Country.md", contents: "country\n" }],
+      added: [{ name: "Country", path: "types/Country.md" }],
       unchanged: 0,
     };
 
     await applyPlan(plan, dir, T);
 
-    expect(await readFile(join(dir, "types/objects/Country.md"), "utf8")).toBe("country\n");
+    expect(await readFile(join(dir, "types/Country.md"), "utf8")).toBe("country\n");
   });
 
   it("leaves no temp files behind", async () => {
@@ -79,13 +79,13 @@ describe("applyPlan", () => {
   it("rewrites log.md rather than appending, keeping one heading per day", async () => {
     const dir = await workspace();
     const plan: BundlePlan = {
-      actions: [{ kind: "create", path: "types/objects/A.md", contents: "a" }],
-      added: [{ name: "A", path: "types/objects/A.md" }],
+      actions: [{ kind: "create", path: "types/A.md", contents: "a" }],
+      added: [{ name: "A", path: "types/A.md" }],
       changed: [],
       removed: [],
       unchanged: 0,
       indexes: 0,
-      migrated: [],
+      migrated: { frontmatter: [], relocated: [] },
     };
 
     await applyPlan(plan, dir, "2026-07-24T09:00:00.000Z");
@@ -108,5 +108,67 @@ describe("applyPlan", () => {
     await applyPlan(plan, dir, T);
 
     expect(await readdir(dir)).toEqual(["index.md"]);
+  });
+
+  it("removes a file a delete action names, after writing the new one", async () => {
+    const dir = await workspace();
+    await mkdir(join(dir, "types/objects"), { recursive: true });
+    await writeFile(join(dir, "types/objects/Product.md"), "old\n", "utf8");
+
+    await applyPlan(
+      {
+        ...empty,
+        actions: [
+          { kind: "migrate", path: "types/Product.md", contents: "new\n" },
+          { kind: "delete", path: "types/objects/Product.md" },
+        ],
+      },
+      dir,
+      T,
+    );
+
+    expect(await readFile(join(dir, "types/Product.md"), "utf8")).toBe("new\n");
+    await expect(readFile(join(dir, "types/objects/Product.md"), "utf8")).rejects.toThrow();
+  });
+
+  it("removes the directory a delete emptied", async () => {
+    const dir = await workspace();
+    await mkdir(join(dir, "types/objects"), { recursive: true });
+    await writeFile(join(dir, "types/objects/index.md"), "old\n", "utf8");
+
+    await applyPlan(
+      { ...empty, actions: [{ kind: "delete", path: "types/objects/index.md" }] },
+      dir,
+      T,
+    );
+
+    await expect(readdir(join(dir, "types/objects"))).rejects.toThrow();
+  });
+
+  it("leaves a directory that still holds a human's stray file", async () => {
+    const dir = await workspace();
+    await mkdir(join(dir, "types/objects"), { recursive: true });
+    await writeFile(join(dir, "types/objects/index.md"), "old\n", "utf8");
+    await writeFile(join(dir, "types/objects/notes.md"), "mine\n", "utf8");
+
+    await applyPlan(
+      { ...empty, actions: [{ kind: "delete", path: "types/objects/index.md" }] },
+      dir,
+      T,
+    );
+
+    expect(await readdir(join(dir, "types/objects"))).toEqual(["notes.md"]);
+  });
+
+  it("tolerates a delete for a file that is already gone", async () => {
+    const dir = await workspace();
+
+    await expect(
+      applyPlan(
+        { ...empty, actions: [{ kind: "delete", path: "types/objects/Product.md" }] },
+        dir,
+        T,
+      ),
+    ).resolves.toBeUndefined();
   });
 });

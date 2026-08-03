@@ -1,16 +1,22 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { DIRECTORY_BY_KIND, elementId, resolvePaths, TYPE_LABEL_BY_KIND } from "./naming.js";
+import {
+  DIRECTORY_BY_KIND,
+  elementId,
+  KIND_ORDER,
+  resolvePaths,
+  TYPE_LABEL_BY_KIND,
+} from "./naming.js";
 
 describe("DIRECTORY_BY_KIND", () => {
   it("maps every concept kind to its documented directory", () => {
     expect(DIRECTORY_BY_KIND).toEqual({
-      object: "types/objects",
-      interface: "types/interfaces",
-      union: "types/unions",
-      enum: "types/enums",
-      input: "types/inputs",
-      scalar: "types/scalars",
+      object: "types",
+      interface: "types",
+      union: "types",
+      enum: "types",
+      input: "types",
+      scalar: "types",
       query: "queries",
       mutation: "mutations",
       subscription: "subscriptions",
@@ -40,6 +46,27 @@ describe("TYPE_LABEL_BY_KIND", () => {
   });
 });
 
+describe("KIND_ORDER", () => {
+  it("lists every kind exactly once, types first in definitional weight", () => {
+    expect(KIND_ORDER).toEqual([
+      "object",
+      "interface",
+      "union",
+      "enum",
+      "input",
+      "scalar",
+      "query",
+      "mutation",
+      "subscription",
+      "directive",
+    ]);
+  });
+
+  it("covers every key of DIRECTORY_BY_KIND", () => {
+    expect([...KIND_ORDER].sort()).toEqual(Object.keys(DIRECTORY_BY_KIND).sort());
+  });
+});
+
 describe("resolvePaths", () => {
   it("uses the exact GraphQL name as the filename", () => {
     const paths = resolvePaths([
@@ -49,8 +76,8 @@ describe("resolvePaths", () => {
       { kind: "directive", name: "auth" },
     ]);
 
-    expect(paths.get(elementId({ kind: "object", name: "User" }))).toBe("types/objects/User.md");
-    expect(paths.get(elementId({ kind: "enum", name: "Role" }))).toBe("types/enums/Role.md");
+    expect(paths.get(elementId({ kind: "object", name: "User" }))).toBe("types/User.md");
+    expect(paths.get(elementId({ kind: "enum", name: "Role" }))).toBe("types/Role.md");
     expect(paths.get(elementId({ kind: "query", name: "user" }))).toBe("queries/user.md");
     expect(paths.get(elementId({ kind: "directive", name: "auth" }))).toBe("directives/auth.md");
   });
@@ -58,13 +85,13 @@ describe("resolvePaths", () => {
   it("does not suffix names that collide only across different directories", () => {
     const paths = resolvePaths([
       { kind: "object", name: "User" },
-      { kind: "enum", name: "User" },
-      { kind: "input", name: "user" },
+      { kind: "query", name: "User" },
+      { kind: "directive", name: "User" },
     ]);
 
-    expect(paths.get(elementId({ kind: "object", name: "User" }))).toBe("types/objects/User.md");
-    expect(paths.get(elementId({ kind: "enum", name: "User" }))).toBe("types/enums/User.md");
-    expect(paths.get(elementId({ kind: "input", name: "user" }))).toBe("types/inputs/user.md");
+    expect(paths.get(elementId({ kind: "object", name: "User" }))).toBe("types/User.md");
+    expect(paths.get(elementId({ kind: "query", name: "User" }))).toBe("queries/User.md");
+    expect(paths.get(elementId({ kind: "directive", name: "User" }))).toBe("directives/User.md");
   });
 
   it("returns one entry per input element", () => {
@@ -89,10 +116,10 @@ describe("resolvePaths collisions", () => {
     ]);
 
     expect(paths.get(elementId({ kind: "object", name: "User" }))).toBe(
-      `types/objects/User-${hashOf("User")}.md`,
+      `types/User-${hashOf("User")}.md`,
     );
     expect(paths.get(elementId({ kind: "object", name: "user" }))).toBe(
-      `types/objects/user-${hashOf("user")}.md`,
+      `types/user-${hashOf("user")}.md`,
     );
   });
 
@@ -100,7 +127,7 @@ describe("resolvePaths collisions", () => {
     const paths = resolvePaths([{ kind: "object", name: "index" }]);
 
     expect(paths.get(elementId({ kind: "object", name: "index" }))).toBe(
-      `types/objects/index-${hashOf("index")}.md`,
+      `types/index-${hashOf("index")}.md`,
     );
   });
 
@@ -132,9 +159,73 @@ describe("resolvePaths collisions", () => {
     const paths = resolvePaths([
       { kind: "object", name: "User" },
       { kind: "object", name: "user" },
-      { kind: "enum", name: "User" },
+      { kind: "query", name: "User" },
     ]);
 
-    expect(paths.get(elementId({ kind: "enum", name: "User" }))).toBe("types/enums/User.md");
+    expect(paths.get(elementId({ kind: "query", name: "User" }))).toBe("queries/User.md");
+  });
+});
+
+describe("the flattened types directory", () => {
+  it("puts every type kind directly under types/", () => {
+    const paths = resolvePaths([
+      { kind: "object", name: "Product" },
+      { kind: "interface", name: "Node" },
+      { kind: "union", name: "PaymentMethod" },
+      { kind: "enum", name: "Currency" },
+      { kind: "input", name: "ProductFilter" },
+      { kind: "scalar", name: "DateTime" },
+    ]);
+
+    expect(paths.get("object:Product")).toBe("types/Product.md");
+    expect(paths.get("interface:Node")).toBe("types/Node.md");
+    expect(paths.get("union:PaymentMethod")).toBe("types/PaymentMethod.md");
+    expect(paths.get("enum:Currency")).toBe("types/Currency.md");
+    expect(paths.get("input:ProductFilter")).toBe("types/ProductFilter.md");
+    expect(paths.get("scalar:DateTime")).toBe("types/DateTime.md");
+  });
+
+  it("leaves operations and directives where they are", () => {
+    const paths = resolvePaths([
+      { kind: "query", name: "product" },
+      { kind: "mutation", name: "placeOrder" },
+      { kind: "subscription", name: "reviewPosted" },
+      { kind: "directive", name: "auth" },
+    ]);
+
+    expect(paths.get("query:product")).toBe("queries/product.md");
+    expect(paths.get("mutation:placeOrder")).toBe("mutations/placeOrder.md");
+    expect(paths.get("subscription:reviewPosted")).toBe("subscriptions/reviewPosted.md");
+    expect(paths.get("directive:auth")).toBe("directives/auth.md");
+  });
+
+  it("hashes a type and an input that differ only by case", () => {
+    const paths = resolvePaths([
+      { kind: "object", name: "User" },
+      { kind: "input", name: "user" },
+    ]);
+
+    const object = paths.get("object:User");
+    const input = paths.get("input:user");
+
+    expect(object).toMatch(/^types\/User-[0-9a-f]{8}\.md$/);
+    expect(input).toMatch(/^types\/user-[0-9a-f]{8}\.md$/);
+    expect(object?.toLowerCase()).not.toBe(input?.toLowerCase());
+  });
+
+  it("hashes a type whose name is a reserved basename", () => {
+    const paths = resolvePaths([{ kind: "enum", name: "Index" }]);
+
+    expect(paths.get("enum:Index")).toMatch(/^types\/Index-[0-9a-f]{8}\.md$/);
+  });
+
+  it("does not hash a type and an operation sharing a case-folded name", () => {
+    const paths = resolvePaths([
+      { kind: "object", name: "Product" },
+      { kind: "query", name: "product" },
+    ]);
+
+    expect(paths.get("object:Product")).toBe("types/Product.md");
+    expect(paths.get("query:product")).toBe("queries/product.md");
   });
 });

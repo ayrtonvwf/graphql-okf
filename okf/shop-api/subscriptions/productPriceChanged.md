@@ -14,7 +14,7 @@ generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 
 Emits a product each time its price changes.
 
-**Returns** [`Product!`](/types/objects/Product.md)
+**Returns** [`Product!`](/types/Product.md)
 
 <!-- graphql-okf:generated:end -->
 

@@ -6,7 +6,7 @@ import { splitFile } from "./parse.js";
 import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
 
 function split(text: string) {
-  const result = splitFile(text, "types/objects/LegacyOrder.md");
+  const result = splitFile(text, "types/LegacyOrder.md");
   if (result === null) throw new Error("expected an owned file");
   return result;
 }
@@ -32,14 +32,14 @@ const live = split(
 
 describe("titleOf", () => {
   it("reads the JSON-encoded title", () => {
-    expect(titleOf(live, "types/objects/LegacyOrder.md")).toBe("LegacyOrder");
+    expect(titleOf(live, "types/LegacyOrder.md")).toBe("LegacyOrder");
   });
 
   it("falls back to the file basename when there is no title", () => {
     const untitled = split(
       "---\ntype: object\n---\n\n<!-- graphql-okf:generated:start -->\nx\n<!-- graphql-okf:generated:end -->\n",
     );
-    expect(titleOf(untitled, "types/objects/Ghost.md")).toBe("Ghost");
+    expect(titleOf(untitled, "types/Ghost.md")).toBe("Ghost");
   });
 });
 
@@ -67,7 +67,7 @@ describe("renderTombstone", () => {
   });
 
   it("quotes removedAt so YAML 1.1 consumers see a string", () => {
-    const split = splitFile(existingConcept, "types/objects/Country.md");
+    const split = splitFile(existingConcept, "types/Country.md");
     if (split === null) throw new Error("fixture must be an owned file");
 
     const parts = renderTombstone(split, emitContext("0.1", "2026-08-01T00:00:00.000Z"));
@@ -91,7 +91,7 @@ describe("renderTombstone", () => {
   });
 
   it("does not nest the preserved H1 under a lower-level heading", () => {
-    const split = splitFile(existingConcept, "types/objects/Country.md");
+    const split = splitFile(existingConcept, "types/Country.md");
     if (split === null) throw new Error("fixture must be an owned file");
 
     const parts = renderTombstone(split, emitContext("0.1", "2026-08-01T00:00:00.000Z"));

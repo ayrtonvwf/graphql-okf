@@ -8,7 +8,7 @@ import { GENERATED_END, GENERATED_START } from "./seam.js";
 const scalar: ScalarTypeNode = {
   kind: "scalar",
   name: "String",
-  path: "types/scalars/String.md",
+  path: "types/String.md",
   description: null,
   appliedDirectives: [],
   specifiedByUrl: null,

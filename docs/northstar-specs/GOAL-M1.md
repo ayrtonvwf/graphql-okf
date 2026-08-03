@@ -89,6 +89,13 @@ inherits it. It MUST be settled and documented before the emitter is built.
   (for example: types under a `types/` area, root operations under
   `queries/` / `mutations/` / `subscriptions/`), while remaining within OKF's
   rule that a file's path is its identity.
+  - Type concepts live directly under `types/`, not in a per-kind subdirectory.
+    GraphQL keeps all named types in one namespace, so the name is unique there
+    by construction; the kind is carried by the `type:` frontmatter field
+    (`GOAL-5.3`) and by a heading in `types/index.md`. Root operations and
+    directives keep their own directories, whose namespaces *can* collide with
+    type names. Recorded per issue #22: this is the emitted layout, not an
+    additional requirement.
 - `GOAL-4.4` — Naming MUST handle collisions and case sensitivity safely across
   filesystems (two schema elements must never map to the same path; casing-only
   differences must not collide on case-insensitive filesystems).
@@ -174,7 +181,7 @@ genuinely differentiated capability.
   `OrderInput` links to the `OrderInput` concept; an object implementing an
   interface links to that interface; a union links to each member type.
   - Links are emitted in OKF §6.1's **absolute bundle-relative** form —
-    `/types/objects/Product.md` — rather than relative to the linking file.
+    `/types/Product.md` — rather than relative to the linking file.
     §6.1 recommends this form "because it is stable when documents are moved
     within their subdirectory". Recorded per issue #22: this is the emitted
     convention, not an additional requirement.

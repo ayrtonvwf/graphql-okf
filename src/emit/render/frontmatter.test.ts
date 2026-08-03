@@ -7,7 +7,7 @@ import { renderFrontmatter, renderProvenance } from "./frontmatter.js";
 const objectConcept: ObjectTypeNode = {
   kind: "object",
   name: "Country",
-  path: "types/objects/Country.md",
+  path: "types/Country.md",
   description: "An ISO country.",
   appliedDirectives: [],
   fields: [],
@@ -41,7 +41,7 @@ describe("renderFrontmatter", () => {
     const enumConcept: EnumTypeNode = {
       kind: "enum",
       name: "Role",
-      path: "types/enums/Role.md",
+      path: "types/Role.md",
       description: null,
       appliedDirectives: [],
       values: [],

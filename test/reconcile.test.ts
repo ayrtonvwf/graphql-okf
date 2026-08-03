@@ -7,13 +7,14 @@ import { readSchema, syncOkfBundle } from "../src/index.js";
 import { applyPlan } from "../src/reconcile/apply.js";
 import { reconcile } from "../src/reconcile/plan.js";
 import { readExistingBundle } from "../src/reconcile/read.js";
-import { readTree as snapshot, writeTree } from "./support/bundle-tree.js";
+import { readTree, readTree as snapshot, writeTree } from "./support/bundle-tree.js";
 
 const BASE = new URL("./fixtures/kitchen-sink.graphql", import.meta.url).pathname;
 const EVOLVED = new URL("./fixtures/kitchen-sink-evolved.graphql", import.meta.url).pathname;
 
 const T1 = "2026-07-01T10:00:00.000Z";
 const T2 = "2026-07-24T09:00:00.000Z";
+const T3 = "2026-08-01T09:00:00.000Z";
 
 async function freshBundle(sdl: string): Promise<string> {
   const outDir = join(await mkdtemp(join(tmpdir(), "okf-recon-")), "bundle");
@@ -68,9 +69,9 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
 
     const result = await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir, now: T2 });
 
-    expect(result.added).toContain("types/objects/Invoice.md");
+    expect(result.added).toContain("types/Invoice.md");
     expect(result.added).toContain("queries/invoices.md");
-    expect(result.removed).toContain("types/objects/User_case.md");
+    expect(result.removed).toContain("types/User_case.md");
     expect(result.changed.length).toBeGreaterThan(0);
   });
 
@@ -81,14 +82,14 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
     const log = await readFile(join(outDir, "log.md"), "utf8");
 
     expect(log).toContain(`## ${T2.slice(0, 10)}`);
-    expect(log).toContain("* [`Invoice`](/types/objects/Invoice.md)");
+    expect(log).toContain("* [`Invoice`](/types/Invoice.md)");
     expect(log).toContain("**Removed**");
     expect(log.indexOf(`## ${T2.slice(0, 10)}`)).toBeLessThan(log.indexOf(`## ${T1.slice(0, 10)}`));
   });
 
   it("preserves human prose in a concept it updates", async () => {
     const outDir = await freshBundle(BASE);
-    const target = join(outDir, "types/objects/User_case.md");
+    const target = join(outDir, "types/User_case.md");
     await writeFile(target, `${await readFile(target, "utf8")}\n## Ownership\n\nBilling team.\n`);
 
     await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir, now: T2 });
@@ -102,7 +103,7 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
     const outDir = await freshBundle(BASE);
     await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir, now: T2 });
 
-    const index = await readFile(join(outDir, "types/objects/index.md"), "utf8");
+    const index = await readFile(join(outDir, "types/index.md"), "utf8");
 
     expect(index).toContain("- (removed)");
   });
@@ -151,8 +152,8 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
       now: "2026-09-01T00:00:00.000Z",
     });
 
-    expect(result.added).toContain("types/objects/User_case.md");
-    const restored = await readFile(join(outDir, "types/objects/User_case.md"), "utf8");
+    expect(result.added).toContain("types/User_case.md");
+    const restored = await readFile(join(outDir, "types/User_case.md"), "utf8");
     expect(restored).not.toContain("status: removed");
     expect(restored).not.toContain("Last known definition");
   });
@@ -182,7 +183,7 @@ describe("a bundle written before absolute links", () => {
     // relative link, which GOAL-6.3 preserves verbatim into a generated table
     // cell. The "nothing relative in the generated region" assertion below
     // would rightly flag it, and this test is not the place to argue about it.
-    const concept = "types/objects/User.md";
+    const concept = "types/User.md";
     expect(before.has(concept), `${concept} missing from the fixture bundle`).toBe(true);
     const human = "\n## Ownership\n\nOwned by Catalog. See [runbook](../../runbook.md).\n";
     legacy.set(concept, `${legacy.get(concept) ?? ""}${human}`);
@@ -258,5 +259,143 @@ describe("an interrupted run (GOAL-8.5)", () => {
 
     const files = await snapshot(outDir);
     expect([...files.keys()].filter((path) => path.includes("graphql-okf-tmp"))).toEqual([]);
+  });
+});
+
+describe("migrating a bundle from the nested types layout", () => {
+  const LEGACY_DIR: Record<string, string> = {
+    object: "objects",
+    interface: "interfaces",
+    union: "unions",
+    enum: "enums",
+    input: "inputs",
+    scalar: "scalars",
+  };
+
+  /**
+   * Re-nests a flat bundle into the pre-#22 layout, using each concept's `type:`
+   * frontmatter to pick its kind directory, and rebuilds the kind indexes.
+   */
+  function toLegacyLayout(flat: ReadonlyMap<string, string>): Map<string, string> {
+    const nested = new Map<string, string>();
+    const byDir = new Map<string, string[]>();
+
+    for (const [path, text] of flat) {
+      if (!path.startsWith("types/") || path === "types/index.md") {
+        nested.set(path, text);
+        continue;
+      }
+      const label = /^type: "GraphQL (\w+) Type"$/m.exec(text)?.[1]?.toLowerCase() ?? "object";
+      const dir = `types/${LEGACY_DIR[label] ?? "objects"}`;
+      const name = path.slice("types/".length);
+      nested.set(`${dir}/${name}`, text);
+
+      const bucket = byDir.get(dir);
+      if (bucket === undefined) {
+        byDir.set(dir, [name]);
+      } else {
+        bucket.push(name);
+      }
+    }
+
+    for (const [dir, names] of byDir) {
+      const bullets = [...names]
+        .sort()
+        .map((name) => `* [${name.replace(/\.md$/, "")}](/${dir}/${name})`);
+      nested.set(
+        `${dir}/index.md`,
+        `# Types\n\n<!-- graphql-okf:generated:start -->\n${bullets.join("\n")}\n<!-- graphql-okf:generated:end -->\n\n<!-- Human-authored content below this line is preserved across regenerations. -->\n`,
+      );
+    }
+
+    return nested;
+  }
+
+  it("moves every concept, keeps human text, and is a no-op on re-run", async () => {
+    const build = join(await mkdtemp(join(tmpdir(), "okf-flat-")), "bundle");
+    await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir: build, now: T1 });
+    const legacy = toLegacyLayout(await readTree(build));
+
+    // Human text in a concept and in a kind index — the two things a move can destroy.
+    const post = legacy.get("types/objects/Post.md") ?? "";
+    legacy.set("types/objects/Post.md", `${post}\n## Ownership\n\nPing #catalog.\n`);
+    const objectsIndex = legacy.get("types/objects/index.md") ?? "";
+    legacy.set("types/objects/index.md", `${objectsIndex}\nSee ADR-14.\n`);
+
+    const outDir = join(await mkdtemp(join(tmpdir(), "okf-legacy-")), "bundle");
+    await writeTree(outDir, legacy);
+
+    const result = await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir, now: T2 });
+    const after = await readTree(outDir);
+
+    // Every concept moved.
+    expect([...after.keys()].filter((path) => /^types\/\w+\//.test(path))).toEqual([
+      "types/objects/index.md",
+    ]);
+    expect(after.has("types/Post.md")).toBe(true);
+    expect(result.relocated.length).toBeGreaterThan(0);
+
+    // A type that links to nothing still reached its new path — the sameContent trap.
+    expect(after.has("types/Boolean.md")).toBe(true);
+
+    // Human text survived both moves.
+    expect(after.get("types/Post.md")).toContain("Ping #catalog.");
+    expect(after.get("types/objects/index.md")).toContain("See ADR-14.");
+    expect(after.get("types/objects/index.md")).toContain("* [Types](/types/index.md)");
+
+    // Emptied kind directories are gone; nothing was tombstoned.
+    expect(after.has("types/scalars/index.md")).toBe(false);
+    expect(result.removed).toEqual([]);
+
+    // The log records the layout change once.
+    const log = after.get("log.md") ?? "";
+    expect(log).toContain("* Bundle layout: `types/<kind>/` flattened into `types/` across");
+
+    // Second run is a complete no-op (GOAL-8.1).
+    const again = await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir, now: T3 });
+    expect(again.added).toEqual([]);
+    expect(again.changed).toEqual([]);
+    expect(again.relocated).toEqual([]);
+    expect(await readTree(outDir)).toEqual(after);
+  });
+
+  it("moves a tombstoned concept to its flat path and keeps it under Removed", async () => {
+    const build = join(await mkdtemp(join(tmpdir(), "okf-flat-")), "bundle");
+    await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir: build, now: T1 });
+    // Tombstone types/User_case.md while the bundle is still flat, per the
+    // BASE -> EVOLVED pattern used elsewhere in this file.
+    await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir: build, now: T2 });
+    const legacy = toLegacyLayout(await readTree(build));
+    expect(legacy.has("types/objects/User_case.md")).toBe(true);
+
+    const outDir = join(await mkdtemp(join(tmpdir(), "okf-legacy-tombstone-")), "bundle");
+    await writeTree(outDir, legacy);
+
+    await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir, now: T3 });
+    const after = await readTree(outDir);
+
+    // The tombstoned concept moved to its new flat path.
+    expect(after.has("types/User_case.md")).toBe(true);
+    expect(after.has("types/objects/User_case.md")).toBe(false);
+    expect(after.get("types/User_case.md")).toContain('graphql_okf_status: "removed"');
+
+    // It is still listed under Removed in the flattened types index.
+    const typesIndex = after.get("types/index.md") ?? "";
+    expect(typesIndex).toContain("## Removed");
+    expect(typesIndex).toContain("User_case");
+  });
+
+  it("leaves a human's stray file and its directory alone", async () => {
+    const build = join(await mkdtemp(join(tmpdir(), "okf-flat-")), "bundle");
+    await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir: build, now: T1 });
+    const legacy = toLegacyLayout(await readTree(build));
+    legacy.set("types/objects/notes.md", "# My notes\n");
+
+    const outDir = join(await mkdtemp(join(tmpdir(), "okf-stray-")), "bundle");
+    await writeTree(outDir, legacy);
+    await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir, now: T2 });
+
+    const after = await readTree(outDir);
+    expect(after.get("types/objects/notes.md")).toBe("# My notes\n");
   });
 });

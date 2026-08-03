@@ -14,13 +14,13 @@ generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 
 Looks up a single product.
 
-**Returns** [`Product`](/types/objects/Product.md)
+**Returns** [`Product`](/types/Product.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `id` | [`ID!`](/types/scalars/ID.md) |  |  |
+| `id` | [`ID!`](/types/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

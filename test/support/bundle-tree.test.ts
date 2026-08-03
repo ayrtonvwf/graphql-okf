@@ -9,7 +9,7 @@ describe("writeTree then readTree", () => {
     const dir = join(await mkdtemp(join(tmpdir(), "okf-tree-")), "bundle");
     const tree = new Map([
       ["index.md", "# root\n"],
-      ["types/objects/User.md", "# User\n"],
+      ["types/User.md", "# User\n"],
     ]);
 
     await writeTree(dir, tree);

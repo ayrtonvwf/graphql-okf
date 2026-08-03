@@ -36,7 +36,7 @@ describe("project", () => {
 
   it("emits built-in scalars as concepts", () => {
     const ir = project(loadedFrom("type Query { hello: String }"));
-    const scalar = conceptAt(ir.concepts, "types/scalars/String.md") as ScalarTypeNode;
+    const scalar = conceptAt(ir.concepts, "types/String.md") as ScalarTypeNode;
 
     expect(scalar.kind).toBe("scalar");
     expect(scalar.isBuiltIn).toBe(true);
@@ -49,7 +49,7 @@ describe("project", () => {
         type Query { at: DateTime }
       `),
     );
-    const scalar = conceptAt(ir.concepts, "types/scalars/DateTime.md") as ScalarTypeNode;
+    const scalar = conceptAt(ir.concepts, "types/DateTime.md") as ScalarTypeNode;
 
     expect(scalar.isBuiltIn).toBe(false);
     expect(scalar.specifiedByUrl).toBe("https://scalars.test/datetime");
@@ -69,7 +69,7 @@ describe("project", () => {
         type Query { role: Role }
       `),
     );
-    const role = conceptAt(ir.concepts, "types/enums/Role.md") as EnumTypeNode;
+    const role = conceptAt(ir.concepts, "types/Role.md") as EnumTypeNode;
 
     expect(role.description).toBe("Access level.");
     expect(role.values.map((value) => value.name)).toEqual(["ADMIN", "OWNER", "VIEWER"]);
@@ -100,12 +100,12 @@ describe("project object and interface types", () => {
         type Query { user: User }
       `),
     );
-    const user = conceptAt(ir.concepts, "types/objects/User.md") as ObjectTypeNode;
+    const user = conceptAt(ir.concepts, "types/User.md") as ObjectTypeNode;
 
     expect(user.fields.find((field) => field.name === "tags")?.type).toEqual({
       wrappers: ["nonNull", "list", "list", "nonNull"],
       name: "String",
-      path: "types/scalars/String.md",
+      path: "types/String.md",
     });
     // [String]! is asymmetric under reversal, unlike [[String!]]! above: this
     // catches an implementation that records wrappers innermost-first instead
@@ -113,7 +113,7 @@ describe("project object and interface types", () => {
     expect(user.fields.find((field) => field.name === "label")?.type).toEqual({
       wrappers: ["nonNull", "list"],
       name: "String",
-      path: "types/scalars/String.md",
+      path: "types/String.md",
     });
   });
 
@@ -127,7 +127,7 @@ describe("project object and interface types", () => {
         type Query { user: User }
       `),
     );
-    const user = conceptAt(ir.concepts, "types/objects/User.md") as ObjectTypeNode;
+    const user = conceptAt(ir.concepts, "types/User.md") as ObjectTypeNode;
 
     expect(user.fields.map((field) => field.name)).toEqual(["age", "name"]);
     expect(user.fields[1]?.args.map((arg) => arg.name)).toEqual(["locale", "upper"]);
@@ -140,7 +140,7 @@ describe("project object and interface types", () => {
         type Query { user: User }
       `),
     );
-    const user = conceptAt(ir.concepts, "types/objects/User.md") as ObjectTypeNode;
+    const user = conceptAt(ir.concepts, "types/User.md") as ObjectTypeNode;
 
     expect(user.fields[0]?.deprecation).toEqual({ reason: "No longer supported" });
   });
@@ -153,11 +153,9 @@ describe("project object and interface types", () => {
         type Query { user: User }
       `),
     );
-    const user = conceptAt(ir.concepts, "types/objects/User.md") as ObjectTypeNode;
+    const user = conceptAt(ir.concepts, "types/User.md") as ObjectTypeNode;
 
-    expect(user.interfaces).toEqual([
-      { wrappers: [], name: "Node", path: "types/interfaces/Node.md" },
-    ]);
+    expect(user.interfaces).toEqual([{ wrappers: [], name: "Node", path: "types/Node.md" }]);
   });
 
   it("records implementedBy on an interface, including interfaces implementing interfaces", () => {
@@ -169,13 +167,10 @@ describe("project object and interface types", () => {
         type Query { user: User }
       `),
     );
-    const node = conceptAt(ir.concepts, "types/interfaces/Node.md") as InterfaceTypeNode;
+    const node = conceptAt(ir.concepts, "types/Node.md") as InterfaceTypeNode;
 
     expect(node.implementedBy.map((ref) => ref.name)).toEqual(["Entity", "User"]);
-    expect(node.implementedBy.map((ref) => ref.path)).toEqual([
-      "types/interfaces/Entity.md",
-      "types/objects/User.md",
-    ]);
+    expect(node.implementedBy.map((ref) => ref.path)).toEqual(["types/Entity.md", "types/User.md"]);
   });
 
   it("normalizes an empty GraphQL description to null", () => {
@@ -186,7 +181,7 @@ describe("project object and interface types", () => {
         type Thing { id: ID! }
       `),
     );
-    const thing = conceptAt(ir.concepts, "types/objects/Thing.md") as ObjectTypeNode;
+    const thing = conceptAt(ir.concepts, "types/Thing.md") as ObjectTypeNode;
 
     expect(thing.description).toBeNull();
   });
@@ -202,11 +197,11 @@ describe("project unions, inputs, and default values", () => {
         type Query { content: Content }
       `),
     );
-    const content = conceptAt(ir.concepts, "types/unions/Content.md") as UnionTypeNode;
+    const content = conceptAt(ir.concepts, "types/Content.md") as UnionTypeNode;
 
     expect(content.members).toEqual([
-      { wrappers: [], name: "Comment", path: "types/objects/Comment.md" },
-      { wrappers: [], name: "Post", path: "types/objects/Post.md" },
+      { wrappers: [], name: "Comment", path: "types/Comment.md" },
+      { wrappers: [], name: "Post", path: "types/Post.md" },
     ]);
   });
 
@@ -217,13 +212,13 @@ describe("project unions, inputs, and default values", () => {
         type Query { order(input: OrderInput): String }
       `),
     );
-    const input = conceptAt(ir.concepts, "types/inputs/OrderInput.md") as InputObjectTypeNode;
+    const input = conceptAt(ir.concepts, "types/OrderInput.md") as InputObjectTypeNode;
 
     expect(input.fields.map((field) => field.name)).toEqual(["quantity", "sku"]);
     expect(input.fields[1]?.type).toEqual({
       wrappers: ["nonNull"],
       name: "String",
-      path: "types/scalars/String.md",
+      path: "types/String.md",
     });
   });
 
@@ -242,7 +237,7 @@ describe("project unions, inputs, and default values", () => {
         type Query { search(filter: Filter): String }
       `),
     );
-    const filter = conceptAt(ir.concepts, "types/inputs/Filter.md") as InputObjectTypeNode;
+    const filter = conceptAt(ir.concepts, "types/Filter.md") as InputObjectTypeNode;
     const defaults = Object.fromEntries(
       filter.fields.map((field) => [field.name, field.defaultValue]),
     );
@@ -264,7 +259,7 @@ describe("project unions, inputs, and default values", () => {
         type Wrapper { search(limit: Int = 25): String }
       `),
     );
-    const wrapper = conceptAt(ir.concepts, "types/objects/Wrapper.md") as ObjectTypeNode;
+    const wrapper = conceptAt(ir.concepts, "types/Wrapper.md") as ObjectTypeNode;
 
     expect(wrapper.fields[0]?.args[0]?.defaultValue).toBe("25");
   });
@@ -284,7 +279,7 @@ describe("project root operations", () => {
     const user = conceptAt(ir.concepts, "queries/user.md") as OperationNode;
     expect(user.kind).toBe("query");
     expect(user.args.map((arg) => arg.name)).toEqual(["id"]);
-    expect(user.type).toEqual({ wrappers: [], name: "User", path: "types/objects/User.md" });
+    expect(user.type).toEqual({ wrappers: [], name: "User", path: "types/User.md" });
 
     expect(conceptAt(ir.concepts, "queries/users.md").kind).toBe("query");
     expect(conceptAt(ir.concepts, "mutations/createUser.md").kind).toBe("mutation");
@@ -294,7 +289,7 @@ describe("project root operations", () => {
   it("does not emit root operation types as object concepts", () => {
     const ir = project(loadedFrom("type Query { hello: String }"));
 
-    expect(ir.concepts.some((concept) => concept.path === "types/objects/Query.md")).toBe(false);
+    expect(ir.concepts.some((concept) => concept.path === "types/Query.md")).toBe(false);
     // Strengthened: the brief's assertion above only rules out that one specific path.
     // Assert Query is absent as ANY object concept (by kind+name), so a bug that emitted
     // it under some other path (e.g. due to a broken pathFor) would still be caught.
@@ -312,9 +307,7 @@ describe("project root operations", () => {
     );
 
     expect(conceptAt(ir.concepts, "queries/hello.md").kind).toBe("query");
-    expect(ir.concepts.some((concept) => concept.path === "types/objects/RootQuery.md")).toBe(
-      false,
-    );
+    expect(ir.concepts.some((concept) => concept.path === "types/RootQuery.md")).toBe(false);
   });
 
   it("links a reference to a root type at the operation directory index", () => {
@@ -403,7 +396,7 @@ describe("project directives", () => {
         type Query { user: User }
       `),
     );
-    const user = conceptAt(ir.concepts, "types/objects/User.md") as ObjectTypeNode;
+    const user = conceptAt(ir.concepts, "types/User.md") as ObjectTypeNode;
 
     expect(user.appliedDirectives).toEqual([
       { name: "auth", path: "directives/auth.md", args: [{ name: "requires", value: '"ADMIN"' }] },
@@ -421,8 +414,8 @@ describe("project directives", () => {
         type Query { user: User }
       `),
     );
-    const scalar = conceptAt(ir.concepts, "types/scalars/DateTime.md") as ScalarTypeNode;
-    const user = conceptAt(ir.concepts, "types/objects/User.md") as ObjectTypeNode;
+    const scalar = conceptAt(ir.concepts, "types/DateTime.md") as ScalarTypeNode;
+    const user = conceptAt(ir.concepts, "types/User.md") as ObjectTypeNode;
 
     expect(scalar.appliedDirectives).toEqual([]);
     expect(scalar.specifiedByUrl).toBe("https://scalars.test/dt");
@@ -443,7 +436,7 @@ describe("project directives", () => {
         type Query { user: User }
       `),
     );
-    const user = conceptAt(ir.concepts, "types/objects/User.md") as ObjectTypeNode;
+    const user = conceptAt(ir.concepts, "types/User.md") as ObjectTypeNode;
 
     expect(user.fields[0]?.appliedDirectives).toEqual([
       { name: "audit", path: "directives/audit.md", args: [] },
@@ -459,7 +452,7 @@ describe("project directives", () => {
         type Query { user: User }
       `),
     );
-    const user = conceptAt(ir.concepts, "types/objects/User.md") as ObjectTypeNode;
+    const user = conceptAt(ir.concepts, "types/User.md") as ObjectTypeNode;
 
     expect(user.appliedDirectives.map((applied) => applied.name)).toEqual(["alpha", "zed"]);
     // Strengthened: the brief's assertion above only checks the resulting order, which a

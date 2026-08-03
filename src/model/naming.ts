@@ -13,18 +13,44 @@ export type ConceptKind =
   | "subscription"
   | "directive";
 
+/**
+ * Type kinds all share `types/`. GraphQL keeps every named type in one
+ * namespace, so a name is unique within it by construction; the kind is carried
+ * by `type:` frontmatter (GOAL-5.3) and by a heading in `types/index.md`.
+ * Directive names and root operation field names occupy separate namespaces that
+ * *can* collide with type names, so those directories stay distinct.
+ */
 export const DIRECTORY_BY_KIND: Record<ConceptKind, string> = {
-  object: "types/objects",
-  interface: "types/interfaces",
-  union: "types/unions",
-  enum: "types/enums",
-  input: "types/inputs",
-  scalar: "types/scalars",
+  object: "types",
+  interface: "types",
+  union: "types",
+  enum: "types",
+  input: "types",
+  scalar: "types",
   query: "queries",
   mutation: "mutations",
   subscription: "subscriptions",
   directive: "directives",
 };
+
+/**
+ * The canonical order kinds are presented in — currently the group order of a
+ * multi-kind `index.md`. An explicit array rather than `Object.keys` of a record:
+ * output order is load-bearing (GOAL-8.1) and must not rest on key-insertion
+ * order surviving a future edit.
+ */
+export const KIND_ORDER: readonly ConceptKind[] = [
+  "object",
+  "interface",
+  "union",
+  "enum",
+  "input",
+  "scalar",
+  "query",
+  "mutation",
+  "subscription",
+  "directive",
+];
 
 /**
  * The `type` value emitted into frontmatter. OKF §4.1 asks for values that are

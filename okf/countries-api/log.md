@@ -4,6 +4,36 @@ type: Log
 
 # Update Log
 
+## 2026-08-03
+
+### 21:36:02.273Z
+
+**Migrated**
+
+* Bundle layout: `types/<kind>/` flattened into `types/` across 14 concepts.
+
+**Changed**
+
+* [`deprecated`](/directives/deprecated.md)
+* [`include`](/directives/include.md)
+* [`skip`](/directives/skip.md)
+* [`specifiedBy`](/directives/specifiedBy.md)
+* [`continent`](/queries/continent.md)
+* [`continents`](/queries/continents.md)
+* [`countries`](/queries/countries.md)
+* [`country`](/queries/country.md)
+* [`language`](/queries/language.md)
+* [`languages`](/queries/languages.md)
+* [`Continent`](/types/Continent.md)
+* [`ContinentFilterInput`](/types/ContinentFilterInput.md)
+* [`Country`](/types/Country.md)
+* [`CountryFilterInput`](/types/CountryFilterInput.md)
+* [`Language`](/types/Language.md)
+* [`LanguageFilterInput`](/types/LanguageFilterInput.md)
+* [`State`](/types/State.md)
+* [`StringQueryOperatorInput`](/types/StringQueryOperatorInput.md)
+* [`Subdivision`](/types/Subdivision.md)
+
 ## 2026-08-01
 
 ### 16:30:39.323Z

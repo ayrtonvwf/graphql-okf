@@ -244,7 +244,7 @@ We think this separation is a requirement rather than a preference, for one reas
 
 But there's an asymmetry that has to be solved, and it's the most interesting unsolved design question in the project:
 
-- **docs → graphql links are easy and safe.** The docs bundle points at `../graphql-api/types/objects/Order.md`. If `Order` is removed, the link dangles — which is a *good* failure mode, because it's mechanically detectable, and `log.md` says exactly when and why it broke.
+- **docs → graphql links are easy and safe.** The docs bundle points at `../graphql-api/types/Order.md`. If `Order` is removed, the link dangles — which is a *good* failure mode, because it's mechanically detectable, and `log.md` says exactly when and why it broke.
 - **graphql → docs links cannot be generated deterministically.** The generator has no way to know a docs page exists. The pointer has to come from somewhere, and there are only three candidates:
   1. A human writes it below the preservation marker — which is hydration again, the thing we're trying to avoid.
   2. A sidecar mapping file in the bundle: human-owned, machine-read, keeping generated files pure while allowing links to be rendered into them.

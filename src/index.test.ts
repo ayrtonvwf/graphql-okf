@@ -27,10 +27,10 @@ describe("syncOkfBundle", () => {
     });
 
     expect(result.created).toBe(true);
-    expect(result.added).toContain("types/objects/Country.md");
+    expect(result.added).toContain("types/Country.md");
     expect(result.changed).toEqual([]);
     expect(result.removed).toEqual([]);
-    expect(await readFile(join(outDir, "types/objects/Country.md"), "utf8")).toContain(
+    expect(await readFile(join(outDir, "types/Country.md"), "utf8")).toContain(
       'type: "GraphQL Object Type"',
     );
   });
@@ -48,7 +48,7 @@ describe("syncOkfBundle", () => {
     expect(log).toContain("## 2026-07-24");
     expect(log).toContain("### 09:00:00.000Z");
     expect(log).toContain("**Added**");
-    expect(log).toContain("* [`Country`](/types/objects/Country.md)");
+    expect(log).toContain("* [`Country`](/types/Country.md)");
   });
 
   it("refuses a non-empty directory that is not a bundle", async () => {

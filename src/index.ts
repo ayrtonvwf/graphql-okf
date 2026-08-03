@@ -26,6 +26,8 @@ export interface SyncResult {
   readonly indexes: number;
   /** Concepts whose frontmatter this run converted from OKF v0.1 to v0.2. */
   readonly migrated: readonly string[];
+  /** New paths of concepts this run moved into the flattened `types/` layout. */
+  readonly relocated: readonly string[];
 }
 
 export async function syncOkfBundle(options: SyncOkfBundleOptions): Promise<SyncResult> {
@@ -56,7 +58,8 @@ export async function syncOkfBundle(options: SyncOkfBundleOptions): Promise<Sync
     removed: plan.removed.map((change) => change.path),
     unchanged: plan.unchanged,
     indexes: plan.indexes,
-    migrated: [...plan.migrated],
+    migrated: [...plan.migrated.frontmatter],
+    relocated: [...plan.migrated.relocated],
   };
 }
 

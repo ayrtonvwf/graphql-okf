@@ -56,7 +56,7 @@ describe("migrating a v0.1 bundle to v0.2", () => {
 
   it("preserves human frontmatter keys and human prose verbatim (GOAL-8.3)", async () => {
     const outDir = await v1Bundle();
-    const target = join(outDir, "types/objects/User.md");
+    const target = join(outDir, "types/User.md");
     const original = await readFile(target, "utf8");
     const edited = original
       .replace('timestamp: "', 'owner: "platform-team"\ntimestamp: "')

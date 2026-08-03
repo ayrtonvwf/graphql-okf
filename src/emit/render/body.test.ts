@@ -25,17 +25,17 @@ import {
 
 const scalarRef = (name: string, wrappers: TypeRef["wrappers"] = []): TypeRef => ({
   name,
-  path: `types/scalars/${name}.md`,
+  path: `types/${name}.md`,
   wrappers,
 });
 
 const country: ObjectTypeNode = {
   kind: "object",
   name: "Country",
-  path: "types/objects/Country.md",
+  path: "types/Country.md",
   description: "An ISO country.",
   appliedDirectives: [],
-  interfaces: [{ name: "Node", path: "types/interfaces/Node.md", wrappers: [] }],
+  interfaces: [{ name: "Node", path: "types/Node.md", wrappers: [] }],
   fields: [
     {
       name: "code",
@@ -70,16 +70,14 @@ describe("renderObjectBody", () => {
     const out = renderObjectBody(country);
     expect(out).toContain("# Country");
     expect(out).toContain("An ISO country.");
-    expect(out).toContain("Implements [`Node`](/types/interfaces/Node.md).");
-    expect(out).toContain("| `code` | [`ID!`](/types/scalars/ID.md) | The ISO code. |");
+    expect(out).toContain("Implements [`Node`](/types/Node.md).");
+    expect(out).toContain("| `code` | [`ID!`](/types/ID.md) | The ISO code. |");
     expect(out).toContain(
-      "| `phone` | [`String`](/types/scalars/String.md) | (deprecated: use dialCode) |",
+      "| `phone` | [`String`](/types/String.md) | (deprecated: use dialCode) |",
     );
     expect(out).toContain("## Arguments");
     expect(out).toContain("### `phone`");
-    expect(out).toContain(
-      '| `code` | [`String!`](/types/scalars/String.md) | `"+1"` | Calling code. |',
-    );
+    expect(out).toContain('| `code` | [`String!`](/types/String.md) | `"+1"` | Calling code. |');
   });
 
   it("renders an applied directive's arguments inline", () => {
@@ -121,7 +119,7 @@ describe("renderObjectBody", () => {
     };
 
     expect(renderObjectBody(node)).toContain(
-      "| `email` | [`EmailAddress!`](/types/scalars/EmailAddress.md) | [`@auth`](/directives/auth.md)(requires: STAFF) |",
+      "| `email` | [`EmailAddress!`](/types/EmailAddress.md) | [`@auth`](/directives/auth.md)(requires: STAFF) |",
     );
   });
 
@@ -147,7 +145,7 @@ describe("renderObjectBody", () => {
     };
 
     expect(renderObjectBody(node)).toContain(
-      "| `defaultAddress` | [`String`](/types/scalars/String.md) | Where orders are shipped. (deprecated: use shippingAddress) [`@auth`](/directives/auth.md)(requires: CUSTOMER) |",
+      "| `defaultAddress` | [`String`](/types/String.md) | Where orders are shipped. (deprecated: use shippingAddress) [`@auth`](/directives/auth.md)(requires: CUSTOMER) |",
     );
   });
 
@@ -163,11 +161,11 @@ describe("renderInterfaceBody", () => {
     const node: InterfaceTypeNode = {
       kind: "interface",
       name: "Node",
-      path: "types/interfaces/Node.md",
+      path: "types/Node.md",
       description: null,
       appliedDirectives: [],
       interfaces: [],
-      implementedBy: [{ name: "Country", path: "types/objects/Country.md", wrappers: [] }],
+      implementedBy: [{ name: "Country", path: "types/Country.md", wrappers: [] }],
       fields: [
         {
           name: "id",
@@ -181,8 +179,8 @@ describe("renderInterfaceBody", () => {
     };
     const out = renderInterfaceBody(node);
     expect(out).toContain("# Node");
-    expect(out).toContain("Implemented by [`Country`](/types/objects/Country.md).");
-    expect(out).toContain("| `id` | [`ID!`](/types/scalars/ID.md) |  |");
+    expect(out).toContain("Implemented by [`Country`](/types/Country.md).");
+    expect(out).toContain("| `id` | [`ID!`](/types/ID.md) |  |");
   });
 });
 
@@ -191,19 +189,19 @@ describe("renderUnionBody", () => {
     const node: UnionTypeNode = {
       kind: "union",
       name: "SearchResult",
-      path: "types/unions/SearchResult.md",
+      path: "types/SearchResult.md",
       description: null,
       appliedDirectives: [],
       members: [
-        { name: "Country", path: "types/objects/Country.md", wrappers: [] },
-        { name: "Continent", path: "types/objects/Continent.md", wrappers: [] },
+        { name: "Country", path: "types/Country.md", wrappers: [] },
+        { name: "Continent", path: "types/Continent.md", wrappers: [] },
       ],
     };
     const out = renderUnionBody(node);
     expect(out).toContain("# Schema");
     expect(out).toContain("| Member |");
-    expect(out).toContain("| [`Country`](/types/objects/Country.md) |");
-    expect(out).toContain("| [`Continent`](/types/objects/Continent.md) |");
+    expect(out).toContain("| [`Country`](/types/Country.md) |");
+    expect(out).toContain("| [`Continent`](/types/Continent.md) |");
   });
 });
 
@@ -212,7 +210,7 @@ describe("renderEnumBody", () => {
     const node: EnumTypeNode = {
       kind: "enum",
       name: "Role",
-      path: "types/enums/Role.md",
+      path: "types/Role.md",
       description: "Access level.",
       appliedDirectives: [],
       values: [
@@ -240,14 +238,14 @@ describe("renderInputBody", () => {
     const node: InputObjectTypeNode = {
       kind: "input",
       name: "LanguageFilterInput",
-      path: "types/inputs/LanguageFilterInput.md",
+      path: "types/LanguageFilterInput.md",
       description: null,
       appliedDirectives: [],
       fields: [
         {
           name: "limit",
           description: null,
-          type: { name: "Int", path: "types/scalars/Int.md", wrappers: [] },
+          type: { name: "Int", path: "types/Int.md", wrappers: [] },
           defaultValue: "10",
           deprecation: null,
           appliedDirectives: [],
@@ -257,7 +255,7 @@ describe("renderInputBody", () => {
     const out = renderInputBody(node);
     expect(out).toContain("# Schema");
     expect(out).toContain("| Field | Type | Default | Description |");
-    expect(out).toContain("| `limit` | [`Int`](/types/scalars/Int.md) | `10` |  |");
+    expect(out).toContain("| `limit` | [`Int`](/types/Int.md) | `10` |  |");
   });
 });
 
@@ -266,7 +264,7 @@ describe("renderScalarBody", () => {
     const node: ScalarTypeNode = {
       kind: "scalar",
       name: "DateTime",
-      path: "types/scalars/DateTime.md",
+      path: "types/DateTime.md",
       description: "An ISO-8601 timestamp.",
       appliedDirectives: [],
       specifiedByUrl: "https://scalars.test/datetime",
@@ -282,7 +280,7 @@ describe("renderScalarBody", () => {
     const node: ScalarTypeNode = {
       kind: "scalar",
       name: "String",
-      path: "types/scalars/String.md",
+      path: "types/String.md",
       description: null,
       appliedDirectives: [],
       specifiedByUrl: null,
@@ -305,7 +303,7 @@ const languages: OperationNode = {
       description: "Narrows results.",
       type: {
         name: "LanguageFilterInput",
-        path: "types/inputs/LanguageFilterInput.md",
+        path: "types/LanguageFilterInput.md",
         wrappers: [],
       },
       defaultValue: null,
@@ -315,7 +313,7 @@ const languages: OperationNode = {
   ],
   type: {
     name: "Language",
-    path: "types/objects/Language.md",
+    path: "types/Language.md",
     wrappers: ["nonNull", "list", "nonNull"],
   },
   deprecation: null,
@@ -325,11 +323,11 @@ describe("renderOperationBody", () => {
   it("renders returns and arguments with absolute bundle links", () => {
     const out = renderOperationBody(languages);
     expect(out).toContain("# languages");
-    expect(out).toContain("**Returns** [`[Language!]!`](/types/objects/Language.md)");
+    expect(out).toContain("**Returns** [`[Language!]!`](/types/Language.md)");
     expect(out).toContain("# Schema");
     expect(out).toContain("| Argument | Type | Default | Description |");
     expect(out).toContain(
-      "| `filter` | [`LanguageFilterInput`](/types/inputs/LanguageFilterInput.md) |  | Narrows results. |",
+      "| `filter` | [`LanguageFilterInput`](/types/LanguageFilterInput.md) |  | Narrows results. |",
     );
   });
 
@@ -354,7 +352,7 @@ describe("renderDirectiveBody", () => {
         {
           name: "reason",
           description: "Why.",
-          type: { name: "String", path: "types/scalars/String.md", wrappers: [] },
+          type: { name: "String", path: "types/String.md", wrappers: [] },
           defaultValue: '"No longer supported"',
           deprecation: null,
           appliedDirectives: [],
@@ -366,7 +364,7 @@ describe("renderDirectiveBody", () => {
     expect(out).toContain("Locations: `ARGUMENT_DEFINITION`, `ENUM_VALUE`, `FIELD_DEFINITION`.");
     expect(out).toContain("# Schema");
     expect(out).toContain(
-      '| `reason` | [`String`](/types/scalars/String.md) | `"No longer supported"` | Why. |',
+      '| `reason` | [`String`](/types/String.md) | `"No longer supported"` | Why. |',
     );
   });
 });
@@ -381,7 +379,7 @@ describe("renderBody dispatcher", () => {
     const union: UnionTypeNode = {
       kind: "union",
       name: "SearchResult",
-      path: "types/unions/SearchResult.md",
+      path: "types/SearchResult.md",
       description: null,
       appliedDirectives: [],
       members: [],
@@ -389,7 +387,7 @@ describe("renderBody dispatcher", () => {
     const enumNode: EnumTypeNode = {
       kind: "enum",
       name: "Role",
-      path: "types/enums/Role.md",
+      path: "types/Role.md",
       description: null,
       appliedDirectives: [],
       values: [],
@@ -397,7 +395,7 @@ describe("renderBody dispatcher", () => {
     const input: InputObjectTypeNode = {
       kind: "input",
       name: "LanguageFilterInput",
-      path: "types/inputs/LanguageFilterInput.md",
+      path: "types/LanguageFilterInput.md",
       description: null,
       appliedDirectives: [],
       fields: [],
@@ -405,7 +403,7 @@ describe("renderBody dispatcher", () => {
     const scalar: ScalarTypeNode = {
       kind: "scalar",
       name: "String",
-      path: "types/scalars/String.md",
+      path: "types/String.md",
       description: null,
       appliedDirectives: [],
       specifiedByUrl: null,
@@ -451,7 +449,7 @@ describe("applied directives on non-field rows", () => {
     const body = renderObjectBody({
       kind: "object",
       name: "Query",
-      path: "types/objects/Query.md",
+      path: "types/Query.md",
       description: null,
       appliedDirectives: [],
       interfaces: [],
@@ -459,12 +457,12 @@ describe("applied directives on non-field rows", () => {
         {
           name: "orders",
           description: null,
-          type: { wrappers: [], name: "Order", path: "types/objects/Order.md" },
+          type: { wrappers: [], name: "Order", path: "types/Order.md" },
           args: [
             {
               name: "customerId",
               description: "Whose orders.",
-              type: { wrappers: [], name: "ID", path: "types/scalars/ID.md" },
+              type: { wrappers: [], name: "ID", path: "types/ID.md" },
               defaultValue: null,
               deprecation: null,
               appliedDirectives: [auth],
@@ -477,7 +475,7 @@ describe("applied directives on non-field rows", () => {
     });
 
     expect(body).toContain(
-      "| `customerId` | [`ID`](/types/scalars/ID.md) |  | Whose orders. [`@auth`](/directives/auth.md)(requires: STAFF) |",
+      "| `customerId` | [`ID`](/types/ID.md) |  | Whose orders. [`@auth`](/directives/auth.md)(requires: STAFF) |",
     );
   });
 
@@ -485,14 +483,14 @@ describe("applied directives on non-field rows", () => {
     const body = renderInputBody({
       kind: "input",
       name: "OrderFilter",
-      path: "types/inputs/OrderFilter.md",
+      path: "types/OrderFilter.md",
       description: null,
       appliedDirectives: [],
       fields: [
         {
           name: "customerId",
           description: null,
-          type: { wrappers: [], name: "ID", path: "types/scalars/ID.md" },
+          type: { wrappers: [], name: "ID", path: "types/ID.md" },
           defaultValue: null,
           deprecation: null,
           appliedDirectives: [auth],
@@ -501,7 +499,7 @@ describe("applied directives on non-field rows", () => {
     });
 
     expect(body).toContain(
-      "| `customerId` | [`ID`](/types/scalars/ID.md) |  | [`@auth`](/directives/auth.md)(requires: STAFF) |",
+      "| `customerId` | [`ID`](/types/ID.md) |  | [`@auth`](/directives/auth.md)(requires: STAFF) |",
     );
   });
 
@@ -509,7 +507,7 @@ describe("applied directives on non-field rows", () => {
     const body = renderEnumBody({
       kind: "enum",
       name: "Role",
-      path: "types/enums/Role.md",
+      path: "types/Role.md",
       description: null,
       appliedDirectives: [],
       values: [
@@ -531,12 +529,12 @@ describe("applied directives on non-field rows", () => {
       description: null,
       appliedDirectives: [],
       deprecation: null,
-      type: { wrappers: [], name: "Order", path: "types/objects/Order.md" },
+      type: { wrappers: [], name: "Order", path: "types/Order.md" },
       args: [
         {
           name: "customerId",
           description: null,
-          type: { wrappers: [], name: "ID", path: "types/scalars/ID.md" },
+          type: { wrappers: [], name: "ID", path: "types/ID.md" },
           defaultValue: null,
           deprecation: null,
           appliedDirectives: [auth],
@@ -545,7 +543,7 @@ describe("applied directives on non-field rows", () => {
     });
 
     expect(body).toContain(
-      "| `customerId` | [`ID`](/types/scalars/ID.md) |  | [`@auth`](/directives/auth.md)(requires: STAFF) |",
+      "| `customerId` | [`ID`](/types/ID.md) |  | [`@auth`](/directives/auth.md)(requires: STAFF) |",
     );
   });
 
@@ -553,7 +551,7 @@ describe("applied directives on non-field rows", () => {
     const body = renderEnumBody({
       kind: "enum",
       name: "Role",
-      path: "types/enums/Role.md",
+      path: "types/Role.md",
       description: null,
       appliedDirectives: [],
       values: [
@@ -579,7 +577,7 @@ describe("applied directives on non-field rows", () => {
     const body = renderEnumBody({
       kind: "enum",
       name: "Role",
-      path: "types/enums/Role.md",
+      path: "types/Role.md",
       description: null,
       appliedDirectives: [],
       values: [
@@ -607,7 +605,7 @@ describe("applied directives on non-field rows", () => {
     const body = renderEnumBody({
       kind: "enum",
       name: "Role",
-      path: "types/enums/Role.md",
+      path: "types/Role.md",
       description: null,
       appliedDirectives: [
         {
@@ -626,7 +624,7 @@ describe("applied directives on non-field rows", () => {
     const body = renderEnumBody({
       kind: "enum",
       name: "Role",
-      path: "types/enums/Role.md",
+      path: "types/Role.md",
       description: null,
       appliedDirectives: [],
       values: [
@@ -648,7 +646,7 @@ describe("# Schema sections", () => {
     const body = renderObjectBody({
       kind: "object",
       name: "Country",
-      path: "types/objects/Country.md",
+      path: "types/Country.md",
       description: null,
       appliedDirectives: [],
       interfaces: [],
@@ -656,7 +654,7 @@ describe("# Schema sections", () => {
         {
           name: "code",
           description: "ISO 3166-1 alpha-2 code.",
-          type: { wrappers: ["nonNull"], name: "ID", path: "types/scalars/ID.md" },
+          type: { wrappers: ["nonNull"], name: "ID", path: "types/ID.md" },
           args: [],
           deprecation: null,
           appliedDirectives: [],
@@ -667,14 +665,14 @@ describe("# Schema sections", () => {
     expect(body).toContain("\n# Schema\n");
     expect(body).toContain("| Field | Type | Description |");
     expect(body).toContain("| --- | --- | --- |");
-    expect(body).toContain("| `code` | [`ID!`](/types/scalars/ID.md) | ISO 3166-1 alpha-2 code. |");
+    expect(body).toContain("| `code` | [`ID!`](/types/ID.md) | ISO 3166-1 alpha-2 code. |");
   });
 
   it("keeps a multi-paragraph field description on one row", () => {
     const body = renderObjectBody({
       kind: "object",
       name: "Product",
-      path: "types/objects/Product.md",
+      path: "types/Product.md",
       description: null,
       appliedDirectives: [],
       interfaces: [],
@@ -682,7 +680,7 @@ describe("# Schema sections", () => {
         {
           name: "description",
           description: "The blurb.\n\nMay contain Markdown.",
-          type: { wrappers: [], name: "String", path: "types/scalars/String.md" },
+          type: { wrappers: [], name: "String", path: "types/String.md" },
           args: [],
           deprecation: null,
           appliedDirectives: [],
@@ -690,7 +688,7 @@ describe("# Schema sections", () => {
         {
           name: "sku",
           description: null,
-          type: { wrappers: [], name: "String", path: "types/scalars/String.md" },
+          type: { wrappers: [], name: "String", path: "types/String.md" },
           args: [],
           deprecation: null,
           appliedDirectives: [],
@@ -699,7 +697,7 @@ describe("# Schema sections", () => {
     });
 
     expect(body).toContain(
-      "| `description` | [`String`](/types/scalars/String.md) | The blurb. May contain Markdown. |",
+      "| `description` | [`String`](/types/String.md) | The blurb. May contain Markdown. |",
     );
     // The second field must still be in the same table, not a new one.
     expect(body.match(/\| Field \| Type \| Description \|/g)).toHaveLength(1);
@@ -710,7 +708,7 @@ describe("# Schema sections", () => {
     const body = renderObjectBody({
       kind: "object",
       name: "Query",
-      path: "types/objects/Thing.md",
+      path: "types/Thing.md",
       description: null,
       appliedDirectives: [],
       interfaces: [],
@@ -718,12 +716,12 @@ describe("# Schema sections", () => {
         {
           name: "languages",
           description: null,
-          type: { wrappers: [], name: "Language", path: "types/objects/Language.md" },
+          type: { wrappers: [], name: "Language", path: "types/Language.md" },
           args: [
             {
               name: "limit",
               description: "How many.",
-              type: { wrappers: [], name: "Int", path: "types/scalars/Int.md" },
+              type: { wrappers: [], name: "Int", path: "types/Int.md" },
               defaultValue: "10",
               deprecation: null,
               appliedDirectives: [],
@@ -738,14 +736,14 @@ describe("# Schema sections", () => {
     expect(body).toContain("## Arguments");
     expect(body).toContain("### `languages`");
     expect(body).toContain("| Argument | Type | Default | Description |");
-    expect(body).toContain("| `limit` | [`Int`](/types/scalars/Int.md) | `10` | How many. |");
+    expect(body).toContain("| `limit` | [`Int`](/types/Int.md) | `10` | How many. |");
   });
 
   it("omits the Arguments subsection when no field takes arguments", () => {
     const body = renderObjectBody({
       kind: "object",
       name: "Country",
-      path: "types/objects/Country.md",
+      path: "types/Country.md",
       description: null,
       appliedDirectives: [],
       interfaces: [],
@@ -753,7 +751,7 @@ describe("# Schema sections", () => {
         {
           name: "code",
           description: null,
-          type: { wrappers: [], name: "ID", path: "types/scalars/ID.md" },
+          type: { wrappers: [], name: "ID", path: "types/ID.md" },
           args: [],
           deprecation: null,
           appliedDirectives: [],
@@ -768,7 +766,7 @@ describe("# Schema sections", () => {
     const body = renderEnumBody({
       kind: "enum",
       name: "Role",
-      path: "types/enums/Role.md",
+      path: "types/Role.md",
       description: null,
       appliedDirectives: [],
       values: [
@@ -785,14 +783,14 @@ describe("# Schema sections", () => {
     const body = renderUnionBody({
       kind: "union",
       name: "Result",
-      path: "types/unions/Result.md",
+      path: "types/Result.md",
       description: null,
       appliedDirectives: [],
-      members: [{ wrappers: [], name: "Country", path: "types/objects/Country.md" }],
+      members: [{ wrappers: [], name: "Country", path: "types/Country.md" }],
     });
 
     expect(body).toContain("| Member |");
-    expect(body).toContain("| [`Country`](/types/objects/Country.md) |");
+    expect(body).toContain("| [`Country`](/types/Country.md) |");
   });
 
   it("renders operation arguments as a table under # Schema", () => {
@@ -804,12 +802,12 @@ describe("# Schema sections", () => {
       description: null,
       appliedDirectives: [],
       deprecation: null,
-      type: { wrappers: [], name: "Country", path: "types/objects/Country.md" },
+      type: { wrappers: [], name: "Country", path: "types/Country.md" },
       args: [
         {
           name: "filter",
           description: "Narrow the list.",
-          type: { wrappers: [], name: "Filter", path: "types/inputs/Filter.md" },
+          type: { wrappers: [], name: "Filter", path: "types/Filter.md" },
           defaultValue: null,
           deprecation: null,
           appliedDirectives: [],
@@ -819,16 +817,14 @@ describe("# Schema sections", () => {
 
     expect(body).toContain("# Schema");
     expect(body).toContain("| Argument | Type | Default | Description |");
-    expect(body).toContain(
-      "| `filter` | [`Filter`](/types/inputs/Filter.md) |  | Narrow the list. |",
-    );
+    expect(body).toContain("| `filter` | [`Filter`](/types/Filter.md) |  | Narrow the list. |");
   });
 
   it("surfaces deprecation in the description cell", () => {
     const body = renderEnumBody({
       kind: "enum",
       name: "Role",
-      path: "types/enums/Role.md",
+      path: "types/Role.md",
       description: null,
       appliedDirectives: [],
       values: [
@@ -848,7 +844,7 @@ describe("# Schema sections", () => {
     const body = renderEnumBody({
       kind: "enum",
       name: "Sep",
-      path: "types/enums/Sep.md",
+      path: "types/Sep.md",
       description: null,
       appliedDirectives: [],
       values: [
@@ -863,7 +859,7 @@ describe("# Schema sections", () => {
     const body = renderObjectBody({
       kind: "object",
       name: "Product",
-      path: "types/objects/Product.md",
+      path: "types/Product.md",
       description: "A product.\n\nMay contain Markdown.",
       appliedDirectives: [],
       interfaces: [],
