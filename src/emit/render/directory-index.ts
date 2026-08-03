@@ -37,10 +37,8 @@ export function renderDirectoryIndex(
   const blocks = sections
     .filter((section) => section.entries.length > 0)
     .map((section) => {
-      const bullets_list = section.entries.map(bullet).join("\n");
-      return section.heading === undefined
-        ? bullets_list
-        : `## ${section.heading}\n\n${bullets_list}`;
+      const bullets = section.entries.map(bullet).join("\n");
+      return section.heading === undefined ? bullets : `## ${section.heading}\n\n${bullets}`;
     });
 
   const block =
