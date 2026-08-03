@@ -1,4 +1,4 @@
-import { mkdtemp, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -108,5 +108,67 @@ describe("applyPlan", () => {
     await applyPlan(plan, dir, T);
 
     expect(await readdir(dir)).toEqual(["index.md"]);
+  });
+
+  it("removes a file a delete action names, after writing the new one", async () => {
+    const dir = await workspace();
+    await mkdir(join(dir, "types/objects"), { recursive: true });
+    await writeFile(join(dir, "types/objects/Product.md"), "old\n", "utf8");
+
+    await applyPlan(
+      {
+        ...empty,
+        actions: [
+          { kind: "migrate", path: "types/Product.md", contents: "new\n" },
+          { kind: "delete", path: "types/objects/Product.md" },
+        ],
+      },
+      dir,
+      T,
+    );
+
+    expect(await readFile(join(dir, "types/Product.md"), "utf8")).toBe("new\n");
+    await expect(readFile(join(dir, "types/objects/Product.md"), "utf8")).rejects.toThrow();
+  });
+
+  it("removes the directory a delete emptied", async () => {
+    const dir = await workspace();
+    await mkdir(join(dir, "types/objects"), { recursive: true });
+    await writeFile(join(dir, "types/objects/index.md"), "old\n", "utf8");
+
+    await applyPlan(
+      { ...empty, actions: [{ kind: "delete", path: "types/objects/index.md" }] },
+      dir,
+      T,
+    );
+
+    await expect(readdir(join(dir, "types/objects"))).rejects.toThrow();
+  });
+
+  it("leaves a directory that still holds a human's stray file", async () => {
+    const dir = await workspace();
+    await mkdir(join(dir, "types/objects"), { recursive: true });
+    await writeFile(join(dir, "types/objects/index.md"), "old\n", "utf8");
+    await writeFile(join(dir, "types/objects/notes.md"), "mine\n", "utf8");
+
+    await applyPlan(
+      { ...empty, actions: [{ kind: "delete", path: "types/objects/index.md" }] },
+      dir,
+      T,
+    );
+
+    expect(await readdir(join(dir, "types/objects"))).toEqual(["notes.md"]);
+  });
+
+  it("tolerates a delete for a file that is already gone", async () => {
+    const dir = await workspace();
+
+    await expect(
+      applyPlan(
+        { ...empty, actions: [{ kind: "delete", path: "types/objects/Product.md" }] },
+        dir,
+        T,
+      ),
+    ).resolves.toBeUndefined();
   });
 });

@@ -3,10 +3,15 @@ import { buildBundle } from "../emit/bundle.js";
 import { emitContext } from "../emit/context.js";
 import { assembleFile, EMPTY_HUMAN } from "../emit/render/seam.js";
 import type { SchemaIr } from "../model/ir.js";
-import { reconcile } from "./plan.js";
+import { type FileAction, reconcile } from "./plan.js";
 
 const T1 = "2026-07-01T10:00:00.000Z";
 const T2 = "2026-07-24T09:00:00.000Z";
+
+/** Type guard to narrow FileAction to non-delete actions */
+function isNotDelete(action: FileAction): action is Exclude<FileAction, { kind: "delete" }> {
+  return action.kind !== "delete";
+}
 
 const ir: SchemaIr = {
   resource: "schema.graphql",
@@ -81,8 +86,10 @@ describe("reconcile", () => {
 
     expect(plan.changed.map((change) => change.name)).toEqual(["Country"]);
     expect(action?.kind).toBe("update");
-    expect(action?.contents).toContain(`timestamp: ${JSON.stringify(T2)}`);
-    expect(action?.contents).toContain("A sovereign state.");
+    expect(action && isNotDelete(action) ? action.contents : "").toContain(
+      `timestamp: ${JSON.stringify(T2)}`,
+    );
+    expect(action && isNotDelete(action) ? action.contents : "").toContain("A sovereign state.");
   });
 
   it("preserves the human region verbatim when updating", () => {
@@ -97,7 +104,9 @@ describe("reconcile", () => {
     const plan = reconcile(evolved, disk, emitContext("0.1", T2));
     const action = plan.actions.find((entry) => entry.path === path);
 
-    expect(action?.contents).toContain("Our team owns this type.");
+    expect(action && isNotDelete(action) ? action.contents : "").toContain(
+      "Our team owns this type.",
+    );
   });
 
   it("recreates a concept file a human deleted", () => {
@@ -126,7 +135,9 @@ describe("reconcile", () => {
 
     expect(plan.actions.map((action) => action.path)).toEqual(["index.md"]);
     expect(plan.actions[0]?.kind).toBe("index");
-    expect(plan.actions[0]?.contents).toContain("<!-- graphql-okf:generated:start -->");
+    expect(
+      plan.actions[0] && isNotDelete(plan.actions[0]) ? plan.actions[0].contents : "",
+    ).toContain("<!-- graphql-okf:generated:start -->");
     expect(plan.added).toEqual([]);
     expect(plan.changed).toEqual([]);
   });
@@ -134,7 +145,8 @@ describe("reconcile", () => {
   it("preserves a human key added to the bundle-root index across a real re-run", () => {
     const first = reconcile(ir, new Map(), emitContext("0.1", T1));
     const rootAction = first.actions.find((action) => action.path === "index.md");
-    if (rootAction === undefined) throw new Error("expected a root index action");
+    if (rootAction === undefined || !isNotDelete(rootAction))
+      throw new Error("expected a root index action");
 
     const edited = rootAction.contents.replace("---\n\n# ", "owner: platform-team\n---\n\n# ");
     const existing = new Map([["index.md", edited]]);
@@ -173,7 +185,7 @@ describe("reconcile", () => {
 
     const second = reconcile(evolved, existing, emitContext("0.1", T2));
     const rewritten = second.actions.find((action) => action.path === "index.md");
-    if (rewritten === undefined) {
+    if (rewritten === undefined || !isNotDelete(rewritten)) {
       throw new Error("expected reconcile to emit a real action for index.md on the second run");
     }
 
@@ -193,7 +205,9 @@ describe("reconcile", () => {
 
   it("reports zero index writes on an unchanged re-run", () => {
     const first = reconcile(ir, new Map(), emitContext("0.1", "2026-07-25T00:00:00.000Z"));
-    const existing = new Map(first.actions.map((action) => [action.path, action.contents]));
+    const existing = new Map(
+      first.actions.filter(isNotDelete).map((action) => [action.path, action.contents]),
+    );
 
     const second = reconcile(ir, existing, emitContext("0.1", "2026-07-25T00:00:00.000Z"));
 
@@ -217,7 +231,7 @@ describe("reconcile migrating a v0.1 bundle", () => {
     expect(plan.migrated).toEqual(["types/Country.md"]);
     const migrate = plan.actions.find((action) => action.kind === "migrate");
     expect(migrate?.path).toBe("types/Country.md");
-    expect(migrate?.contents).toContain(
+    expect(migrate && isNotDelete(migrate) ? migrate.contents : "").toContain(
       'generated: { by: "graphql-okf/0.1", at: "2026-07-01T10:00:00.000Z" }',
     );
   });
@@ -268,9 +282,15 @@ describe("reconcile removals", () => {
 
     expect(plan.removed.map((change) => change.name)).toEqual(["Country"]);
     expect(action?.kind).toBe("tombstone");
-    expect(action?.contents).toContain('graphql_okf_status: "removed"');
-    expect(action?.contents).toContain(`removedAt: ${JSON.stringify(T2)}`);
-    expect(action?.contents).toContain("# Last known definition");
+    expect(action && isNotDelete(action) ? action.contents : "").toContain(
+      'graphql_okf_status: "removed"',
+    );
+    expect(action && isNotDelete(action) ? action.contents : "").toContain(
+      `removedAt: ${JSON.stringify(T2)}`,
+    );
+    expect(action && isNotDelete(action) ? action.contents : "").toContain(
+      "# Last known definition",
+    );
   });
 
   it("keeps the tombstoned file at its original path so inbound links resolve", () => {
@@ -287,13 +307,15 @@ describe("reconcile removals", () => {
     const plan = reconcile(emptyIr, disk, emitContext("0.1", T2));
     const action = plan.actions.find((entry) => entry.path === path);
 
-    expect(action?.contents).toContain("Still referenced by the billing service.");
+    expect(action && isNotDelete(action) ? action.contents : "").toContain(
+      "Still referenced by the billing service.",
+    );
   });
 
   it("never re-tombstones: a second run against the same schema is a no-op", () => {
     const disk = bundleOnDisk(ir, T1);
     const first = reconcile(emptyIr, disk, emitContext("0.1", T2));
-    for (const action of first.actions) {
+    for (const action of first.actions.filter(isNotDelete)) {
       disk.set(action.path, action.contents);
     }
 
@@ -305,7 +327,9 @@ describe("reconcile removals", () => {
 
   it("restores a concept that comes back, logging it as added", () => {
     const disk = bundleOnDisk(ir, T1);
-    for (const action of reconcile(emptyIr, disk, emitContext("0.1", T2)).actions) {
+    for (const action of reconcile(emptyIr, disk, emitContext("0.1", T2)).actions.filter(
+      isNotDelete,
+    )) {
       disk.set(action.path, action.contents);
     }
 
@@ -314,8 +338,10 @@ describe("reconcile removals", () => {
 
     expect(plan.added.map((change) => change.name)).toEqual(["Country"]);
     expect(plan.changed).toEqual([]);
-    expect(action?.contents).not.toContain("status: removed");
-    expect(action?.contents).not.toContain("removedAt:");
-    expect(action?.contents).not.toContain("Last known definition");
+    expect(action && isNotDelete(action) ? action.contents : "").not.toContain("status: removed");
+    expect(action && isNotDelete(action) ? action.contents : "").not.toContain("removedAt:");
+    expect(action && isNotDelete(action) ? action.contents : "").not.toContain(
+      "Last known definition",
+    );
   });
 });

@@ -12,11 +12,18 @@ export interface ConceptChange {
   readonly path: string;
 }
 
-interface FileAction {
-  readonly kind: "create" | "update" | "tombstone" | "index" | "migrate";
-  readonly path: string;
-  readonly contents: string;
-}
+/**
+ * A delete carries no contents, and the union says so rather than passing an
+ * unused empty string. Deleting is new as of issue #22's flatten: before it,
+ * graphql-okf only ever wrote.
+ */
+export type FileAction =
+  | { readonly kind: "delete"; readonly path: string }
+  | {
+      readonly kind: "create" | "update" | "tombstone" | "index" | "migrate";
+      readonly path: string;
+      readonly contents: string;
+    };
 
 export interface BundlePlan {
   readonly actions: readonly FileAction[];
