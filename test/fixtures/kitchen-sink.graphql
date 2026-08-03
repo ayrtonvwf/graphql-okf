@@ -32,6 +32,12 @@ type User implements Node & Entity @auth(requires: ADMIN) {
 
 type Post implements Node {
   id: ID!
+  # Deliberate relative Markdown link in this description: test/reconcile.test.ts
+  # steers its human-edit fixture onto User.md (not Post.md) specifically to avoid
+  # this link, and test/support/bundle-links.test.ts exercises the relative-link
+  # resolution this description is meant to trigger. Don't move this description
+  # to another field without checking both.
+  "See the [ordering guide](../guides/ordering.md) for how this is sequenced."
   author: User!
 }
 

@@ -70,15 +70,15 @@ describe("renderObjectBody", () => {
     const out = renderObjectBody(country);
     expect(out).toContain("# Country");
     expect(out).toContain("An ISO country.");
-    expect(out).toContain("Implements [`Node`](../interfaces/Node.md).");
-    expect(out).toContain("| `code` | [`ID!`](../scalars/ID.md) | The ISO code. |");
+    expect(out).toContain("Implements [`Node`](/types/interfaces/Node.md).");
+    expect(out).toContain("| `code` | [`ID!`](/types/scalars/ID.md) | The ISO code. |");
     expect(out).toContain(
-      "| `phone` | [`String`](../scalars/String.md) | (deprecated: use dialCode) |",
+      "| `phone` | [`String`](/types/scalars/String.md) | (deprecated: use dialCode) |",
     );
     expect(out).toContain("## Arguments");
     expect(out).toContain("### `phone`");
     expect(out).toContain(
-      '| `code` | [`String!`](../scalars/String.md) | `"+1"` | Calling code. |',
+      '| `code` | [`String!`](/types/scalars/String.md) | `"+1"` | Calling code. |',
     );
   });
 
@@ -95,7 +95,7 @@ describe("renderObjectBody", () => {
     };
     const out = renderObjectBody(node);
     expect(out).toContain(
-      "Directives: [`@cacheControl`](../../directives/cacheControl.md)(maxAge: 60).",
+      "Directives: [`@cacheControl`](/directives/cacheControl.md)(maxAge: 60).",
     );
   });
 
@@ -121,7 +121,7 @@ describe("renderObjectBody", () => {
     };
 
     expect(renderObjectBody(node)).toContain(
-      "| `email` | [`EmailAddress!`](../scalars/EmailAddress.md) | [`@auth`](../../directives/auth.md)(requires: STAFF) |",
+      "| `email` | [`EmailAddress!`](/types/scalars/EmailAddress.md) | [`@auth`](/directives/auth.md)(requires: STAFF) |",
     );
   });
 
@@ -147,7 +147,7 @@ describe("renderObjectBody", () => {
     };
 
     expect(renderObjectBody(node)).toContain(
-      "| `defaultAddress` | [`String`](../scalars/String.md) | Where orders are shipped. (deprecated: use shippingAddress) [`@auth`](../../directives/auth.md)(requires: CUSTOMER) |",
+      "| `defaultAddress` | [`String`](/types/scalars/String.md) | Where orders are shipped. (deprecated: use shippingAddress) [`@auth`](/directives/auth.md)(requires: CUSTOMER) |",
     );
   });
 
@@ -181,8 +181,8 @@ describe("renderInterfaceBody", () => {
     };
     const out = renderInterfaceBody(node);
     expect(out).toContain("# Node");
-    expect(out).toContain("Implemented by [`Country`](../objects/Country.md).");
-    expect(out).toContain("| `id` | [`ID!`](../scalars/ID.md) |  |");
+    expect(out).toContain("Implemented by [`Country`](/types/objects/Country.md).");
+    expect(out).toContain("| `id` | [`ID!`](/types/scalars/ID.md) |  |");
   });
 });
 
@@ -202,8 +202,8 @@ describe("renderUnionBody", () => {
     const out = renderUnionBody(node);
     expect(out).toContain("# Schema");
     expect(out).toContain("| Member |");
-    expect(out).toContain("| [`Country`](../objects/Country.md) |");
-    expect(out).toContain("| [`Continent`](../objects/Continent.md) |");
+    expect(out).toContain("| [`Country`](/types/objects/Country.md) |");
+    expect(out).toContain("| [`Continent`](/types/objects/Continent.md) |");
   });
 });
 
@@ -257,7 +257,7 @@ describe("renderInputBody", () => {
     const out = renderInputBody(node);
     expect(out).toContain("# Schema");
     expect(out).toContain("| Field | Type | Default | Description |");
-    expect(out).toContain("| `limit` | [`Int`](../scalars/Int.md) | `10` |  |");
+    expect(out).toContain("| `limit` | [`Int`](/types/scalars/Int.md) | `10` |  |");
   });
 });
 
@@ -322,14 +322,14 @@ const languages: OperationNode = {
 };
 
 describe("renderOperationBody", () => {
-  it("renders returns and arguments with links resolving across directories", () => {
+  it("renders returns and arguments with absolute bundle links", () => {
     const out = renderOperationBody(languages);
     expect(out).toContain("# languages");
-    expect(out).toContain("**Returns** [`[Language!]!`](../types/objects/Language.md)");
+    expect(out).toContain("**Returns** [`[Language!]!`](/types/objects/Language.md)");
     expect(out).toContain("# Schema");
     expect(out).toContain("| Argument | Type | Default | Description |");
     expect(out).toContain(
-      "| `filter` | [`LanguageFilterInput`](../types/inputs/LanguageFilterInput.md) |  | Narrows results. |",
+      "| `filter` | [`LanguageFilterInput`](/types/inputs/LanguageFilterInput.md) |  | Narrows results. |",
     );
   });
 
@@ -366,7 +366,7 @@ describe("renderDirectiveBody", () => {
     expect(out).toContain("Locations: `ARGUMENT_DEFINITION`, `ENUM_VALUE`, `FIELD_DEFINITION`.");
     expect(out).toContain("# Schema");
     expect(out).toContain(
-      '| `reason` | [`String`](../types/scalars/String.md) | `"No longer supported"` | Why. |',
+      '| `reason` | [`String`](/types/scalars/String.md) | `"No longer supported"` | Why. |',
     );
   });
 });
@@ -477,7 +477,7 @@ describe("applied directives on non-field rows", () => {
     });
 
     expect(body).toContain(
-      "| `customerId` | [`ID`](../scalars/ID.md) |  | Whose orders. [`@auth`](../../directives/auth.md)(requires: STAFF) |",
+      "| `customerId` | [`ID`](/types/scalars/ID.md) |  | Whose orders. [`@auth`](/directives/auth.md)(requires: STAFF) |",
     );
   });
 
@@ -501,7 +501,7 @@ describe("applied directives on non-field rows", () => {
     });
 
     expect(body).toContain(
-      "| `customerId` | [`ID`](../scalars/ID.md) |  | [`@auth`](../../directives/auth.md)(requires: STAFF) |",
+      "| `customerId` | [`ID`](/types/scalars/ID.md) |  | [`@auth`](/directives/auth.md)(requires: STAFF) |",
     );
   });
 
@@ -518,7 +518,7 @@ describe("applied directives on non-field rows", () => {
     });
 
     expect(body).toContain(
-      "| `STAFF` | Internal. [`@auth`](../../directives/auth.md)(requires: STAFF) |",
+      "| `STAFF` | Internal. [`@auth`](/directives/auth.md)(requires: STAFF) |",
     );
   });
 
@@ -545,7 +545,7 @@ describe("applied directives on non-field rows", () => {
     });
 
     expect(body).toContain(
-      "| `customerId` | [`ID`](../types/scalars/ID.md) |  | [`@auth`](../directives/auth.md)(requires: STAFF) |",
+      "| `customerId` | [`ID`](/types/scalars/ID.md) |  | [`@auth`](/directives/auth.md)(requires: STAFF) |",
     );
   });
 
@@ -572,7 +572,7 @@ describe("applied directives on non-field rows", () => {
       ],
     });
 
-    expect(body).toContain('| `STAFF` | [`@note`](../../directives/note.md)(text: "a \\| b") |');
+    expect(body).toContain('| `STAFF` | [`@note`](/directives/note.md)(text: "a \\| b") |');
   });
 
   it("collapses a newline in a directive argument value", () => {
@@ -599,7 +599,7 @@ describe("applied directives on non-field rows", () => {
     });
 
     expect(body).toContain(
-      '| `STAFF` | [`@note`](../../directives/note.md)(text: """ multi line """) |',
+      '| `STAFF` | [`@note`](/directives/note.md)(text: """ multi line """) |',
     );
   });
 
@@ -619,7 +619,7 @@ describe("applied directives on non-field rows", () => {
       values: [],
     });
 
-    expect(body).toContain('Directives: [`@note`](../../directives/note.md)(text: "a | b").');
+    expect(body).toContain('Directives: [`@note`](/directives/note.md)(text: "a | b").');
   });
 
   it("escapes a pipe in a deprecation reason so the row survives", () => {
@@ -667,7 +667,7 @@ describe("# Schema sections", () => {
     expect(body).toContain("\n# Schema\n");
     expect(body).toContain("| Field | Type | Description |");
     expect(body).toContain("| --- | --- | --- |");
-    expect(body).toContain("| `code` | [`ID!`](../scalars/ID.md) | ISO 3166-1 alpha-2 code. |");
+    expect(body).toContain("| `code` | [`ID!`](/types/scalars/ID.md) | ISO 3166-1 alpha-2 code. |");
   });
 
   it("keeps a multi-paragraph field description on one row", () => {
@@ -699,7 +699,7 @@ describe("# Schema sections", () => {
     });
 
     expect(body).toContain(
-      "| `description` | [`String`](../scalars/String.md) | The blurb. May contain Markdown. |",
+      "| `description` | [`String`](/types/scalars/String.md) | The blurb. May contain Markdown. |",
     );
     // The second field must still be in the same table, not a new one.
     expect(body.match(/\| Field \| Type \| Description \|/g)).toHaveLength(1);
@@ -738,7 +738,7 @@ describe("# Schema sections", () => {
     expect(body).toContain("## Arguments");
     expect(body).toContain("### `languages`");
     expect(body).toContain("| Argument | Type | Default | Description |");
-    expect(body).toContain("| `limit` | [`Int`](../scalars/Int.md) | `10` | How many. |");
+    expect(body).toContain("| `limit` | [`Int`](/types/scalars/Int.md) | `10` | How many. |");
   });
 
   it("omits the Arguments subsection when no field takes arguments", () => {
@@ -792,7 +792,7 @@ describe("# Schema sections", () => {
     });
 
     expect(body).toContain("| Member |");
-    expect(body).toContain("| [`Country`](../objects/Country.md) |");
+    expect(body).toContain("| [`Country`](/types/objects/Country.md) |");
   });
 
   it("renders operation arguments as a table under # Schema", () => {
@@ -820,7 +820,7 @@ describe("# Schema sections", () => {
     expect(body).toContain("# Schema");
     expect(body).toContain("| Argument | Type | Default | Description |");
     expect(body).toContain(
-      "| `filter` | [`Filter`](../types/inputs/Filter.md) |  | Narrow the list. |",
+      "| `filter` | [`Filter`](/types/inputs/Filter.md) |  | Narrow the list. |",
     );
   });
 

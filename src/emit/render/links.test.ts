@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TypeRef } from "../../model/ir.js";
-import { decoratedType, relLink, typeLink } from "./links.js";
+import { bundleLink, decoratedType, typeLink } from "./links.js";
 
 const ref = (name: string, path: string, wrappers: TypeRef["wrappers"] = []): TypeRef => ({
   name,
@@ -24,27 +24,24 @@ describe("decoratedType", () => {
   });
 });
 
-describe("relLink", () => {
-  it("links to a sibling file", () => {
-    expect(relLink("types/objects/Country.md", "types/objects/Language.md")).toBe("Language.md");
+describe("bundleLink", () => {
+  it("prefixes a bundle path with a slash", () => {
+    expect(bundleLink("types/objects/Language.md")).toBe("/types/objects/Language.md");
   });
 
-  it("links across sibling directories", () => {
-    expect(relLink("types/objects/Country.md", "types/scalars/ID.md")).toBe("../scalars/ID.md");
+  it("does not depend on where the link is written from", () => {
+    expect(bundleLink("types/scalars/ID.md")).toBe("/types/scalars/ID.md");
   });
 
-  it("links from a top-level directory into a nested one", () => {
-    expect(relLink("queries/languages.md", "types/objects/Language.md")).toBe(
-      "../types/objects/Language.md",
-    );
+  it("handles a bundle-root file", () => {
+    expect(bundleLink("index.md")).toBe("/index.md");
   });
 });
 
 describe("typeLink", () => {
   it("wraps the decorated type in a code-formatted markdown link", () => {
     const t = ref("Language", "types/objects/Language.md", ["nonNull", "list", "nonNull"]);
-    expect(typeLink("queries/languages.md", t)).toBe(
-      "[`[Language!]!`](../types/objects/Language.md)",
-    );
+
+    expect(typeLink(t)).toBe("[`[Language!]!`](/types/objects/Language.md)");
   });
 });

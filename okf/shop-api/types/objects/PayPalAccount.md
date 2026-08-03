@@ -18,7 +18,7 @@ A linked PayPal account.
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `email` | [`EmailAddress!`](../scalars/EmailAddress.md) |  |
+| `email` | [`EmailAddress!`](/types/scalars/EmailAddress.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

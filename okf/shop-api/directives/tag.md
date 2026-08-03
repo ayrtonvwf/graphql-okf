@@ -22,7 +22,7 @@ Repeatable.
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `name` | [`String!`](../types/scalars/String.md) |  |  |
+| `name` | [`String!`](/types/scalars/String.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

@@ -18,9 +18,9 @@ Everything needed to turn a basket into an order.
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `payWith` | [`PaymentInput!`](PaymentInput.md) |  |  |
-| `productIds` | [`[ID!]!`](../scalars/ID.md) |  |  |
-| `shipTo` | [`AddressInput!`](AddressInput.md) |  |  |
+| `payWith` | [`PaymentInput!`](/types/inputs/PaymentInput.md) |  |  |
+| `productIds` | [`[ID!]!`](/types/scalars/ID.md) |  |  |
+| `shipTo` | [`AddressInput!`](/types/inputs/AddressInput.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

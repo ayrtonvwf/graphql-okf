@@ -20,14 +20,14 @@ Full-text search across the catalog.
 
 **Deprecated: Use products(filter:) instead.**
 
-**Returns** [`[Product!]!`](../types/objects/Product.md)
+**Returns** [`[Product!]!`](/types/objects/Product.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `fuzzy` | [`Boolean`](../types/scalars/Boolean.md) | `false` | Ignored since the search backend migration. (deprecated: The backend always matches fuzzily.) |
-| `query` | [`String!`](../types/scalars/String.md) |  |  |
+| `fuzzy` | [`Boolean`](/types/scalars/Boolean.md) | `false` | Ignored since the search backend migration. (deprecated: The backend always matches fuzzily.) |
+| `query` | [`String!`](/types/scalars/String.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

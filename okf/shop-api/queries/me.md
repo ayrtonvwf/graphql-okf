@@ -14,7 +14,7 @@ generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 
 The currently authenticated customer, if any.
 
-**Returns** [`Customer`](../types/objects/Customer.md)
+**Returns** [`Customer`](/types/objects/Customer.md)
 
 <!-- graphql-okf:generated:end -->
 

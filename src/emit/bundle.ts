@@ -5,6 +5,7 @@ import type { ConceptKind } from "../model/naming.js";
 import type { EmitContext } from "./context.js";
 import { renderConceptParts } from "./render/concept.js";
 import { type IndexEntry, renderDirectoryIndex } from "./render/directory-index.js";
+import { bundleLink } from "./render/links.js";
 import { conceptResource } from "./render/resource.js";
 import type { FileParts } from "./render/seam.js";
 
@@ -113,7 +114,7 @@ export function buildBundle(
       const base = posix.basename(child);
       entries.push({
         label: `${base}/`,
-        link: `${base}/index.md`,
+        link: bundleLink(`${child}/index.md`),
         summary: DIRECTORY_LABELS[child] ?? base,
       });
     }
@@ -122,7 +123,7 @@ export function buildBundle(
       const summary = firstSentence(concept.description) ?? KIND_SUMMARY[concept.kind];
       entries.push({
         label: concept.name,
-        link: posix.basename(concept.path),
+        link: bundleLink(concept.path),
         summary,
       });
     }
@@ -130,7 +131,7 @@ export function buildBundle(
     for (const tombstone of tombstonesByDir.get(dir) ?? []) {
       entries.push({
         label: tombstone.title,
-        link: posix.basename(tombstone.path),
+        link: bundleLink(tombstone.path),
         summary: "(removed)",
       });
     }

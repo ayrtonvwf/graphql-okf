@@ -14,14 +14,14 @@ generated: { by: "graphql-okf/0.1", at: "2026-03-02T09:00:00.000Z" }
 
 Lists products, most recently created first.
 
-**Returns** [`[Product!]!`](../types/objects/Product.md)
+**Returns** [`[Product!]!`](/types/objects/Product.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `filter` | [`ProductFilter`](../types/inputs/ProductFilter.md) |  |  |
-| `first` | [`Int`](../types/scalars/Int.md) | `20` | Maximum number of products to return. |
+| `filter` | [`ProductFilter`](/types/inputs/ProductFilter.md) |  |  |
+| `first` | [`Int`](/types/scalars/Int.md) | `20` | Maximum number of products to return. |
 
 <!-- graphql-okf:generated:end -->
 

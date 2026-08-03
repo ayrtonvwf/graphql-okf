@@ -14,24 +14,24 @@ generated: { by: "graphql-okf/0.1", at: "2026-05-20T09:00:00.000Z" }
 
 A customer's purchase.
 
-Directives: [`@auth`](../../directives/auth.md)(requires: CUSTOMER).
+Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
 
-Implements [`Node`](../interfaces/Node.md), [`Timestamped`](../interfaces/Timestamped.md).
+Implements [`Node`](/types/interfaces/Node.md), [`Timestamped`](/types/interfaces/Timestamped.md).
 
 # Schema
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `createdAt` | [`DateTime!`](../scalars/DateTime.md) |  |
-| `currency` | [`Currency!`](../enums/Currency.md) |  |
-| `customer` | [`Customer!`](Customer.md) |  |
-| `id` | [`ID!`](../scalars/ID.md) |  |
-| `lines` | [`[OrderLine!]!`](OrderLine.md) |  |
-| `paidWith` | [`PaymentMethod`](../unions/PaymentMethod.md) |  |
-| `shipTo` | [`Address!`](Address.md) |  |
-| `status` | [`OrderStatus!`](../enums/OrderStatus.md) |  |
-| `total` | [`Money!`](Money.md) | The order total, including the currency it is denominated in. |
-| `updatedAt` | [`DateTime`](../scalars/DateTime.md) |  |
+| `createdAt` | [`DateTime!`](/types/scalars/DateTime.md) |  |
+| `currency` | [`Currency!`](/types/enums/Currency.md) |  |
+| `customer` | [`Customer!`](/types/objects/Customer.md) |  |
+| `id` | [`ID!`](/types/scalars/ID.md) |  |
+| `lines` | [`[OrderLine!]!`](/types/objects/OrderLine.md) |  |
+| `paidWith` | [`PaymentMethod`](/types/unions/PaymentMethod.md) |  |
+| `shipTo` | [`Address!`](/types/objects/Address.md) |  |
+| `status` | [`OrderStatus!`](/types/enums/OrderStatus.md) |  |
+| `total` | [`Money!`](/types/objects/Money.md) | The order total, including the currency it is denominated in. |
+| `updatedAt` | [`DateTime`](/types/scalars/DateTime.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

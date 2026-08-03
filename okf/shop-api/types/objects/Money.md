@@ -18,8 +18,8 @@ An amount of money in a specific currency.
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `amountCents` | [`Int!`](../scalars/Int.md) | The amount in the smallest unit of the currency, e.g. cents. |
-| `currency` | [`Currency!`](../enums/Currency.md) |  |
+| `amountCents` | [`Int!`](/types/scalars/Int.md) | The amount in the smallest unit of the currency, e.g. cents. |
+| `currency` | [`Currency!`](/types/enums/Currency.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

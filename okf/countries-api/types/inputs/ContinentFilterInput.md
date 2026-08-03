@@ -3,7 +3,7 @@ type: "GraphQL Input Type"
 title: "ContinentFilterInput"
 resource: "https://countries.trevorblades.com/graphql#ContinentFilterInput"
 tags: ["graphql", "input"]
-generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -15,7 +15,7 @@ generated: { by: "graphql-okf/0.1", at: "2026-07-25T00:00:00.000Z" }
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `code` | [`StringQueryOperatorInput`](StringQueryOperatorInput.md) |  |  |
+| `code` | [`StringQueryOperatorInput`](/types/inputs/StringQueryOperatorInput.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

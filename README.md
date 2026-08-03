@@ -242,6 +242,12 @@ documented here:
   graphql-okf https://gitlab.com/api/graphql --out okf/gitlab-api
   ```
 
+Links inside these samples are **bundle-root-absolute** (`/types/objects/Product.md`),
+following OKF §6.1's recommendation. GitHub's file browser resolves a leading `/`
+against the repository root, so cross-links in these samples will not resolve
+when clicked on github.com. Clone the repo, or point a tool at the bundle
+directory, to follow them.
+
 Countries and GitLab were generated with the exact CLI invocations shown in
 [Usage](#usage) above, against each API's live introspection endpoint;
 shop-api was generated from the local SDL files in

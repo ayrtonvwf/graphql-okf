@@ -18,9 +18,9 @@ One line of an order: a product and how many of it were bought.
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `product` | [`Product!`](Product.md) |  |
-| `quantity` | [`Int!`](../scalars/Int.md) |  |
-| `unitPriceCents` | [`Int!`](../scalars/Int.md) | The price of a single unit at the time the order was placed. |
+| `product` | [`Product!`](/types/objects/Product.md) |  |
+| `quantity` | [`Int!`](/types/scalars/Int.md) |  |
+| `unitPriceCents` | [`Int!`](/types/scalars/Int.md) | The price of a single unit at the time the order was placed. |
 
 <!-- graphql-okf:generated:end -->
 

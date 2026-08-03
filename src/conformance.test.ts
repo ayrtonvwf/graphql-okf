@@ -1,8 +1,13 @@
 import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, posix } from "node:path";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
+import {
+  generatedRegionOf,
+  internalLinkTargets,
+  resolveBundleLink,
+} from "../test/support/bundle-links.js";
 import { buildBundle } from "./emit/bundle.js";
 import { emitContext } from "./emit/context.js";
 import { assembleFile, EMPTY_HUMAN } from "./emit/render/seam.js";
@@ -117,19 +122,46 @@ describe("OKF §9 conformance", () => {
     const broken: string[] = [];
 
     for (const [path, text] of files) {
-      for (const match of text.matchAll(/\]\(([^)]+)\)/g)) {
-        const target = match[1];
-        if (target === undefined || /^[a-z]+:/.test(target) || target.startsWith("#")) {
-          continue;
-        }
-        const resolved = posix.normalize(posix.join(posix.dirname(path), target));
-        if (!files.has(resolved)) {
+      for (const target of internalLinkTargets(text)) {
+        if (!files.has(resolveBundleLink(path, target))) {
           broken.push(`${path} -> ${target}`);
         }
       }
     }
 
     expect(broken).toEqual([]);
+  });
+
+  /**
+   * The guard rail for issue #22's flatten: an emitted link must not depend on
+   * how deep its file sits. Scoped to the generated region because human
+   * content below the seam is not ours. Note that a *description* preserved
+   * under GOAL-6.3 can carry a relative link and render inside a generated
+   * table cell; no current fixture does, and if one ever does the fix is to
+   * narrow this scan, not to relax the rule.
+   */
+  it("emits no relative internal link", async () => {
+    const files = await bundleFor("examples/shop-api/v1.graphql");
+    const relative: string[] = [];
+
+    for (const [path, text] of files) {
+      // `buildBundle` never emits log.md (it's written only by the reconciler
+      // on subsequent runs), so every file here is a concept file and is
+      // expected to carry the generated-region markers. A file that silently
+      // lost them would make `generatedRegionOf` return "", scanning zero
+      // links and vacuously passing the check below — assert the markers are
+      // present so that failure mode is caught here instead.
+      const region = generatedRegionOf(text);
+      expect(region, `${path} has no generated-region markers`).not.toBe("");
+
+      for (const target of internalLinkTargets(region)) {
+        if (!target.startsWith("/")) {
+          relative.push(`${path} -> ${target}`);
+        }
+      }
+    }
+
+    expect(relative).toEqual([]);
   });
 
   it("emits a top-level # Schema section the reference tooling can parse", async () => {
