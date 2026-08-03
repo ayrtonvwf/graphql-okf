@@ -3,7 +3,7 @@ type: "GraphQL Query"
 title: "languages"
 resource: "https://countries.trevorblades.com/graphql#Query.languages"
 tags: ["graphql", "query"]
-generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-03T21:36:02.273Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -11,13 +11,13 @@ generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
 
 # languages
 
-**Returns** [`[Language!]!`](/types/objects/Language.md)
+**Returns** [`[Language!]!`](/types/Language.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `filter` | [`LanguageFilterInput`](/types/inputs/LanguageFilterInput.md) | `{}` |  |
+| `filter` | [`LanguageFilterInput`](/types/LanguageFilterInput.md) | `{}` |  |
 
 <!-- graphql-okf:generated:end -->
 

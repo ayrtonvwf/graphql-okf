@@ -3,7 +3,7 @@ type: "GraphQL Query"
 title: "continents"
 resource: "https://countries.trevorblades.com/graphql#Query.continents"
 tags: ["graphql", "query"]
-generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-03T21:36:02.273Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -11,13 +11,13 @@ generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
 
 # continents
 
-**Returns** [`[Continent!]!`](/types/objects/Continent.md)
+**Returns** [`[Continent!]!`](/types/Continent.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `filter` | [`ContinentFilterInput`](/types/inputs/ContinentFilterInput.md) | `{}` |  |
+| `filter` | [`ContinentFilterInput`](/types/ContinentFilterInput.md) | `{}` |  |
 
 <!-- graphql-okf:generated:end -->
 

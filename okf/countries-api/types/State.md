@@ -3,7 +3,7 @@ type: "GraphQL Object Type"
 title: "State"
 resource: "https://countries.trevorblades.com/graphql#State"
 tags: ["graphql", "object"]
-generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-03T21:36:02.273Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -15,9 +15,9 @@ generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `code` | [`String`](/types/scalars/String.md) |  |
-| `country` | [`Country!`](/types/objects/Country.md) |  |
-| `name` | [`String!`](/types/scalars/String.md) |  |
+| `code` | [`String`](/types/String.md) |  |
+| `country` | [`Country!`](/types/Country.md) |  |
+| `name` | [`String!`](/types/String.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

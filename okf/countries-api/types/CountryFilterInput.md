@@ -3,7 +3,7 @@ type: "GraphQL Input Type"
 title: "CountryFilterInput"
 resource: "https://countries.trevorblades.com/graphql#CountryFilterInput"
 tags: ["graphql", "input"]
-generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-03T21:36:02.273Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -15,10 +15,10 @@ generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `code` | [`StringQueryOperatorInput`](/types/inputs/StringQueryOperatorInput.md) |  |  |
-| `continent` | [`StringQueryOperatorInput`](/types/inputs/StringQueryOperatorInput.md) |  |  |
-| `currency` | [`StringQueryOperatorInput`](/types/inputs/StringQueryOperatorInput.md) |  |  |
-| `name` | [`StringQueryOperatorInput`](/types/inputs/StringQueryOperatorInput.md) |  |  |
+| `code` | [`StringQueryOperatorInput`](/types/StringQueryOperatorInput.md) |  |  |
+| `continent` | [`StringQueryOperatorInput`](/types/StringQueryOperatorInput.md) |  |  |
+| `currency` | [`StringQueryOperatorInput`](/types/StringQueryOperatorInput.md) |  |  |
+| `name` | [`StringQueryOperatorInput`](/types/StringQueryOperatorInput.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

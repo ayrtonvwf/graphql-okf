@@ -3,7 +3,7 @@ type: "GraphQL Input Type"
 title: "StringQueryOperatorInput"
 resource: "https://countries.trevorblades.com/graphql#StringQueryOperatorInput"
 tags: ["graphql", "input"]
-generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-03T21:36:02.273Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -15,11 +15,11 @@ generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `eq` | [`String`](/types/scalars/String.md) |  |  |
-| `in` | [`[String!]`](/types/scalars/String.md) |  |  |
-| `ne` | [`String`](/types/scalars/String.md) |  |  |
-| `nin` | [`[String!]`](/types/scalars/String.md) |  |  |
-| `regex` | [`String`](/types/scalars/String.md) |  |  |
+| `eq` | [`String`](/types/String.md) |  |  |
+| `in` | [`[String!]`](/types/String.md) |  |  |
+| `ne` | [`String`](/types/String.md) |  |  |
+| `nin` | [`[String!]`](/types/String.md) |  |  |
+| `regex` | [`String`](/types/String.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

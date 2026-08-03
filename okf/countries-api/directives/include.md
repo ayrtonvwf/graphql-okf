@@ -4,7 +4,7 @@ title: "include"
 description: "Directs the executor to include this field or fragment only when the `if` argument is true."
 resource: "https://countries.trevorblades.com/graphql#@include"
 tags: ["graphql", "directive"]
-generated: { by: "graphql-okf/0.1", at: "2026-08-01T16:30:39.323Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-03T21:36:02.273Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -20,7 +20,7 @@ Locations: `FIELD`, `FRAGMENT_SPREAD`, `INLINE_FRAGMENT`.
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `if` | [`Boolean!`](/types/scalars/Boolean.md) |  | Included when true. |
+| `if` | [`Boolean!`](/types/Boolean.md) |  | Included when true. |
 
 <!-- graphql-okf:generated:end -->
 
