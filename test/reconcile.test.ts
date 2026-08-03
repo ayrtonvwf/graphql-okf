@@ -7,13 +7,14 @@ import { readSchema, syncOkfBundle } from "../src/index.js";
 import { applyPlan } from "../src/reconcile/apply.js";
 import { reconcile } from "../src/reconcile/plan.js";
 import { readExistingBundle } from "../src/reconcile/read.js";
-import { readTree as snapshot, writeTree } from "./support/bundle-tree.js";
+import { readTree, readTree as snapshot, writeTree } from "./support/bundle-tree.js";
 
 const BASE = new URL("./fixtures/kitchen-sink.graphql", import.meta.url).pathname;
 const EVOLVED = new URL("./fixtures/kitchen-sink-evolved.graphql", import.meta.url).pathname;
 
 const T1 = "2026-07-01T10:00:00.000Z";
 const T2 = "2026-07-24T09:00:00.000Z";
+const T3 = "2026-08-01T09:00:00.000Z";
 
 async function freshBundle(sdl: string): Promise<string> {
   const outDir = join(await mkdtemp(join(tmpdir(), "okf-recon-")), "bundle");
@@ -258,5 +259,117 @@ describe("an interrupted run (GOAL-8.5)", () => {
 
     const files = await snapshot(outDir);
     expect([...files.keys()].filter((path) => path.includes("graphql-okf-tmp"))).toEqual([]);
+  });
+});
+
+describe("migrating a bundle from the nested types layout", () => {
+  const LEGACY_DIR: Record<string, string> = {
+    object: "objects",
+    interface: "interfaces",
+    union: "unions",
+    enum: "enums",
+    input: "inputs",
+    scalar: "scalars",
+  };
+
+  /**
+   * Re-nests a flat bundle into the pre-#22 layout, using each concept's `type:`
+   * frontmatter to pick its kind directory, and rebuilds the kind indexes.
+   */
+  function toLegacyLayout(flat: ReadonlyMap<string, string>): Map<string, string> {
+    const nested = new Map<string, string>();
+    const byDir = new Map<string, string[]>();
+
+    for (const [path, text] of flat) {
+      if (!path.startsWith("types/") || path === "types/index.md") {
+        nested.set(path, text);
+        continue;
+      }
+      const label = /^type: "GraphQL (\w+) Type"$/m.exec(text)?.[1]?.toLowerCase() ?? "object";
+      const dir = `types/${LEGACY_DIR[label] ?? "objects"}`;
+      const name = path.slice("types/".length);
+      nested.set(`${dir}/${name}`, text);
+
+      const bucket = byDir.get(dir);
+      if (bucket === undefined) {
+        byDir.set(dir, [name]);
+      } else {
+        bucket.push(name);
+      }
+    }
+
+    for (const [dir, names] of byDir) {
+      const bullets = [...names]
+        .sort()
+        .map((name) => `* [${name.replace(/\.md$/, "")}](/${dir}/${name})`);
+      nested.set(
+        `${dir}/index.md`,
+        `# Types\n\n<!-- graphql-okf:generated:start -->\n${bullets.join("\n")}\n<!-- graphql-okf:generated:end -->\n\n<!-- Human-authored content below this line is preserved across regenerations. -->\n`,
+      );
+    }
+
+    return nested;
+  }
+
+  it("moves every concept, keeps human text, and is a no-op on re-run", async () => {
+    const build = join(await mkdtemp(join(tmpdir(), "okf-flat-")), "bundle");
+    await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir: build, now: T1 });
+    const legacy = toLegacyLayout(await readTree(build));
+
+    // Human text in a concept and in a kind index — the two things a move can destroy.
+    const post = legacy.get("types/objects/Post.md") ?? "";
+    legacy.set("types/objects/Post.md", `${post}\n## Ownership\n\nPing #catalog.\n`);
+    const objectsIndex = legacy.get("types/objects/index.md") ?? "";
+    legacy.set("types/objects/index.md", `${objectsIndex}\nSee ADR-14.\n`);
+
+    const outDir = join(await mkdtemp(join(tmpdir(), "okf-legacy-")), "bundle");
+    await writeTree(outDir, legacy);
+
+    const result = await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir, now: T2 });
+    const after = await readTree(outDir);
+
+    // Every concept moved.
+    expect([...after.keys()].filter((path) => /^types\/\w+\//.test(path))).toEqual([
+      "types/objects/index.md",
+    ]);
+    expect(after.has("types/Post.md")).toBe(true);
+    expect(result.relocated.length).toBeGreaterThan(0);
+
+    // A type that links to nothing still reached its new path — the sameContent trap.
+    expect(after.has("types/Boolean.md")).toBe(true);
+
+    // Human text survived both moves.
+    expect(after.get("types/Post.md")).toContain("Ping #catalog.");
+    expect(after.get("types/objects/index.md")).toContain("See ADR-14.");
+    expect(after.get("types/objects/index.md")).toContain("* [Types](/types/index.md)");
+
+    // Emptied kind directories are gone; nothing was tombstoned.
+    expect(after.has("types/scalars/index.md")).toBe(false);
+    expect(result.removed).toEqual([]);
+
+    // The log records the layout change once.
+    const log = after.get("log.md") ?? "";
+    expect(log).toContain("* Bundle layout: `types/<kind>/` flattened into `types/` across");
+
+    // Second run is a complete no-op (GOAL-8.1).
+    const again = await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir, now: T3 });
+    expect(again.added).toEqual([]);
+    expect(again.changed).toEqual([]);
+    expect(again.relocated).toEqual([]);
+    expect(await readTree(outDir)).toEqual(after);
+  });
+
+  it("leaves a human's stray file and its directory alone", async () => {
+    const build = join(await mkdtemp(join(tmpdir(), "okf-flat-")), "bundle");
+    await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir: build, now: T1 });
+    const legacy = toLegacyLayout(await readTree(build));
+    legacy.set("types/objects/notes.md", "# My notes\n");
+
+    const outDir = join(await mkdtemp(join(tmpdir(), "okf-stray-")), "bundle");
+    await writeTree(outDir, legacy);
+    await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir, now: T2 });
+
+    const after = await readTree(outDir);
+    expect(after.get("types/objects/notes.md")).toBe("# My notes\n");
   });
 });
