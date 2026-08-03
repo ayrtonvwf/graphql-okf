@@ -145,7 +145,10 @@ export function buildBundle(
             `resource: ${JSON.stringify(ir.resource)}`,
           ]
         : undefined;
-    bundle.set(indexPath, renderDirectoryIndex(title, sortByLabel(entries), frontmatter));
+    bundle.set(
+      indexPath,
+      renderDirectoryIndex(title, [{ entries: sortByLabel(entries) }], frontmatter),
+    );
   }
 
   return bundle;
