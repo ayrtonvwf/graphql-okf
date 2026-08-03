@@ -119,6 +119,17 @@ describe("relayoutBundle", () => {
     ).toThrow(GraphqlOkfError);
   });
 
+  it("throws when two legacy moves collide under case-folding", () => {
+    expect(() =>
+      relayoutBundle(
+        new Map([
+          ["types/objects/User.md", owned("object")],
+          ["types/inputs/user.md", owned("input")],
+        ]),
+      ),
+    ).toThrow(GraphqlOkfError);
+  });
+
   it("ignores files outside the six legacy kind directories", () => {
     const file = owned("body");
     const result = relayoutBundle(

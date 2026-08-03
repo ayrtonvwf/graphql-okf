@@ -193,7 +193,11 @@ export function reconcile(
   }
 
   for (const redirect of relayout.redirects) {
+    if (acted.has(redirect.path)) {
+      continue;
+    }
     actions.push({ kind: "index", path: redirect.path, contents: redirect.contents });
+    acted.add(redirect.path);
   }
 
   for (const path of relayout.deletes) {

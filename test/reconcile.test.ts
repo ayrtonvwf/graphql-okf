@@ -359,6 +359,32 @@ describe("migrating a bundle from the nested types layout", () => {
     expect(await readTree(outDir)).toEqual(after);
   });
 
+  it("moves a tombstoned concept to its flat path and keeps it under Removed", async () => {
+    const build = join(await mkdtemp(join(tmpdir(), "okf-flat-")), "bundle");
+    await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir: build, now: T1 });
+    // Tombstone types/User_case.md while the bundle is still flat, per the
+    // BASE -> EVOLVED pattern used elsewhere in this file.
+    await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir: build, now: T2 });
+    const legacy = toLegacyLayout(await readTree(build));
+    expect(legacy.has("types/objects/User_case.md")).toBe(true);
+
+    const outDir = join(await mkdtemp(join(tmpdir(), "okf-legacy-tombstone-")), "bundle");
+    await writeTree(outDir, legacy);
+
+    await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir, now: T3 });
+    const after = await readTree(outDir);
+
+    // The tombstoned concept moved to its new flat path.
+    expect(after.has("types/User_case.md")).toBe(true);
+    expect(after.has("types/objects/User_case.md")).toBe(false);
+    expect(after.get("types/User_case.md")).toContain('graphql_okf_status: "removed"');
+
+    // It is still listed under Removed in the flattened types index.
+    const typesIndex = after.get("types/index.md") ?? "";
+    expect(typesIndex).toContain("## Removed");
+    expect(typesIndex).toContain("User_case");
+  });
+
   it("leaves a human's stray file and its directory alone", async () => {
     const build = join(await mkdtemp(join(tmpdir(), "okf-flat-")), "bundle");
     await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir: build, now: T1 });

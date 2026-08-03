@@ -74,6 +74,10 @@ export function relayoutBundle(existing: ReadonlyMap<string, string>): RelayoutR
   const moves: Move[] = [];
   const redirects: Redirect[] = [];
   const deletes: string[] = [];
+  // Tracks the target this run intends to move each legacy path to, keyed by
+  // case-folded target, so two concepts differing only by case (e.g. `type User`
+  // and `input user`) are caught before they land on the same filesystem entry.
+  const plannedTargets = new Map<string, string>();
 
   for (const [path, text] of existing) {
     const basename = legacyBasename(path);
@@ -105,6 +109,21 @@ export function relayoutBundle(existing: ReadonlyMap<string, string>): RelayoutR
     }
 
     const to = `types/${basename}`;
+    const foldedTo = to.toLowerCase();
+    const plannedFrom = plannedTargets.get(foldedTo);
+    if (plannedFrom !== undefined && plannedFrom !== path) {
+      throw new GraphqlOkfError(
+        "LAYOUT_MOVE_CONFLICT",
+        `"${plannedFrom}" and "${path}" both migrate to paths that collide once case-folded ` +
+          `(around "${to}"). These are two distinct concepts that differ only by case, so the ` +
+          "naming scheme's hash-suffix disambiguation applies to them — relayout does not compute " +
+          "that suffix and refuses to guess. Resolve this manually (for example, by re-running a " +
+          "sync against the current schema, which will assign each concept its correct hashed path, " +
+          "or by renaming one of the two files) before migrating this bundle.",
+      );
+    }
+    plannedTargets.set(foldedTo, path);
+
     const target = existing.get(to);
     if (target !== undefined) {
       // An interrupted earlier run wrote the move but not the delete. Identical
