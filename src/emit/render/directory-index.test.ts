@@ -67,11 +67,9 @@ describe("renderDirectoryIndex", () => {
   });
 
   it("emits a frontmatter block above the title when given one", () => {
-    const parts = renderDirectoryIndex(
-      "API interface",
-      [{ entries: [] }],
-      ['okf_version: "0.1"', 'resource: "https://api.test/graphql"'],
-    );
+    const parts = renderDirectoryIndex("API interface", [{ entries: [] }], {
+      frontmatter: ['okf_version: "0.1"', 'resource: "https://api.test/graphql"'],
+    });
 
     expect(parts.preamble).toBe(
       [
@@ -149,5 +147,30 @@ describe("renderDirectoryIndex", () => {
 
     expect(parts.generated).not.toContain("Object types");
     expect(parts.generated).toBe("\n## Scalar types\n\n* [ID](/types/ID.md)\n");
+  });
+
+  describe("the options object", () => {
+    it("puts a note above the bullets, inside the generated region", () => {
+      const parts = renderDirectoryIndex(
+        "API interface",
+        [{ entries: [{ label: "types/", link: "/types/index.md", summary: "Types" }] }],
+        { frontmatter: ['okf_version: "0.2"'], note: "Built-ins have no concept files." },
+      );
+
+      expect(parts.preamble).toBe('---\nokf_version: "0.2"\n---\n\n# API interface\n\n');
+      expect(parts.generated).toBe(
+        "\nBuilt-ins have no concept files.\n\n* [types/](/types/index.md) - Types\n",
+      );
+    });
+
+    it("renders exactly as before when no note is given", () => {
+      const parts = renderDirectoryIndex(
+        "Types",
+        [{ entries: [{ label: "Country", link: "/types/Country.md", summary: "A country." }] }],
+        { frontmatter: ['okf_version: "0.2"'] },
+      );
+
+      expect(parts.generated).toBe("\n* [Country](/types/Country.md) - A country.\n");
+    });
   });
 });

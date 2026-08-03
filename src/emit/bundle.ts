@@ -172,7 +172,7 @@ export function buildBundle(
             `resource: ${JSON.stringify(ir.resource)}`,
           ]
         : undefined;
-    bundle.set(indexPath, renderDirectoryIndex(title, sections, frontmatter));
+    bundle.set(indexPath, renderDirectoryIndex(title, sections, { frontmatter }));
   }
 
   return bundle;
