@@ -15,7 +15,7 @@ const ir: SchemaIr = {
     {
       kind: "object",
       name: "Country",
-      path: "types/objects/Country.md",
+      path: "types/Country.md",
       description: "An ISO country.",
       appliedDirectives: [],
       fields: [],
@@ -37,7 +37,7 @@ describe("reconcile", () => {
   it("creates every file when the bundle does not exist yet", () => {
     const plan = reconcile(ir, new Map(), emitContext("0.1", T1));
 
-    expect(plan.added.map((change) => change.path)).toEqual(["types/objects/Country.md"]);
+    expect(plan.added.map((change) => change.path)).toEqual(["types/Country.md"]);
     expect(plan.actions.some((action) => action.path === "index.md")).toBe(true);
     expect(plan.unchanged).toBe(0);
   });
@@ -58,7 +58,7 @@ describe("reconcile", () => {
     const plan = reconcile(ir, disk, emitContext("0.1", T2));
 
     expect(plan.actions).toEqual([]);
-    expect(disk.get("types/objects/Country.md")).toContain(`timestamp: ${JSON.stringify(T1)}`);
+    expect(disk.get("types/Country.md")).toContain(`timestamp: ${JSON.stringify(T1)}`);
   });
 
   it("does not rewrite a concept whose only difference is the producer version", () => {
@@ -77,7 +77,7 @@ describe("reconcile", () => {
     };
 
     const plan = reconcile(evolved, disk, emitContext("0.1", T2));
-    const action = plan.actions.find((entry) => entry.path === "types/objects/Country.md");
+    const action = plan.actions.find((entry) => entry.path === "types/Country.md");
 
     expect(plan.changed.map((change) => change.name)).toEqual(["Country"]);
     expect(action?.kind).toBe("update");
@@ -87,7 +87,7 @@ describe("reconcile", () => {
 
   it("preserves the human region verbatim when updating", () => {
     const disk = bundleOnDisk(ir, T1);
-    const path = "types/objects/Country.md";
+    const path = "types/Country.md";
     disk.set(`${path}`, `${disk.get(path) ?? ""}\nOur team owns this type.\n`);
     const evolved: SchemaIr = {
       ...ir,
@@ -102,11 +102,11 @@ describe("reconcile", () => {
 
   it("recreates a concept file a human deleted", () => {
     const disk = bundleOnDisk(ir, T1);
-    disk.delete("types/objects/Country.md");
+    disk.delete("types/Country.md");
 
     const plan = reconcile(ir, disk, emitContext("0.1", T2));
 
-    expect(plan.added.map((change) => change.path)).toEqual(["types/objects/Country.md"]);
+    expect(plan.added.map((change) => change.path)).toEqual(["types/Country.md"]);
   });
 
   it("leaves stray files alone and never lists them", () => {
@@ -214,9 +214,9 @@ describe("reconcile migrating a v0.1 bundle", () => {
   it("writes every migrated concept even though its content did not change", () => {
     const plan = reconcile(ir, v1BundleOnDisk(ir, T1), emitContext("0.2", T2));
 
-    expect(plan.migrated).toEqual(["types/objects/Country.md"]);
+    expect(plan.migrated).toEqual(["types/Country.md"]);
     const migrate = plan.actions.find((action) => action.kind === "migrate");
-    expect(migrate?.path).toBe("types/objects/Country.md");
+    expect(migrate?.path).toBe("types/Country.md");
     expect(migrate?.contents).toContain(
       'generated: { by: "graphql-okf/0.1", at: "2026-07-01T10:00:00.000Z" }',
     );
@@ -234,8 +234,8 @@ describe("reconcile migrating a v0.1 bundle", () => {
     const plan = reconcile(evolved, disk, emitContext("0.2", T2));
     const paths = plan.actions.map((action) => action.path);
 
-    expect(paths.filter((path) => path === "types/objects/Country.md")).toHaveLength(1);
-    expect(plan.changed.map((change) => change.path)).toEqual(["types/objects/Country.md"]);
+    expect(paths.filter((path) => path === "types/Country.md")).toHaveLength(1);
+    expect(plan.changed.map((change) => change.path)).toEqual(["types/Country.md"]);
   });
 
   it("reports nothing to migrate for a bundle it just wrote in v0.2", () => {
@@ -264,7 +264,7 @@ describe("reconcile removals", () => {
     const disk = bundleOnDisk(ir, T1);
 
     const plan = reconcile(emptyIr, disk, emitContext("0.1", T2));
-    const action = plan.actions.find((entry) => entry.path === "types/objects/Country.md");
+    const action = plan.actions.find((entry) => entry.path === "types/Country.md");
 
     expect(plan.removed.map((change) => change.name)).toEqual(["Country"]);
     expect(action?.kind).toBe("tombstone");
@@ -276,12 +276,12 @@ describe("reconcile removals", () => {
   it("keeps the tombstoned file at its original path so inbound links resolve", () => {
     const plan = reconcile(emptyIr, bundleOnDisk(ir, T1), emitContext("0.1", T2));
 
-    expect(plan.actions.map((action) => action.path)).toContain("types/objects/Country.md");
+    expect(plan.actions.map((action) => action.path)).toContain("types/Country.md");
   });
 
   it("preserves the human region of a concept it tombstones", () => {
     const disk = bundleOnDisk(ir, T1);
-    const path = "types/objects/Country.md";
+    const path = "types/Country.md";
     disk.set(path, `${disk.get(path) ?? ""}\nStill referenced by the billing service.\n`);
 
     const plan = reconcile(emptyIr, disk, emitContext("0.1", T2));
@@ -310,7 +310,7 @@ describe("reconcile removals", () => {
     }
 
     const plan = reconcile(ir, disk, emitContext("0.1", "2026-08-01T00:00:00.000Z"));
-    const action = plan.actions.find((entry) => entry.path === "types/objects/Country.md");
+    const action = plan.actions.find((entry) => entry.path === "types/Country.md");
 
     expect(plan.added.map((change) => change.name)).toEqual(["Country"]);
     expect(plan.changed).toEqual([]);

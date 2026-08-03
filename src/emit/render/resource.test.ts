@@ -7,7 +7,7 @@ const ORIGIN = "https://api.test/graphql";
 const country: ObjectTypeNode = {
   kind: "object",
   name: "Country",
-  path: "types/objects/Country.md",
+  path: "types/Country.md",
   description: null,
   appliedDirectives: [],
   fields: [],
@@ -22,7 +22,7 @@ const countries: OperationNode = {
   description: null,
   appliedDirectives: [],
   args: [],
-  type: { wrappers: [], name: "Country", path: "types/objects/Country.md" },
+  type: { wrappers: [], name: "Country", path: "types/Country.md" },
   deprecation: null,
 };
 

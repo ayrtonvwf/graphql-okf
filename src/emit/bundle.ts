@@ -30,12 +30,6 @@ const KIND_SUMMARY: Record<ConceptKind, string> = {
 const DIRECTORY_LABELS: Record<string, string> = {
   ".": "API interface",
   types: "Types",
-  "types/objects": "Object types",
-  "types/interfaces": "Interface types",
-  "types/unions": "Union types",
-  "types/enums": "Enum types",
-  "types/inputs": "Input object types",
-  "types/scalars": "Scalar types",
   queries: "Query operations",
   mutations: "Mutation operations",
   subscriptions: "Subscription operations",

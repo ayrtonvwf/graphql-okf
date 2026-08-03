@@ -3,9 +3,9 @@ import { generatedRegionOf, internalLinkTargets, resolveBundleLink } from "./bun
 
 describe("internalLinkTargets", () => {
   it("finds bundle-internal targets", () => {
-    const text = "See [`Money`](Money.md) and [`ID`](/types/scalars/ID.md).";
+    const text = "See [`Money`](Money.md) and [`ID`](/types/ID.md).";
 
-    expect(internalLinkTargets(text)).toEqual(["Money.md", "/types/scalars/ID.md"]);
+    expect(internalLinkTargets(text)).toEqual(["Money.md", "/types/ID.md"]);
   });
 
   it("skips external links and pure fragments", () => {
@@ -29,25 +29,19 @@ describe("internalLinkTargets", () => {
 
 describe("resolveBundleLink", () => {
   it("resolves an absolute target against the bundle root", () => {
-    expect(resolveBundleLink("types/objects/Product.md", "/types/scalars/ID.md")).toBe(
-      "types/scalars/ID.md",
-    );
+    expect(resolveBundleLink("types/Product.md", "/types/ID.md")).toBe("types/ID.md");
   });
 
   it("resolves an absolute target the same way from any depth", () => {
-    expect(resolveBundleLink("index.md", "/types/scalars/ID.md")).toBe("types/scalars/ID.md");
+    expect(resolveBundleLink("index.md", "/types/ID.md")).toBe("types/ID.md");
   });
 
   it("resolves a sibling relative target", () => {
-    expect(resolveBundleLink("types/objects/Product.md", "Money.md")).toBe(
-      "types/objects/Money.md",
-    );
+    expect(resolveBundleLink("types/Product.md", "Money.md")).toBe("types/Money.md");
   });
 
   it("resolves an ascending relative target", () => {
-    expect(resolveBundleLink("types/objects/Product.md", "../scalars/ID.md")).toBe(
-      "types/scalars/ID.md",
-    );
+    expect(resolveBundleLink("queries/product.md", "../types/ID.md")).toBe("types/ID.md");
   });
 });
 

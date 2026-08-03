@@ -114,7 +114,7 @@ describe("OKF §9 conformance", () => {
     const files = await bundleFor("examples/shop-api/v1.graphql");
 
     expect(frontmatterOf(files.get("index.md") ?? "")?.okf_version).toBe("0.2");
-    expect(frontmatterOf(files.get("types/objects/index.md") ?? "")).toBeNull();
+    expect(frontmatterOf(files.get("types/index.md") ?? "")).toBeNull();
   });
 
   it("resolves every internal link to a file in the bundle", async () => {
@@ -166,7 +166,7 @@ describe("OKF §9 conformance", () => {
 
   it("emits a top-level # Schema section the reference tooling can parse", async () => {
     const files = await bundleFor("examples/shop-api/v1.graphql");
-    const product = files.get("types/objects/Product.md");
+    const product = files.get("types/Product.md");
 
     expect(product).toContain("\n# Schema\n");
     expect(product).toContain("| Field | Type | Description |");

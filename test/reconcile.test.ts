@@ -68,9 +68,9 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
 
     const result = await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir, now: T2 });
 
-    expect(result.added).toContain("types/objects/Invoice.md");
+    expect(result.added).toContain("types/Invoice.md");
     expect(result.added).toContain("queries/invoices.md");
-    expect(result.removed).toContain("types/objects/User_case.md");
+    expect(result.removed).toContain("types/User_case.md");
     expect(result.changed.length).toBeGreaterThan(0);
   });
 
@@ -81,14 +81,14 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
     const log = await readFile(join(outDir, "log.md"), "utf8");
 
     expect(log).toContain(`## ${T2.slice(0, 10)}`);
-    expect(log).toContain("* [`Invoice`](/types/objects/Invoice.md)");
+    expect(log).toContain("* [`Invoice`](/types/Invoice.md)");
     expect(log).toContain("**Removed**");
     expect(log.indexOf(`## ${T2.slice(0, 10)}`)).toBeLessThan(log.indexOf(`## ${T1.slice(0, 10)}`));
   });
 
   it("preserves human prose in a concept it updates", async () => {
     const outDir = await freshBundle(BASE);
-    const target = join(outDir, "types/objects/User_case.md");
+    const target = join(outDir, "types/User_case.md");
     await writeFile(target, `${await readFile(target, "utf8")}\n## Ownership\n\nBilling team.\n`);
 
     await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir, now: T2 });
@@ -102,7 +102,7 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
     const outDir = await freshBundle(BASE);
     await syncOkfBundle({ source: { kind: "sdl", path: EVOLVED }, outDir, now: T2 });
 
-    const index = await readFile(join(outDir, "types/objects/index.md"), "utf8");
+    const index = await readFile(join(outDir, "types/index.md"), "utf8");
 
     expect(index).toContain("- (removed)");
   });
@@ -151,8 +151,8 @@ describe("re-running against an evolved schema (DOD-G-4)", () => {
       now: "2026-09-01T00:00:00.000Z",
     });
 
-    expect(result.added).toContain("types/objects/User_case.md");
-    const restored = await readFile(join(outDir, "types/objects/User_case.md"), "utf8");
+    expect(result.added).toContain("types/User_case.md");
+    const restored = await readFile(join(outDir, "types/User_case.md"), "utf8");
     expect(restored).not.toContain("status: removed");
     expect(restored).not.toContain("Last known definition");
   });
@@ -182,7 +182,7 @@ describe("a bundle written before absolute links", () => {
     // relative link, which GOAL-6.3 preserves verbatim into a generated table
     // cell. The "nothing relative in the generated region" assertion below
     // would rightly flag it, and this test is not the place to argue about it.
-    const concept = "types/objects/User.md";
+    const concept = "types/User.md";
     expect(before.has(concept), `${concept} missing from the fixture bundle`).toBe(true);
     const human = "\n## Ownership\n\nOwned by Catalog. See [runbook](../../runbook.md).\n";
     legacy.set(concept, `${legacy.get(concept) ?? ""}${human}`);

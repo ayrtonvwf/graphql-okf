@@ -16,13 +16,13 @@ Emits the order each time its status changes.
 
 Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
 
-**Returns** [`Order!`](/types/objects/Order.md)
+**Returns** [`Order!`](/types/Order.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `orderId` | [`ID!`](/types/scalars/ID.md) |  |  |
+| `orderId` | [`ID!`](/types/ID.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

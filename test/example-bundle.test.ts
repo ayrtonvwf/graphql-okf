@@ -28,12 +28,12 @@ describe("the v1 example schema", () => {
 
     expect(result.added).toHaveLength(43);
     for (const path of [
-      "types/objects/Product.md",
-      "types/interfaces/Purchasable.md",
-      "types/unions/PaymentMethod.md",
-      "types/enums/OrderStatus.md",
-      "types/inputs/PaymentInput.md",
-      "types/scalars/DateTime.md",
+      "types/Product.md",
+      "types/Purchasable.md",
+      "types/PaymentMethod.md",
+      "types/OrderStatus.md",
+      "types/PaymentInput.md",
+      "types/DateTime.md",
       "directives/auth.md",
       "directives/tag.md",
       "queries/searchProducts.md",
@@ -66,8 +66,8 @@ describe("reconciling v1 to v2", () => {
     expect([...result.added].sort()).toEqual([
       "mutations/addReview.md",
       "subscriptions/reviewPosted.md",
-      "types/objects/Money.md",
-      "types/objects/Review.md",
+      "types/Money.md",
+      "types/Review.md",
     ]);
     expect(result.removed).toEqual(["queries/searchProducts.md"]);
     expect(result.changed).toHaveLength(8);
@@ -90,7 +90,7 @@ describe("reconciling v2 to v3", () => {
     });
 
     expect(result.added).toEqual([]);
-    expect(result.removed).toEqual(["types/objects/GiftCard.md"]);
+    expect(result.removed).toEqual(["types/GiftCard.md"]);
     expect(result.changed).toHaveLength(5);
     expect(result.unchanged).toBe(40);
     expect(await readFile(join(outDir, "queries/searchProducts.md"), "utf8")).toBe(
@@ -104,7 +104,7 @@ describe("reconciling v2 to v3", () => {
     await syncOkfBundle({ source: { kind: "sdl", path: V2 }, outDir, now: T2, resource: RESOURCE });
     await syncOkfBundle({ source: { kind: "sdl", path: V3 }, outDir, now: T3, resource: RESOURCE });
 
-    const giftCard = await readFile(join(outDir, "types/objects/GiftCard.md"), "utf8");
+    const giftCard = await readFile(join(outDir, "types/GiftCard.md"), "utf8");
     expect(giftCard).toContain('graphql_okf_status: "removed"');
     expect(giftCard).toContain(`removedAt: ${JSON.stringify(T3)}`);
   });
@@ -136,7 +136,7 @@ async function buildExampleBundle(): Promise<Map<string, string>> {
     resource: RESOURCE,
     okfVersion: "0.1",
   });
-  await appendFile(join(outDir, "types/objects/Product.md"), HUMAN_SECTION);
+  await appendFile(join(outDir, "types/Product.md"), HUMAN_SECTION);
   await syncOkfBundle({
     source: { kind: "sdl", path: V2 },
     outDir,
@@ -182,7 +182,7 @@ describe("the committed example bundle", () => {
     expect(log).toContain(`## ${T3.slice(0, 10)}`);
     expect(log).toContain(`## ${T4.slice(0, 10)}`);
     expect(log).toContain("**Migrated**");
-    expect(built.get("types/objects/Product.md")).toContain("Ping #catalog");
+    expect(built.get("types/Product.md")).toContain("Ping #catalog");
   });
 
   it("records no absolute filesystem path anywhere in the bundle", async () => {

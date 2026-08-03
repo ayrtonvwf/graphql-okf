@@ -14,13 +14,13 @@ generated: { by: "graphql-okf/0.1", at: "2026-03-02T09:00:00.000Z" }
 
 Anything addressable by a globally unique identifier.
 
-Implemented by [`Customer`](/types/objects/Customer.md), [`Order`](/types/objects/Order.md), [`Product`](/types/objects/Product.md), [`Purchasable`](/types/interfaces/Purchasable.md), [`Review`](/types/objects/Review.md).
+Implemented by [`Customer`](/types/Customer.md), [`Order`](/types/Order.md), [`Product`](/types/Product.md), [`Purchasable`](/types/Purchasable.md), [`Review`](/types/Review.md).
 
 # Schema
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `id` | [`ID!`](/types/scalars/ID.md) | The globally unique identifier. |
+| `id` | [`ID!`](/types/ID.md) | The globally unique identifier. |
 
 <!-- graphql-okf:generated:end -->
 

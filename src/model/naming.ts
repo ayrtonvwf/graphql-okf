@@ -13,13 +13,20 @@ export type ConceptKind =
   | "subscription"
   | "directive";
 
+/**
+ * Type kinds all share `types/`. GraphQL keeps every named type in one
+ * namespace, so a name is unique within it by construction; the kind is carried
+ * by `type:` frontmatter (GOAL-5.3) and by a heading in `types/index.md`.
+ * Directive names and root operation field names occupy separate namespaces that
+ * *can* collide with type names, so those directories stay distinct.
+ */
 export const DIRECTORY_BY_KIND: Record<ConceptKind, string> = {
-  object: "types/objects",
-  interface: "types/interfaces",
-  union: "types/unions",
-  enum: "types/enums",
-  input: "types/inputs",
-  scalar: "types/scalars",
+  object: "types",
+  interface: "types",
+  union: "types",
+  enum: "types",
+  input: "types",
+  scalar: "types",
   query: "queries",
   mutation: "mutations",
   subscription: "subscriptions",

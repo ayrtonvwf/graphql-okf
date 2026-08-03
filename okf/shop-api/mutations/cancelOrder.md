@@ -16,14 +16,14 @@ Cancels an order that has not yet shipped.
 
 Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
 
-**Returns** [`Order!`](/types/objects/Order.md)
+**Returns** [`Order!`](/types/Order.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `id` | [`ID!`](/types/scalars/ID.md) |  |  |
-| `reason` | [`String`](/types/scalars/String.md) |  |  |
+| `id` | [`ID!`](/types/ID.md) |  |  |
+| `reason` | [`String`](/types/String.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

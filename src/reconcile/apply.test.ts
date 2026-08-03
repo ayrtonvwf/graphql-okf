@@ -34,14 +34,14 @@ describe("applyPlan", () => {
     const dir = await workspace();
     const plan: BundlePlan = {
       ...empty,
-      actions: [{ kind: "create", path: "types/objects/Country.md", contents: "country\n" }],
-      added: [{ name: "Country", path: "types/objects/Country.md" }],
+      actions: [{ kind: "create", path: "types/Country.md", contents: "country\n" }],
+      added: [{ name: "Country", path: "types/Country.md" }],
       unchanged: 0,
     };
 
     await applyPlan(plan, dir, T);
 
-    expect(await readFile(join(dir, "types/objects/Country.md"), "utf8")).toBe("country\n");
+    expect(await readFile(join(dir, "types/Country.md"), "utf8")).toBe("country\n");
   });
 
   it("leaves no temp files behind", async () => {
@@ -79,8 +79,8 @@ describe("applyPlan", () => {
   it("rewrites log.md rather than appending, keeping one heading per day", async () => {
     const dir = await workspace();
     const plan: BundlePlan = {
-      actions: [{ kind: "create", path: "types/objects/A.md", contents: "a" }],
-      added: [{ name: "A", path: "types/objects/A.md" }],
+      actions: [{ kind: "create", path: "types/A.md", contents: "a" }],
+      added: [{ name: "A", path: "types/A.md" }],
       changed: [],
       removed: [],
       unchanged: 0,

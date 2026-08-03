@@ -14,14 +14,14 @@ generated: { by: "graphql-okf/0.1", at: "2026-03-02T09:00:00.000Z" }
 
 Anything that records when it was created and last modified.
 
-Implemented by [`Customer`](/types/objects/Customer.md), [`Order`](/types/objects/Order.md), [`Product`](/types/objects/Product.md), [`Review`](/types/objects/Review.md).
+Implemented by [`Customer`](/types/Customer.md), [`Order`](/types/Order.md), [`Product`](/types/Product.md), [`Review`](/types/Review.md).
 
 # Schema
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `createdAt` | [`DateTime!`](/types/scalars/DateTime.md) |  |
-| `updatedAt` | [`DateTime`](/types/scalars/DateTime.md) |  |
+| `createdAt` | [`DateTime!`](/types/DateTime.md) |  |
+| `updatedAt` | [`DateTime`](/types/DateTime.md) |  |
 
 <!-- graphql-okf:generated:end -->
 

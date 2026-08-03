@@ -16,7 +16,7 @@ function codeOf(run: () => unknown): string {
 
 describe("splitFile", () => {
   it("splits an owned file into preamble, generated region, and human region", () => {
-    const split = splitFile(file, "types/objects/Country.md");
+    const split = splitFile(file, "types/Country.md");
 
     expect(split?.parts.preamble).toBe("---\ntype: object\n---\n\n");
     expect(split?.parts.generated).toBe("\nbody\n");
@@ -51,10 +51,10 @@ describe("splitFile", () => {
 
   it("names the offending file in the error message", () => {
     try {
-      splitFile(`${GENERATED_START}\n`, "types/objects/Country.md");
+      splitFile(`${GENERATED_START}\n`, "types/Country.md");
       throw new Error("expected a throw");
     } catch (error) {
-      expect((error as Error).message).toContain("types/objects/Country.md");
+      expect((error as Error).message).toContain("types/Country.md");
     }
   });
 });

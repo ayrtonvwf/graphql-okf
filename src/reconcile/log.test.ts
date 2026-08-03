@@ -7,11 +7,11 @@ const T = "2026-07-24T09:00:00.000Z";
 const plan: BundlePlan = {
   actions: [],
   added: [
-    { name: "Invoice", path: "types/objects/Invoice.md" },
+    { name: "Invoice", path: "types/Invoice.md" },
     { name: "invoices", path: "queries/invoices.md" },
   ],
-  changed: [{ name: "User", path: "types/objects/User.md" }],
-  removed: [{ name: "LegacyOrder", path: "types/objects/LegacyOrder.md" }],
+  changed: [{ name: "User", path: "types/User.md" }],
+  removed: [{ name: "LegacyOrder", path: "types/LegacyOrder.md" }],
   unchanged: 12,
   indexes: 0,
   migrated: [],
@@ -25,16 +25,16 @@ describe("renderRunBlock", () => {
         "",
         "**Added**",
         "",
-        "* [`Invoice`](/types/objects/Invoice.md)",
+        "* [`Invoice`](/types/Invoice.md)",
         "* [`invoices`](/queries/invoices.md)",
         "",
         "**Changed**",
         "",
-        "* [`User`](/types/objects/User.md)",
+        "* [`User`](/types/User.md)",
         "",
         "**Removed**",
         "",
-        "* [`LegacyOrder`](/types/objects/LegacyOrder.md)",
+        "* [`LegacyOrder`](/types/LegacyOrder.md)",
       ].join("\n"),
     );
   });
@@ -121,7 +121,7 @@ describe("a migration run", () => {
     removed: [],
     unchanged: 0,
     indexes: 0,
-    migrated: Array.from({ length: 4975 }, (_, index) => `types/objects/T${index}.md`),
+    migrated: Array.from({ length: 4975 }, (_, index) => `types/T${index}.md`),
   };
 
   it("is loggable even with no schema change", () => {
@@ -135,7 +135,7 @@ describe("a migration run", () => {
     expect(block).toContain(
       "* OKF bundle format 0.1 → 0.2 (`timestamp` → `generated`) across 4975 concepts.",
     );
-    expect(block).not.toContain("types/objects/T0.md");
+    expect(block).not.toContain("types/T0.md");
   });
 
   it("writes the count with no locale separators, so runs stay deterministic", () => {
@@ -144,7 +144,7 @@ describe("a migration run", () => {
 
   it("still reports genuine schema changes in the same entry", () => {
     const block = renderRunBlock(
-      { ...migrationPlan, added: [{ name: "Country", path: "types/objects/Country.md" }] },
+      { ...migrationPlan, added: [{ name: "Country", path: "types/Country.md" }] },
       "2026-07-27T09:00:00.000Z",
     );
 

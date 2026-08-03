@@ -20,7 +20,7 @@ Locations: `SCALAR`.
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `url` | [`String!`](/types/scalars/String.md) |  | The URL that specifies the behavior of this scalar. |
+| `url` | [`String!`](/types/String.md) |  | The URL that specifies the behavior of this scalar. |
 
 <!-- graphql-okf:generated:end -->
 

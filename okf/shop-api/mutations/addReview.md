@@ -16,15 +16,15 @@ Adds a review to a product.
 
 Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
 
-**Returns** [`Review!`](/types/objects/Review.md)
+**Returns** [`Review!`](/types/Review.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `body` | [`String`](/types/scalars/String.md) |  |  |
-| `productId` | [`ID!`](/types/scalars/ID.md) |  |  |
-| `rating` | [`Int!`](/types/scalars/Int.md) |  |  |
+| `body` | [`String`](/types/String.md) |  |  |
+| `productId` | [`ID!`](/types/ID.md) |  |  |
+| `rating` | [`Int!`](/types/Int.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

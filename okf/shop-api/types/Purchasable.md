@@ -16,16 +16,16 @@ Anything a customer can put in an order.
 
 Implementors are guaranteed to expose a price in the shop's base currency.
 
-Implements [`Node`](/types/interfaces/Node.md).
+Implements [`Node`](/types/Node.md).
 
-Implemented by [`Product`](/types/objects/Product.md).
+Implemented by [`Product`](/types/Product.md).
 
 # Schema
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `id` | [`ID!`](/types/scalars/ID.md) |  |
-| `price` | [`Money!`](/types/objects/Money.md) | The price, including the currency it is denominated in. |
+| `id` | [`ID!`](/types/ID.md) |  |
+| `price` | [`Money!`](/types/Money.md) | The price, including the currency it is denominated in. |
 
 <!-- graphql-okf:generated:end -->
 

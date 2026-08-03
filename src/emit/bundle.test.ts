@@ -47,21 +47,34 @@ describe("buildBundle", () => {
       type Query { countries: [Country!]! }
     `);
 
-    expect(bundle.has("types/objects/Country.md")).toBe(true);
+    expect(bundle.has("types/Country.md")).toBe(true);
     expect(bundle.has("queries/countries.md")).toBe(true);
     expect(bundle.has("index.md")).toBe(true);
     expect(bundle.has("types/index.md")).toBe(true);
-    expect(bundle.has("types/objects/index.md")).toBe(true);
     expect(bundle.has("queries/index.md")).toBe(true);
   });
 
-  it("lists child directories in a grouping index and concepts in a leaf index", () => {
+  it("lists child directories in the root index and concepts in a leaf index", () => {
     const bundle = bundleFrom("type Query { hello: String }");
     expect(assembled(bundle, "index.md")).toContain("* [types/](/types/index.md)");
     expect(assembled(bundle, "index.md")).toContain("* [queries/](/queries/index.md)");
-    expect(assembled(bundle, "types/index.md")).toContain("* [scalars/](/types/scalars/index.md)");
-    expect(assembled(bundle, "types/scalars/index.md")).toContain(
-      "* [String](/types/scalars/String.md)",
+    expect(assembled(bundle, "types/index.md")).toContain("* [String](/types/String.md)");
+  });
+
+  it("groups a directory index by kind when it holds more than one kind", () => {
+    const bundle = bundleFrom(`
+      "An ISO country."
+      type Country { code: ID! }
+      type Query { countries: [Country!]! }
+    `);
+
+    expect(assembled(bundle, "types/index.md")).toContain("## Object types");
+    expect(assembled(bundle, "types/index.md")).toContain(
+      "* [Country](/types/Country.md) - An ISO country.",
+    );
+    expect(assembled(bundle, "types/index.md")).toContain("## Scalar types");
+    expect(assembled(bundle, "types/index.md")).toContain(
+      "* [ID](/types/ID.md) - The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache.",
     );
   });
 
@@ -81,7 +94,7 @@ describe("buildBundle", () => {
           {
             kind: "object",
             name: "Product",
-            path: "types/objects/Product.md",
+            path: "types/Product.md",
             description: "A product\nspanning lines. More.",
             appliedDirectives: [],
             fields: [],
@@ -92,8 +105,8 @@ describe("buildBundle", () => {
       emitContext("0.1", "2026-07-25T00:00:00.000Z"),
     );
 
-    expect(bundle.get("types/objects/index.md")?.generated).toContain(
-      "* [Product](/types/objects/Product.md) - A product spanning lines.",
+    expect(bundle.get("types/index.md")?.generated).toContain(
+      "* [Product](/types/Product.md) - A product spanning lines.",
     );
   });
 
@@ -108,7 +121,7 @@ describe("buildBundle", () => {
 
     expect(bundle.get("index.md")?.preamble).toContain('okf_version: "0.1"');
     expect(bundle.get("index.md")?.preamble).toContain(`resource: ${JSON.stringify(ir.resource)}`);
-    expect(bundle.get("types/objects/index.md")?.preamble).not.toContain("---");
+    expect(bundle.get("types/index.md")?.preamble).not.toContain("---");
   });
 
   it("declares the emitted okf_version on the bundle-root index", () => {
@@ -146,34 +159,30 @@ describe("buildBundle", () => {
 describe("buildBundle with tombstones", () => {
   it("lists a tombstoned concept in its directory index, marked removed", () => {
     const bundle = buildBundle(irWithOneObject, emitContext("0.1", "2026-07-24T00:00:00.000Z"), [
-      { path: "types/objects/LegacyOrder.md", title: "LegacyOrder" },
+      { path: "types/LegacyOrder.md", title: "LegacyOrder" },
     ]);
 
-    const index = bundle.get("types/objects/index.md");
-    expect(index?.generated).toContain(
-      "* [LegacyOrder](/types/objects/LegacyOrder.md) - (removed)",
-    );
+    const index = bundle.get("types/index.md");
+    expect(index?.generated).toContain("* [LegacyOrder](/types/LegacyOrder.md) - (removed)");
   });
 
   it("keeps a directory index alive when only tombstones remain in it", () => {
     const bundle = buildBundle(irWithNoInputs, emitContext("0.1", "2026-07-24T00:00:00.000Z"), [
-      { path: "types/inputs/OldInput.md", title: "OldInput" },
+      { path: "types/OldInput.md", title: "OldInput" },
     ]);
 
-    expect(bundle.get("types/inputs/index.md")?.generated).toContain(
-      "* [OldInput](/types/inputs/OldInput.md) - (removed)",
-    );
     expect(bundle.get("types/index.md")?.generated).toContain(
-      "* [inputs/](/types/inputs/index.md)",
+      "* [OldInput](/types/OldInput.md) - (removed)",
     );
+    expect(bundle.get("types/index.md")?.generated).toContain("* [String](/types/String.md)");
   });
 
   it("does not write a concept file for a tombstone", () => {
     const bundle = buildBundle(irWithOneObject, emitContext("0.1", "2026-07-24T00:00:00.000Z"), [
-      { path: "types/objects/LegacyOrder.md", title: "LegacyOrder" },
+      { path: "types/LegacyOrder.md", title: "LegacyOrder" },
     ]);
 
-    expect(bundle.has("types/objects/LegacyOrder.md")).toBe(false);
+    expect(bundle.has("types/LegacyOrder.md")).toBe(false);
   });
 });
 

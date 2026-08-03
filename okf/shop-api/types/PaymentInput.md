@@ -22,9 +22,9 @@ Directives: [`@oneOf`](/directives/oneOf.md).
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `creditCardToken` | [`String`](/types/scalars/String.md) |  |  |
-| `giftCardCode` | [`String`](/types/scalars/String.md) |  |  |
-| `payPalToken` | [`String`](/types/scalars/String.md) |  |  |
+| `creditCardToken` | [`String`](/types/String.md) |  |  |
+| `giftCardCode` | [`String`](/types/String.md) |  |  |
+| `payPalToken` | [`String`](/types/String.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

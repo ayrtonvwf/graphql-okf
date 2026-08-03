@@ -16,13 +16,13 @@ Places an order for the given products.
 
 Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
 
-**Returns** [`Order!`](/types/objects/Order.md)
+**Returns** [`Order!`](/types/Order.md)
 
 # Schema
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `input` | [`PlaceOrderInput!`](/types/inputs/PlaceOrderInput.md) |  |  |
+| `input` | [`PlaceOrderInput!`](/types/PlaceOrderInput.md) |  |  |
 
 <!-- graphql-okf:generated:end -->
 

@@ -32,15 +32,15 @@ describe("readSchema", () => {
     const ir = await readSchema({ kind: "sdl", path: FIXTURE });
     const paths = ir.concepts.map((concept: ConceptNode) => concept.path);
 
-    expect(paths).not.toContain("types/objects/index.md");
-    expect(paths.some((path) => path.startsWith("types/objects/index-"))).toBe(true);
+    expect(paths).not.toContain("types/index.md");
+    expect(paths.some((path) => path.startsWith("types/index-"))).toBe(true);
   });
 
   it("does not emit the custom root types as objects", async () => {
     const ir = await readSchema({ kind: "sdl", path: FIXTURE });
     const paths = ir.concepts.map((concept: ConceptNode) => concept.path);
 
-    expect(paths).not.toContain("types/objects/RootQuery.md");
+    expect(paths).not.toContain("types/RootQuery.md");
     expect(paths).toContain("queries/me.md");
     expect(paths).toContain("mutations/createUser.md");
   });

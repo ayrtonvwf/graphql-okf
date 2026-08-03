@@ -18,8 +18,8 @@ How an order was paid for.
 
 | Member |
 | --- |
-| [`CreditCard`](/types/objects/CreditCard.md) |
-| [`PayPalAccount`](/types/objects/PayPalAccount.md) |
+| [`CreditCard`](/types/CreditCard.md) |
+| [`PayPalAccount`](/types/PayPalAccount.md) |
 
 <!-- graphql-okf:generated:end -->
 

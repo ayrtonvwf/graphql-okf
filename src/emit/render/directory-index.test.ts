@@ -123,7 +123,7 @@ describe("renderDirectoryIndex", () => {
   it("renders a headingless section as a bare list, ahead of headed ones", () => {
     const parts = renderDirectoryIndex("Types", [
       {
-        entries: [{ label: "objects/", link: "/types/objects/index.md", summary: "Object types" }],
+        entries: [{ label: "objects/", link: "/types/index.md", summary: "Object types" }],
       },
       { heading: "Scalar types", entries: [{ label: "ID", link: "/types/ID.md", summary: "" }] },
     ]);
@@ -131,7 +131,7 @@ describe("renderDirectoryIndex", () => {
     expect(parts.generated).toBe(
       [
         "",
-        "* [objects/](/types/objects/index.md) - Object types",
+        "* [objects/](/types/index.md) - Object types",
         "",
         "## Scalar types",
         "",

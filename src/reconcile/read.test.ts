@@ -17,14 +17,14 @@ describe("readExistingBundle", () => {
 
   it("reads nested markdown files keyed by POSIX relative path, sorted", async () => {
     const dir = await workspace();
-    await mkdir(join(dir, "types", "objects"), { recursive: true });
+    await mkdir(join(dir, "types"), { recursive: true });
     await writeFile(join(dir, "index.md"), "root\n");
-    await writeFile(join(dir, "types", "objects", "Country.md"), "country\n");
+    await writeFile(join(dir, "types", "Country.md"), "country\n");
 
     const files = await readExistingBundle(dir);
 
-    expect([...files.keys()]).toEqual(["index.md", "types/objects/Country.md"]);
-    expect(files.get("types/objects/Country.md")).toBe("country\n");
+    expect([...files.keys()]).toEqual(["index.md", "types/Country.md"]);
+    expect(files.get("types/Country.md")).toBe("country\n");
   });
 
   it("ignores files that are not markdown", async () => {

@@ -41,7 +41,7 @@ describe("v2Evidence", () => {
       v2Evidence(
         new Map([
           ["index.md", rootIndex("0.1")],
-          ["types/objects/Country.md", v1Concept],
+          ["types/Country.md", v1Concept],
         ]),
       ),
     ).toBeNull();
@@ -57,7 +57,7 @@ describe("v2Evidence", () => {
       v2Evidence(
         new Map([
           ["index.md", rootIndex("0.1")],
-          ["types/objects/Country.md", v1Concept],
+          ["types/Country.md", v1Concept],
           ["NOTE.md", stray],
         ]),
       ),
@@ -68,11 +68,11 @@ describe("v2Evidence", () => {
     const evidence = v2Evidence(
       new Map([
         ["index.md", rootIndex("0.1")],
-        ["types/objects/Country.md", v2Concept],
+        ["types/Country.md", v2Concept],
       ]),
     );
 
-    expect(evidence).toContain("types/objects/Country.md");
+    expect(evidence).toContain("types/Country.md");
   });
 });
 

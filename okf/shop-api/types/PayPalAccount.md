@@ -1,8 +1,8 @@
 ---
 type: "GraphQL Object Type"
-title: "CreditCard"
-description: "A payment card."
-resource: "https://shop.example/graphql#CreditCard"
+title: "PayPalAccount"
+description: "A linked PayPal account."
+resource: "https://shop.example/graphql#PayPalAccount"
 tags: ["graphql", "object"]
 generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
@@ -10,18 +10,15 @@ generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 <!-- graphql-okf:generated:start -->
 <!-- Regenerated on each run. Do not edit inside this block; edits below the end marker are preserved. -->
 
-# CreditCard
+# PayPalAccount
 
-A payment card.
+A linked PayPal account.
 
 # Schema
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `brand` | [`String!`](/types/scalars/String.md) |  |
-| `expiryMonth` | [`Int!`](/types/scalars/Int.md) |  |
-| `expiryYear` | [`Int!`](/types/scalars/Int.md) |  |
-| `last4` | [`String!`](/types/scalars/String.md) | The last four digits of the card number. |
+| `email` | [`EmailAddress!`](/types/EmailAddress.md) |  |
 
 <!-- graphql-okf:generated:end -->
 
