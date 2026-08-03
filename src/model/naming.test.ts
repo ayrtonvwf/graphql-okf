@@ -1,6 +1,12 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { DIRECTORY_BY_KIND, elementId, resolvePaths, TYPE_LABEL_BY_KIND } from "./naming.js";
+import {
+  DIRECTORY_BY_KIND,
+  elementId,
+  KIND_ORDER,
+  resolvePaths,
+  TYPE_LABEL_BY_KIND,
+} from "./naming.js";
 
 describe("DIRECTORY_BY_KIND", () => {
   it("maps every concept kind to its documented directory", () => {
@@ -37,6 +43,27 @@ describe("TYPE_LABEL_BY_KIND", () => {
 
   it("covers exactly the kinds the naming scheme knows about", () => {
     expect(Object.keys(TYPE_LABEL_BY_KIND).sort()).toEqual(Object.keys(DIRECTORY_BY_KIND).sort());
+  });
+});
+
+describe("KIND_ORDER", () => {
+  it("lists every kind exactly once, types first in definitional weight", () => {
+    expect(KIND_ORDER).toEqual([
+      "object",
+      "interface",
+      "union",
+      "enum",
+      "input",
+      "scalar",
+      "query",
+      "mutation",
+      "subscription",
+      "directive",
+    ]);
+  });
+
+  it("covers every key of DIRECTORY_BY_KIND", () => {
+    expect([...KIND_ORDER].sort()).toEqual(Object.keys(DIRECTORY_BY_KIND).sort());
   });
 });
 

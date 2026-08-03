@@ -1,6 +1,6 @@
 import { buildSchema } from "graphql";
 import { describe, expect, it } from "vitest";
-import type { SchemaIr } from "../model/ir.js";
+import type { ObjectTypeNode, ScalarTypeNode, SchemaIr } from "../model/ir.js";
 import { project } from "../model/project.js";
 import type { LoadedSchema } from "../source/types.js";
 import { buildBundle } from "./bundle.js";
@@ -174,5 +174,64 @@ describe("buildBundle with tombstones", () => {
     ]);
 
     expect(bundle.has("types/objects/LegacyOrder.md")).toBe(false);
+  });
+});
+
+const MULTI_KIND_IR: SchemaIr = {
+  resource: "test.graphql",
+  origin: "sdl",
+  concepts: [
+    {
+      kind: "object",
+      name: "Country",
+      path: "types/Country.md",
+      description: "An ISO country.",
+      appliedDirectives: [],
+      fields: [],
+      interfaces: [],
+    } satisfies ObjectTypeNode,
+    {
+      kind: "scalar",
+      name: "ID",
+      path: "types/ID.md",
+      description: null,
+      appliedDirectives: [],
+      specifiedByUrl: null,
+      isBuiltIn: true,
+    } satisfies ScalarTypeNode,
+  ],
+};
+
+describe("an index for a directory holding more than one kind", () => {
+  it("groups its concepts under a heading per kind, in KIND_ORDER", () => {
+    const bundle = buildBundle(MULTI_KIND_IR, emitContext("0.2", TS));
+
+    expect(assembled(bundle, "types/index.md")).toContain(
+      [
+        "## Object types",
+        "",
+        "* [Country](/types/Country.md) - An ISO country.",
+        "",
+        "## Scalar types",
+        "",
+        "* [ID](/types/ID.md) - Scalar type.",
+      ].join("\n"),
+    );
+  });
+
+  it("puts tombstones in a trailing Removed section", () => {
+    const bundle = buildBundle(MULTI_KIND_IR, emitContext("0.2", TS), [
+      { path: "types/GiftCard.md", title: "GiftCard" },
+    ]);
+    const index = assembled(bundle, "types/index.md");
+
+    expect(index).toContain("## Removed\n\n* [GiftCard](/types/GiftCard.md) - (removed)");
+    expect(index.indexOf("## Removed")).toBeGreaterThan(index.indexOf("## Scalar types"));
+  });
+
+  it("leaves a single-kind directory as a flat list", () => {
+    const bundle = bundleFrom("type Query { hello: String }");
+
+    expect(assembled(bundle, "queries/index.md")).not.toContain("## ");
   });
 });

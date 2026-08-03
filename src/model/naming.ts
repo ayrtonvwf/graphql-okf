@@ -27,6 +27,25 @@ export const DIRECTORY_BY_KIND: Record<ConceptKind, string> = {
 };
 
 /**
+ * The canonical order kinds are presented in — currently the group order of a
+ * multi-kind `index.md`. An explicit array rather than `Object.keys` of a record:
+ * output order is load-bearing (GOAL-8.1) and must not rest on key-insertion
+ * order surviving a future edit.
+ */
+export const KIND_ORDER: readonly ConceptKind[] = [
+  "object",
+  "interface",
+  "union",
+  "enum",
+  "input",
+  "scalar",
+  "query",
+  "mutation",
+  "subscription",
+  "directive",
+];
+
+/**
  * The `type` value emitted into frontmatter. OKF §4.1 asks for values that are
  * descriptive and self-explanatory; `object` is neither in a shared catalog.
  * `ConceptKind` stays the internal key — only the emitted label lives here.

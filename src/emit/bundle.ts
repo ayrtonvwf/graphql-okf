@@ -1,10 +1,14 @@
 import { posix } from "node:path";
 import { firstSentence } from "../model/description.js";
 import type { ConceptNode, SchemaIr } from "../model/ir.js";
-import type { ConceptKind } from "../model/naming.js";
+import { type ConceptKind, KIND_ORDER } from "../model/naming.js";
 import type { EmitContext } from "./context.js";
 import { renderConceptParts } from "./render/concept.js";
-import { type IndexEntry, renderDirectoryIndex } from "./render/directory-index.js";
+import {
+  type IndexEntry,
+  type IndexSection,
+  renderDirectoryIndex,
+} from "./render/directory-index.js";
 import { bundleLink } from "./render/links.js";
 import { conceptResource } from "./render/resource.js";
 import type { FileParts } from "./render/seam.js";
@@ -36,6 +40,20 @@ const DIRECTORY_LABELS: Record<string, string> = {
   mutations: "Mutation operations",
   subscriptions: "Subscription operations",
   directives: "Directives",
+};
+
+/** Heading for a kind's group in an index that holds more than one kind. */
+const KIND_SECTION_LABELS: Record<ConceptKind, string> = {
+  object: "Object types",
+  interface: "Interface types",
+  union: "Union types",
+  enum: "Enum types",
+  input: "Input object types",
+  scalar: "Scalar types",
+  query: "Query operations",
+  mutation: "Mutation operations",
+  subscription: "Subscription operations",
+  directive: "Directives",
 };
 
 function sortByLabel(entries: IndexEntry[]): IndexEntry[] {
@@ -108,31 +126,46 @@ export function buildBundle(
 
   // One index.md per directory.
   for (const dir of allDirs) {
-    const entries: IndexEntry[] = [];
-
+    const childEntries: IndexEntry[] = [];
     for (const child of childDirs.get(dir) ?? []) {
       const base = posix.basename(child);
-      entries.push({
+      childEntries.push({
         label: `${base}/`,
         link: bundleLink(`${child}/index.md`),
         summary: DIRECTORY_LABELS[child] ?? base,
       });
     }
 
-    for (const concept of filesByDir.get(dir) ?? []) {
-      const summary = firstSentence(concept.description) ?? KIND_SUMMARY[concept.kind];
-      entries.push({
-        label: concept.name,
-        link: bundleLink(concept.path),
-        summary,
-      });
-    }
+    const concepts = filesByDir.get(dir) ?? [];
+    const conceptEntry = (concept: ConceptNode): IndexEntry => ({
+      label: concept.name,
+      link: bundleLink(concept.path),
+      summary: firstSentence(concept.description) ?? KIND_SUMMARY[concept.kind],
+    });
 
-    for (const tombstone of tombstonesByDir.get(dir) ?? []) {
-      entries.push({
-        label: tombstone.title,
-        link: bundleLink(tombstone.path),
-        summary: "(removed)",
+    const tombstoneEntries: IndexEntry[] = (tombstonesByDir.get(dir) ?? []).map((tombstone) => ({
+      label: tombstone.title,
+      link: bundleLink(tombstone.path),
+      summary: "(removed)",
+    }));
+
+    const kinds = new Set(concepts.map((concept) => concept.kind));
+    const sections: IndexSection[] = [];
+
+    if (kinds.size > 1) {
+      sections.push({ entries: sortByLabel(childEntries) });
+      for (const kind of KIND_ORDER) {
+        const entries = concepts.filter((concept) => concept.kind === kind).map(conceptEntry);
+        if (entries.length > 0) {
+          sections.push({ heading: KIND_SECTION_LABELS[kind], entries: sortByLabel(entries) });
+        }
+      }
+      if (tombstoneEntries.length > 0) {
+        sections.push({ heading: "Removed", entries: sortByLabel(tombstoneEntries) });
+      }
+    } else {
+      sections.push({
+        entries: sortByLabel([...childEntries, ...concepts.map(conceptEntry), ...tombstoneEntries]),
       });
     }
 
@@ -145,10 +178,7 @@ export function buildBundle(
             `resource: ${JSON.stringify(ir.resource)}`,
           ]
         : undefined;
-    bundle.set(
-      indexPath,
-      renderDirectoryIndex(title, [{ entries: sortByLabel(entries) }], frontmatter),
-    );
+    bundle.set(indexPath, renderDirectoryIndex(title, sections, frontmatter));
   }
 
   return bundle;
