@@ -29,8 +29,6 @@ const irWithOneObject = irFrom(`
   type Query { countries: [Country!]! }
 `);
 
-const irWithNoInputs = irFrom("type Query { hello: String }");
-
 function assembled(bundle: ReadonlyMap<string, FileParts>, path: string): string {
   const parts = bundle.get(path);
   if (!parts) {
@@ -166,15 +164,14 @@ describe("buildBundle with tombstones", () => {
     expect(index?.generated).toContain("* [LegacyOrder](/types/LegacyOrder.md) - (removed)");
   });
 
-  it("keeps a directory index alive when only tombstones remain in it", () => {
-    const bundle = buildBundle(irWithNoInputs, emitContext("0.1", "2026-07-24T00:00:00.000Z"), [
-      { path: "types/OldInput.md", title: "OldInput" },
+  it("materializes a directory index for a directory holding nothing but tombstones", () => {
+    const bundle = buildBundle(irWithOneObject, emitContext("0.1", "2026-07-24T00:00:00.000Z"), [
+      { path: "mutations/OldThing.md", title: "OldThing" },
     ]);
 
-    expect(bundle.get("types/index.md")?.generated).toContain(
-      "* [OldInput](/types/OldInput.md) - (removed)",
+    expect(bundle.get("mutations/index.md")?.generated).toContain(
+      "* [OldThing](/mutations/OldThing.md) - (removed)",
     );
-    expect(bundle.get("types/index.md")?.generated).toContain("* [String](/types/String.md)");
   });
 
   it("does not write a concept file for a tombstone", () => {
