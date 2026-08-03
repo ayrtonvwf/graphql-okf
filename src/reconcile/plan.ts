@@ -5,6 +5,7 @@ import type { SchemaIr } from "../model/ir.js";
 import { mergeFrontmatter, withoutProvenance } from "./frontmatter.js";
 import { migrateBundle } from "./migrate.js";
 import { isIndexPath, type SplitFile, splitFile } from "./parse.js";
+import { relayoutBundle } from "./relayout.js";
 import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
 
 export interface ConceptChange {
@@ -38,10 +39,16 @@ export interface BundlePlan {
    */
   readonly indexes: number;
   /**
-   * Concepts whose frontmatter this run converted from v0.1 to v0.2. Reported
-   * as a count in log.md, not a list: naming five thousand paths is noise.
+   * Whole-bundle format conversions this run performed. Reported as counts in
+   * log.md, not lists: naming five thousand paths is noise.
+   *
+   * `frontmatter` — concepts converted from OKF v0.1 to v0.2.
+   * `relocated`   — new paths of concepts moved into the flattened `types/`.
    */
-  readonly migrated: readonly string[];
+  readonly migrated: {
+    readonly frontmatter: readonly string[];
+    readonly relocated: readonly string[];
+  };
 }
 
 /**
@@ -77,7 +84,8 @@ export function reconcile(
   existing: ReadonlyMap<string, string>,
   ctx: EmitContext,
 ): BundlePlan {
-  const { files, migrated } = migrateBundle(existing, ctx);
+  const relayout = relayoutBundle(existing);
+  const { files, migrated } = migrateBundle(relayout.files, ctx);
   const owned = ownedFiles(files);
 
   const irPaths = new Set(ir.concepts.map((concept) => concept.path));
@@ -160,17 +168,45 @@ export function reconcile(
     removed.push(change);
   }
 
-  // Migration rewrites exactly the region sameContent ignores, so the loop above
-  // sees these files as unchanged. Their writes have to be added explicitly —
-  // and only where reconcile did not already write a newer version of the file.
+  // Migration rewrites exactly the region sameContent ignores, and a relocated
+  // concept is sameContent at its new path — so the loop above sees both as
+  // unchanged. Their writes have to be added explicitly, and only where reconcile
+  // did not already write a newer version of the file.
   const acted = new Set(actions.map((action) => action.path));
+
   for (const path of migrated) {
     const contents = files.get(path);
     if (acted.has(path) || contents === undefined) {
       continue;
     }
     actions.push({ kind: "migrate", path, contents });
+    acted.add(path);
   }
 
-  return { actions, added, changed, removed, unchanged, indexes, migrated };
+  for (const move of relayout.moves) {
+    const contents = files.get(move.to);
+    if (acted.has(move.to) || contents === undefined) {
+      continue;
+    }
+    actions.push({ kind: "migrate", path: move.to, contents });
+    acted.add(move.to);
+  }
+
+  for (const redirect of relayout.redirects) {
+    actions.push({ kind: "index", path: redirect.path, contents: redirect.contents });
+  }
+
+  for (const path of relayout.deletes) {
+    actions.push({ kind: "delete", path });
+  }
+
+  return {
+    actions,
+    added,
+    changed,
+    removed,
+    unchanged,
+    indexes,
+    migrated: { frontmatter: migrated, relocated: relayout.moves.map((move) => move.to) },
+  };
 }

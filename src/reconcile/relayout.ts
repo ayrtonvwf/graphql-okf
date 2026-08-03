@@ -22,12 +22,12 @@ const REDIRECT_ROW =
   "* [Types](/types/index.md) - This directory was flattened into the parent index.";
 const REDIRECT_REGION = `\n${REDIRECT_ROW}\n`;
 
-export interface Move {
+interface Move {
   readonly from: string;
   readonly to: string;
 }
 
-export interface Redirect {
+interface Redirect {
   readonly path: string;
   readonly contents: string;
 }

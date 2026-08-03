@@ -14,7 +14,7 @@ const plan: BundlePlan = {
   removed: [{ name: "LegacyOrder", path: "types/LegacyOrder.md" }],
   unchanged: 12,
   indexes: 0,
-  migrated: [],
+  migrated: { frontmatter: [], relocated: [] },
 };
 
 describe("renderRunBlock", () => {
@@ -102,7 +102,7 @@ describe("hasLoggableChanges", () => {
       removed: [],
       unchanged: 3,
       indexes: 1,
-      migrated: [],
+      migrated: { frontmatter: [], relocated: [] },
     };
 
     expect(hasLoggableChanges(indexOnly)).toBe(false);
@@ -121,7 +121,10 @@ describe("a migration run", () => {
     removed: [],
     unchanged: 0,
     indexes: 0,
-    migrated: Array.from({ length: 4975 }, (_, index) => `types/T${index}.md`),
+    migrated: {
+      frontmatter: Array.from({ length: 4975 }, (_, index) => `types/T${index}.md`),
+      relocated: [],
+    },
   };
 
   it("is loggable even with no schema change", () => {
@@ -155,7 +158,45 @@ describe("a migration run", () => {
 
   it("emits no group when nothing was migrated", () => {
     expect(
-      renderRunBlock({ ...migrationPlan, migrated: [] }, "2026-07-27T09:00:00.000Z"),
+      renderRunBlock(
+        { ...migrationPlan, migrated: { frontmatter: [], relocated: [] } },
+        "2026-07-27T09:00:00.000Z",
+      ),
     ).not.toContain("**Migrated**");
+  });
+});
+
+describe("a layout migration run", () => {
+  it("records a layout migration as one line", () => {
+    const block = renderRunBlock(
+      {
+        ...plan,
+        added: [],
+        changed: [],
+        removed: [],
+        migrated: { frontmatter: [], relocated: ["types/A.md", "types/B.md"] },
+      },
+      T,
+    );
+
+    expect(block).toContain("**Migrated**");
+    expect(block).toContain(
+      "* Bundle layout: `types/<kind>/` flattened into `types/` across 2 concepts.",
+    );
+  });
+
+  it("records both migrations when both fire, frontmatter first", () => {
+    const block = renderRunBlock(
+      { ...plan, migrated: { frontmatter: ["types/A.md"], relocated: ["types/A.md"] } },
+      T,
+    );
+
+    expect(block.indexOf("OKF bundle format")).toBeLessThan(block.indexOf("Bundle layout"));
+  });
+
+  it("emits no Migrated group when neither fired", () => {
+    const block = renderRunBlock({ ...plan, migrated: { frontmatter: [], relocated: [] } }, T);
+
+    expect(block).not.toContain("**Migrated**");
   });
 });

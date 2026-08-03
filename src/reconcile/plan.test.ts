@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildBundle } from "../emit/bundle.js";
 import { emitContext } from "../emit/context.js";
-import { assembleFile, EMPTY_HUMAN } from "../emit/render/seam.js";
+import { assembleFile, EMPTY_HUMAN, HUMAN_HINT } from "../emit/render/seam.js";
 import type { SchemaIr } from "../model/ir.js";
 import { type FileAction, reconcile } from "./plan.js";
 
@@ -228,7 +228,7 @@ describe("reconcile migrating a v0.1 bundle", () => {
   it("writes every migrated concept even though its content did not change", () => {
     const plan = reconcile(ir, v1BundleOnDisk(ir, T1), emitContext("0.2", T2));
 
-    expect(plan.migrated).toEqual(["types/Country.md"]);
+    expect(plan.migrated.frontmatter).toEqual(["types/Country.md"]);
     const migrate = plan.actions.find((action) => action.kind === "migrate");
     expect(migrate?.path).toBe("types/Country.md");
     expect(migrate && isNotDelete(migrate) ? migrate.contents : "").toContain(
@@ -260,14 +260,14 @@ describe("reconcile migrating a v0.1 bundle", () => {
 
     const plan = reconcile(ir, files, emitContext("0.2", T2));
 
-    expect(plan.migrated).toEqual([]);
+    expect(plan.migrated.frontmatter).toEqual([]);
     expect(plan.actions.filter((action) => action.kind === "migrate")).toEqual([]);
   });
 
   it("migrates nothing when the run targets v0.1", () => {
     const plan = reconcile(ir, v1BundleOnDisk(ir, T1), emitContext("0.1", T2));
 
-    expect(plan.migrated).toEqual([]);
+    expect(plan.migrated.frontmatter).toEqual([]);
   });
 });
 
@@ -342,6 +342,74 @@ describe("reconcile removals", () => {
     expect(action && isNotDelete(action) ? action.contents : "").not.toContain("removedAt:");
     expect(action && isNotDelete(action) ? action.contents : "").not.toContain(
       "Last known definition",
+    );
+  });
+});
+
+describe("reconcile migrating a legacy-layout bundle", () => {
+  it("moves a legacy-layout concept and deletes its old path", () => {
+    const fresh = bundleOnDisk(ir, T1);
+    const legacy = new Map([
+      ["index.md", fresh.get("index.md") ?? ""],
+      ["types/index.md", fresh.get("types/index.md") ?? ""],
+      ["types/objects/Country.md", fresh.get("types/Country.md") ?? ""],
+    ]);
+
+    const plan = reconcile(ir, legacy, emitContext("0.1", T1));
+
+    expect(plan.migrated.relocated).toEqual(["types/Country.md"]);
+    expect(plan.actions).toContainEqual({ kind: "delete", path: "types/objects/Country.md" });
+    expect(plan.removed).toEqual([]);
+  });
+
+  it("writes a moved concept whose content is otherwise unchanged", () => {
+    const fresh = bundleOnDisk(ir, T1);
+    const legacy = new Map([
+      ["index.md", fresh.get("index.md") ?? ""],
+      ["types/index.md", fresh.get("types/index.md") ?? ""],
+      ["types/objects/Country.md", fresh.get("types/Country.md") ?? ""],
+    ]);
+
+    const plan = reconcile(ir, legacy, emitContext("0.1", T1));
+    const written = plan.actions.filter((action) => action.path === "types/Country.md");
+
+    expect(written).toHaveLength(1);
+    expect(written[0]?.kind).toBe("migrate");
+  });
+
+  it("deletes an empty kind index and redirects one carrying human text", () => {
+    const fresh = bundleOnDisk(ir, T1);
+    const legacy = new Map([
+      ["index.md", fresh.get("index.md") ?? ""],
+      ["types/index.md", fresh.get("types/index.md") ?? ""],
+      ["types/objects/Country.md", fresh.get("types/Country.md") ?? ""],
+      [
+        "types/scalars/index.md",
+        assembleFile(
+          { preamble: "# Scalar types\n\n", generated: "\n* [ID](/types/scalars/ID.md)\n" },
+          EMPTY_HUMAN,
+        ),
+      ],
+      [
+        "types/objects/index.md",
+        assembleFile(
+          {
+            preamble: "# Object types\n\n",
+            generated: "\n* [Country](/types/objects/Country.md)\n",
+          },
+          `\n\n${HUMAN_HINT}\nSee ADR-14.\n`,
+        ),
+      ],
+    ]);
+
+    const plan = reconcile(ir, legacy, emitContext("0.1", T1));
+
+    expect(plan.actions).toContainEqual({ kind: "delete", path: "types/scalars/index.md" });
+
+    const redirect = plan.actions.find((action) => action.path === "types/objects/index.md");
+    expect(redirect?.kind).toBe("index");
+    expect(redirect !== undefined && "contents" in redirect ? redirect.contents : "").toContain(
+      "See ADR-14.",
     );
   });
 });

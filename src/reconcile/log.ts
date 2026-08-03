@@ -9,7 +9,14 @@ import type { BundlePlan, ConceptChange } from "./plan.js";
 export const LOG_HEADER = ["---", "type: Log", "---", "", "# Update Log"].join("\n");
 
 export function hasLoggableChanges(plan: BundlePlan): boolean {
-  return plan.added.length + plan.changed.length + plan.removed.length + plan.migrated.length > 0;
+  return (
+    plan.added.length +
+      plan.changed.length +
+      plan.removed.length +
+      plan.migrated.frontmatter.length +
+      plan.migrated.relocated.length >
+    0
+  );
 }
 
 function group(heading: string, changes: readonly ConceptChange[]): string[] {
@@ -25,21 +32,24 @@ function group(heading: string, changes: readonly ConceptChange[]): string[] {
 }
 
 /**
- * A whole-bundle format conversion, as one line. Listing every migrated concept
- * would bury the run's real changes under thousands of identical entries; the
- * count carries the fact and git carries the detail. Plain digits — a locale
- * separator would make the log non-deterministic.
+ * Whole-bundle format conversions, as one line each. Listing every affected
+ * concept would bury the run's real changes under thousands of identical
+ * entries; the count carries the fact and git carries the detail. Plain digits —
+ * a locale separator would make the log non-deterministic.
  */
 function migrationGroup(plan: BundlePlan): string[] {
-  if (plan.migrated.length === 0) {
-    return [];
+  const lines: string[] = [];
+  if (plan.migrated.frontmatter.length > 0) {
+    lines.push(
+      `* OKF bundle format 0.1 → 0.2 (\`timestamp\` → \`generated\`) across ${plan.migrated.frontmatter.length} concepts.`,
+    );
   }
-  return [
-    "**Migrated**",
-    "",
-    `* OKF bundle format 0.1 → 0.2 (\`timestamp\` → \`generated\`) across ${plan.migrated.length} concepts.`,
-    "",
-  ];
+  if (plan.migrated.relocated.length > 0) {
+    lines.push(
+      `* Bundle layout: \`types/<kind>/\` flattened into \`types/\` across ${plan.migrated.relocated.length} concepts.`,
+    );
+  }
+  return lines.length === 0 ? [] : ["**Migrated**", "", ...lines, ""];
 }
 
 /** One run's changes, headed by its time of day. No trailing newline. */
