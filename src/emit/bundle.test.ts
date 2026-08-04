@@ -61,6 +61,7 @@ describe("buildBundle", () => {
 
   it("groups a directory index by kind when it holds more than one kind", () => {
     const bundle = bundleFrom(`
+      "An ISO 3166-1 alpha-2 code."
       scalar CountryCode
       "An ISO country."
       type Country { code: CountryCode! }
@@ -73,7 +74,7 @@ describe("buildBundle", () => {
     );
     expect(assembled(bundle, "types/index.md")).toContain("## Scalar types");
     expect(assembled(bundle, "types/index.md")).toContain(
-      "* [CountryCode](/types/CountryCode.md) - Scalar type.",
+      "* [CountryCode](/types/CountryCode.md) - An ISO 3166-1 alpha-2 code.",
     );
   });
 
@@ -199,8 +200,8 @@ const MULTI_KIND_IR: SchemaIr = {
     } satisfies ObjectTypeNode,
     {
       kind: "scalar",
-      name: "ID",
-      path: "types/ID.md",
+      name: "Slug",
+      path: "types/Slug.md",
       description: null,
       appliedDirectives: [],
       specifiedByUrl: null,
@@ -220,7 +221,7 @@ describe("an index for a directory holding more than one kind", () => {
         "",
         "## Scalar types",
         "",
-        "* [ID](/types/ID.md) - Scalar type.",
+        "* [Slug](/types/Slug.md) - Scalar type.",
       ].join("\n"),
     );
   });

@@ -300,6 +300,7 @@ export function project(loaded: LoadedSchema): SchemaIr {
         // Root operation fields always have a concept file: hasConceptFile only
         // withholds one from spec-defined scalars and directives, neither of
         // which root.kind can ever be.
+        /* v8 ignore next -- defensive: unreachable for any legal GraphQL schema, see note above */
         throw new Error(`no path resolved for ${elementId(element)}`);
       }
       concepts.push({

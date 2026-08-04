@@ -485,7 +485,7 @@ describe("spec-defined elements", () => {
   });
 
   it("frees a clean path for a custom type that used to case-collide with a built-in", () => {
-    const ir = project(loadedFrom("type id { value: String! }\ntype Query { thing: id }"));
+    const ir = project(loadedFrom("type id { value: ID! }\ntype Query { thing: id }"));
     const paths = ir.concepts.map((concept) => concept.path);
 
     expect(paths).toContain("types/id.md");
