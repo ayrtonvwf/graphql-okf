@@ -20,7 +20,13 @@ const LEGACY_TYPE_DIRS = [
 
 const REDIRECT_ROW =
   "* [Types](/types/index.md) - This directory was flattened into the parent index.";
-const REDIRECT_REGION = `\n${REDIRECT_ROW}\n`;
+/**
+ * Exported so `plan.ts` can recognize an already-converted redirect stub: once a
+ * legacy kind index carries only this region, it is a permanent placeholder, not
+ * a directory index that `buildBundle` is expected to re-emit — reconcile's
+ * orphaned-index cleanup must not mistake it for one and delete it.
+ */
+export const REDIRECT_REGION = `\n${REDIRECT_ROW}\n`;
 
 interface Move {
   readonly from: string;

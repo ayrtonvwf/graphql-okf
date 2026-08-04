@@ -6,7 +6,7 @@ import { mergeFrontmatter, withoutProvenance } from "./frontmatter.js";
 import { migrateBundle } from "./migrate.js";
 import { isIndexPath, type SplitFile, splitFile } from "./parse.js";
 import { pruneBundle } from "./prune.js";
-import { relayoutBundle } from "./relayout.js";
+import { REDIRECT_REGION, relayoutBundle } from "./relayout.js";
 import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
 
 export interface ConceptChange {
@@ -116,7 +116,9 @@ export function reconcile(
 
   const names = new Map(ir.concepts.map((concept) => [concept.path, concept.name]));
 
-  for (const [path, rendered] of buildBundle(ir, ctx, tombstones)) {
+  const built = buildBundle(ir, ctx, tombstones);
+
+  for (const [path, rendered] of built) {
     const current = owned.get(path);
     const index = isIndexPath(path);
 
@@ -202,6 +204,25 @@ export function reconcile(
     }
     actions.push({ kind: "index", path: redirect.path, contents: redirect.contents });
     acted.add(redirect.path);
+  }
+
+  // A directory that loses its last concept (outright-deleted by prune, not
+  // tombstoned) is absent from `allDirs` in bundle.ts, so `built` never gets an
+  // entry for its index — `buildBundle` only emits an index for a directory that
+  // still has a live concept, tombstone, or child directory. That leaves the
+  // owned index on disk pointing at files that no longer exist. The root index
+  // is exempt: bundle.ts always seeds "." into `allDirs`, so it is always in
+  // `built` and never matches this check.
+  for (const [path, split] of owned) {
+    if (
+      isIndexPath(path) &&
+      !built.has(path) &&
+      !acted.has(path) &&
+      split.parts.generated !== REDIRECT_REGION
+    ) {
+      actions.push({ kind: "delete", path });
+      acted.add(path);
+    }
   }
 
   for (const path of [...relayout.deletes, ...pruned.pruned]) {

@@ -448,4 +448,63 @@ describe("pruning spec-defined concepts", () => {
     expect(plan.actions.some((action) => action.kind === "tombstone")).toBe(false);
     expect(plan.removed).toEqual([]);
   });
+
+  it("deletes a directory index left with no concepts once its last one is pruned", () => {
+    const ir: SchemaIr = {
+      resource: "https://x.example/graphql",
+      origin: "sdl",
+      concepts: [
+        {
+          kind: "object",
+          name: "Product",
+          path: "types/Product.md",
+          description: null,
+          appliedDirectives: [],
+          interfaces: [],
+          fields: [],
+        },
+      ],
+    };
+    const existing = new Map([
+      ["index.md", "# API interface\n"],
+      [
+        "directives/deprecated.md",
+        assembleFile(
+          { preamble: '---\ntitle: "deprecated"\n---\n\n', generated: "\n# deprecated\n\n" },
+          EMPTY_HUMAN,
+        ),
+      ],
+      [
+        "directives/index.md",
+        assembleFile(
+          {
+            preamble: "# Directives\n\n",
+            generated: "\n* [deprecated](/directives/deprecated.md)\n",
+          },
+          EMPTY_HUMAN,
+        ),
+      ],
+    ]);
+
+    const plan = reconcile(ir, existing, emitContext("0.2", "2026-08-03T00:00:00.000Z"));
+
+    expect(plan.migrated.pruned).toEqual(["directives/deprecated.md"]);
+    expect(plan.actions).toContainEqual({ kind: "delete", path: "directives/deprecated.md" });
+    expect(plan.actions).toContainEqual({ kind: "delete", path: "directives/index.md" });
+  });
+
+  it("never deletes the root index even when the bundle has no concepts", () => {
+    const ir: SchemaIr = {
+      resource: "https://x.example/graphql",
+      origin: "sdl",
+      concepts: [],
+    };
+    const existing = new Map([["index.md", "# API interface\n"]]);
+
+    const plan = reconcile(ir, existing, emitContext("0.2", "2026-08-03T00:00:00.000Z"));
+
+    expect(
+      plan.actions.some((action) => action.kind === "delete" && action.path === "index.md"),
+    ).toBe(false);
+  });
 });
