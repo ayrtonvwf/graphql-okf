@@ -4,7 +4,7 @@ import { assembleFile, EMPTY_HUMAN, type FileParts } from "../emit/render/seam.j
 import type { SchemaIr } from "../model/ir.js";
 import { mergeFrontmatter, withoutProvenance } from "./frontmatter.js";
 import { migrateBundle } from "./migrate.js";
-import { isIndexPath, type SplitFile, splitFile } from "./parse.js";
+import { hasHumanText, isIndexPath, type SplitFile, splitFile } from "./parse.js";
 import { pruneBundle } from "./prune.js";
 import { REDIRECT_REGION, relayoutBundle } from "./relayout.js";
 import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
@@ -213,6 +213,11 @@ export function reconcile(
   // owned index on disk pointing at files that no longer exist. The root index
   // is exempt: bundle.ts always seeds "." into `allDirs`, so it is always in
   // `built` and never matches this check.
+  //
+  // A human-annotated orphaned index is never deleted (GOAL-8.3): mirroring
+  // relayout.ts's own precedent for a legacy kind index carrying human text,
+  // it is rewritten with an empty generated region — dropping the stale,
+  // now-broken links — while `split.human` is preserved verbatim.
   for (const [path, split] of owned) {
     if (
       isIndexPath(path) &&
@@ -220,7 +225,15 @@ export function reconcile(
       !acted.has(path) &&
       split.parts.generated !== REDIRECT_REGION
     ) {
-      actions.push({ kind: "delete", path });
+      if (hasHumanText(split.human)) {
+        actions.push({
+          kind: "index",
+          path,
+          contents: assembleFile({ preamble: split.parts.preamble, generated: "" }, split.human),
+        });
+      } else {
+        actions.push({ kind: "delete", path });
+      }
       acted.add(path);
     }
   }

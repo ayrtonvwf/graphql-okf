@@ -493,6 +493,64 @@ describe("pruning spec-defined concepts", () => {
     expect(plan.actions).toContainEqual({ kind: "delete", path: "directives/index.md" });
   });
 
+  it("preserves human text on a directory index orphaned by pruning, instead of deleting it", () => {
+    const ir: SchemaIr = {
+      resource: "https://x.example/graphql",
+      origin: "sdl",
+      concepts: [
+        {
+          kind: "object",
+          name: "Product",
+          path: "types/Product.md",
+          description: null,
+          appliedDirectives: [],
+          interfaces: [],
+          fields: [],
+        },
+      ],
+    };
+    const humanNote = "\nOur team relies on the deprecated directive; do not remove lightly.\n";
+    const existing = new Map([
+      ["index.md", "# API interface\n"],
+      [
+        "directives/deprecated.md",
+        assembleFile(
+          { preamble: '---\ntitle: "deprecated"\n---\n\n', generated: "\n# deprecated\n\n" },
+          EMPTY_HUMAN,
+        ),
+      ],
+      [
+        "directives/index.md",
+        assembleFile(
+          {
+            preamble: "# Directives\n\n",
+            generated: "\n* [deprecated](/directives/deprecated.md)\n",
+          },
+          humanNote,
+        ),
+      ],
+    ]);
+
+    const plan = reconcile(ir, existing, emitContext("0.2", "2026-08-03T00:00:00.000Z"));
+
+    expect(plan.migrated.pruned).toEqual(["directives/deprecated.md"]);
+    expect(plan.actions).toContainEqual({ kind: "delete", path: "directives/deprecated.md" });
+    expect(
+      plan.actions.some(
+        (action) => action.kind === "delete" && action.path === "directives/index.md",
+      ),
+    ).toBe(false);
+
+    const action = plan.actions.find((entry) => entry.path === "directives/index.md");
+    expect(action).toBeDefined();
+    expect(action && isNotDelete(action) ? action.contents : "").toContain(
+      "Our team relies on the deprecated directive",
+    );
+    expect(action && isNotDelete(action) ? action.contents : "").not.toContain(
+      "/directives/deprecated.md",
+    );
+  });
+
   it("never deletes the root index even when the bundle has no concepts", () => {
     const ir: SchemaIr = {
       resource: "https://x.example/graphql",
