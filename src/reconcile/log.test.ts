@@ -14,7 +14,7 @@ const plan: BundlePlan = {
   removed: [{ name: "LegacyOrder", path: "types/LegacyOrder.md" }],
   unchanged: 12,
   indexes: 0,
-  migrated: { frontmatter: [], relocated: [] },
+  migrated: { frontmatter: [], relocated: [], pruned: [] },
 };
 
 describe("renderRunBlock", () => {
@@ -102,7 +102,7 @@ describe("hasLoggableChanges", () => {
       removed: [],
       unchanged: 3,
       indexes: 1,
-      migrated: { frontmatter: [], relocated: [] },
+      migrated: { frontmatter: [], relocated: [], pruned: [] },
     };
 
     expect(hasLoggableChanges(indexOnly)).toBe(false);
@@ -124,6 +124,7 @@ describe("a migration run", () => {
     migrated: {
       frontmatter: Array.from({ length: 4975 }, (_, index) => `types/T${index}.md`),
       relocated: [],
+      pruned: [],
     },
   };
 
@@ -159,7 +160,7 @@ describe("a migration run", () => {
   it("emits no group when nothing was migrated", () => {
     expect(
       renderRunBlock(
-        { ...migrationPlan, migrated: { frontmatter: [], relocated: [] } },
+        { ...migrationPlan, migrated: { frontmatter: [], relocated: [], pruned: [] } },
         "2026-07-27T09:00:00.000Z",
       ),
     ).not.toContain("**Migrated**");
@@ -174,7 +175,7 @@ describe("a layout migration run", () => {
         added: [],
         changed: [],
         removed: [],
-        migrated: { frontmatter: [], relocated: ["types/A.md", "types/B.md"] },
+        migrated: { frontmatter: [], relocated: ["types/A.md", "types/B.md"], pruned: [] },
       },
       T,
     );
@@ -187,7 +188,7 @@ describe("a layout migration run", () => {
 
   it("records both migrations when both fire, frontmatter first", () => {
     const block = renderRunBlock(
-      { ...plan, migrated: { frontmatter: ["types/A.md"], relocated: ["types/A.md"] } },
+      { ...plan, migrated: { frontmatter: ["types/A.md"], relocated: ["types/A.md"], pruned: [] } },
       T,
     );
 
@@ -195,8 +196,30 @@ describe("a layout migration run", () => {
   });
 
   it("emits no Migrated group when neither fired", () => {
-    const block = renderRunBlock({ ...plan, migrated: { frontmatter: [], relocated: [] } }, T);
+    const block = renderRunBlock(
+      { ...plan, migrated: { frontmatter: [], relocated: [], pruned: [] } },
+      T,
+    );
 
     expect(block).not.toContain("**Migrated**");
+  });
+});
+
+describe("the prune migration line", () => {
+  it("reports the count and makes the run loggable", () => {
+    const plan = {
+      actions: [],
+      added: [],
+      changed: [],
+      removed: [],
+      unchanged: 0,
+      indexes: 0,
+      migrated: { frontmatter: [], relocated: [], pruned: ["types/ID.md", "types/Int.md"] },
+    } satisfies BundlePlan;
+
+    expect(hasLoggableChanges(plan)).toBe(true);
+    expect(renderRunBlock(plan, "2026-08-03T09:00:00.000Z")).toContain(
+      "* Built-in scalars and spec directives: 2 concepts no longer emitted (GOAL-7.3).",
+    );
   });
 });

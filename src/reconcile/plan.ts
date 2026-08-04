@@ -5,6 +5,7 @@ import type { SchemaIr } from "../model/ir.js";
 import { mergeFrontmatter, withoutProvenance } from "./frontmatter.js";
 import { migrateBundle } from "./migrate.js";
 import { isIndexPath, type SplitFile, splitFile } from "./parse.js";
+import { pruneBundle } from "./prune.js";
 import { relayoutBundle } from "./relayout.js";
 import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
 
@@ -48,6 +49,8 @@ export interface BundlePlan {
   readonly migrated: {
     readonly frontmatter: readonly string[];
     readonly relocated: readonly string[];
+    /** `pruned` — spec-defined concepts deleted because they are no longer emitted (#23). */
+    readonly pruned: readonly string[];
   };
 }
 
@@ -85,7 +88,8 @@ export function reconcile(
   ctx: EmitContext,
 ): BundlePlan {
   const relayout = relayoutBundle(existing);
-  const { files, migrated } = migrateBundle(relayout.files, ctx);
+  const pruned = pruneBundle(relayout.files);
+  const { files, migrated } = migrateBundle(pruned.files, ctx);
   const owned = ownedFiles(files);
 
   const irPaths = new Set(ir.concepts.map((concept) => concept.path));
@@ -200,7 +204,7 @@ export function reconcile(
     acted.add(redirect.path);
   }
 
-  for (const path of relayout.deletes) {
+  for (const path of [...relayout.deletes, ...pruned.pruned]) {
     actions.push({ kind: "delete", path });
   }
 
@@ -211,6 +215,10 @@ export function reconcile(
     removed,
     unchanged,
     indexes,
-    migrated: { frontmatter: migrated, relocated: relayout.moves.map((move) => move.to) },
+    migrated: {
+      frontmatter: migrated,
+      relocated: relayout.moves.map((move) => move.to),
+      pruned: pruned.pruned,
+    },
   };
 }

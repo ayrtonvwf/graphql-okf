@@ -412,3 +412,40 @@ describe("reconcile migrating a legacy-layout bundle", () => {
     );
   });
 });
+
+describe("pruning spec-defined concepts", () => {
+  it("plans a delete, not a tombstone, and reports it", () => {
+    const ir: SchemaIr = {
+      resource: "https://x.example/graphql",
+      origin: "sdl",
+      concepts: [
+        {
+          kind: "object",
+          name: "Product",
+          path: "types/Product.md",
+          description: null,
+          appliedDirectives: [],
+          interfaces: [],
+          fields: [],
+        },
+      ],
+    };
+    const existing = new Map([
+      ["index.md", "# API interface\n"],
+      [
+        "types/ID.md",
+        assembleFile(
+          { preamble: '---\ntitle: "ID"\n---\n\n', generated: "\n# ID\n\n" },
+          EMPTY_HUMAN,
+        ),
+      ],
+    ]);
+
+    const plan = reconcile(ir, existing, emitContext("0.2", "2026-08-03T00:00:00.000Z"));
+
+    expect(plan.migrated.pruned).toEqual(["types/ID.md"]);
+    expect(plan.actions).toContainEqual({ kind: "delete", path: "types/ID.md" });
+    expect(plan.actions.some((action) => action.kind === "tombstone")).toBe(false);
+    expect(plan.removed).toEqual([]);
+  });
+});

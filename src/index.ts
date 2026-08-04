@@ -28,6 +28,8 @@ export interface SyncResult {
   readonly migrated: readonly string[];
   /** New paths of concepts this run moved into the flattened `types/` layout. */
   readonly relocated: readonly string[];
+  /** Spec-defined concepts this run deleted because they are no longer emitted. */
+  readonly pruned: readonly string[];
 }
 
 export async function syncOkfBundle(options: SyncOkfBundleOptions): Promise<SyncResult> {
@@ -60,6 +62,7 @@ export async function syncOkfBundle(options: SyncOkfBundleOptions): Promise<Sync
     indexes: plan.indexes,
     migrated: [...plan.migrated.frontmatter],
     relocated: [...plan.migrated.relocated],
+    pruned: [...plan.migrated.pruned],
   };
 }
 
