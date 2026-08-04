@@ -8,31 +8,28 @@ generated: { by: "graphql-okf/0.1", at: "2026-05-20T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
-<!-- Regenerated on each run. Do not edit inside this block; edits below the end marker are preserved. -->
-
 # Order
 
 A customer's purchase.
 
-Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
-
-Implements [`Node`](/types/Node.md), [`Timestamped`](/types/Timestamped.md).
-
 # Schema
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `createdAt` | [`DateTime!`](/types/DateTime.md) |  |
-| `currency` | [`Currency!`](/types/Currency.md) |  |
-| `customer` | [`Customer!`](/types/Customer.md) |  |
-| `id` | `ID!` |  |
-| `lines` | [`[OrderLine!]!`](/types/OrderLine.md) |  |
-| `paidWith` | [`PaymentMethod`](/types/PaymentMethod.md) |  |
-| `shipTo` | [`Address!`](/types/Address.md) |  |
-| `status` | [`OrderStatus!`](/types/OrderStatus.md) |  |
-| `total` | [`Money!`](/types/Money.md) | The order total, including the currency it is denominated in. |
-| `updatedAt` | [`DateTime`](/types/DateTime.md) |  |
+```graphql
+type Order implements Node & Timestamped @auth(requires: CUSTOMER) {
+  createdAt: DateTime!
+  currency: Currency!
+  customer: Customer!
+  id: ID!
+  lines: [OrderLine!]!
+  paidWith: PaymentMethod
+  shipTo: Address!
+  status: OrderStatus!
+  "The order total, including the currency it is denominated in."
+  total: Money!
+  updatedAt: DateTime
+}
+```
+
+References: [`Address`](/types/Address.md), [`@auth`](/directives/auth.md), [`Currency`](/types/Currency.md), [`Customer`](/types/Customer.md), [`DateTime`](/types/DateTime.md), [`Money`](/types/Money.md), [`Node`](/types/Node.md), [`OrderLine`](/types/OrderLine.md), [`OrderStatus`](/types/OrderStatus.md), [`PaymentMethod`](/types/PaymentMethod.md), [`Timestamped`](/types/Timestamped.md).
 
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

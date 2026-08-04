@@ -8,21 +8,16 @@ generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
-<!-- Regenerated on each run. Do not edit inside this block; edits below the end marker are preserved. -->
-
 # updateDefaultAddress
 
 Replaces a customer's default shipping address.
 
-**Returns** [`Customer!`](/types/Customer.md)
-
 # Schema
 
-| Argument | Type | Default | Description |
-| --- | --- | --- | --- |
-| `address` | [`AddressInput!`](/types/AddressInput.md) |  |  |
-| `customerId` | `ID!` |  |  |
+```graphql
+updateDefaultAddress(address: AddressInput!, customerId: ID!): Customer!
+```
+
+References: [`AddressInput`](/types/AddressInput.md), [`Customer`](/types/Customer.md).
 
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

@@ -8,8 +8,6 @@ generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
-<!-- Regenerated on each run. Do not edit inside this block; edits below the end marker are preserved. -->
-
 # Role
 
 Access levels a caller can hold.
@@ -18,12 +16,15 @@ Used by the `@auth` directive to gate fields.
 
 # Schema
 
-| Value | Description |
-| --- | --- |
-| `CUSTOMER` | A signed-in shopper. |
-| `GUEST` | Anyone, including unauthenticated callers. |
-| `STAFF` | A member of shop staff. |
+```graphql
+enum Role {
+  "A signed-in shopper."
+  CUSTOMER
+  "Anyone, including unauthenticated callers."
+  GUEST
+  "A member of shop staff."
+  STAFF
+}
+```
 
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

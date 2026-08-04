@@ -3,22 +3,18 @@ type: "GraphQL Query"
 title: "country"
 resource: "https://countries.trevorblades.com/graphql#Query.country"
 tags: ["graphql", "query"]
-generated: { by: "graphql-okf/0.1", at: "2026-08-04T00:52:49.068Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-04T16:53:04.837Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
-<!-- Regenerated on each run. Do not edit inside this block; edits below the end marker are preserved. -->
-
 # country
-
-**Returns** [`Country`](/types/Country.md)
 
 # Schema
 
-| Argument | Type | Default | Description |
-| --- | --- | --- | --- |
-| `code` | `ID!` |  |  |
+```graphql
+country(code: ID!): Country
+```
+
+References: [`Country`](/types/Country.md).
 
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

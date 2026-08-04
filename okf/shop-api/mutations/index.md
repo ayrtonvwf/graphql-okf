@@ -8,5 +8,3 @@ Signatures are GraphQL SDL. A type name in a signature is a concept file at `/ty
 * [`placeOrder(input: PlaceOrderInput!): Order!`](/mutations/placeOrder.md) - Places an order for the given products.
 * [`updateDefaultAddress(address: AddressInput!, customerId: ID!): Customer!`](/mutations/updateDefaultAddress.md) - Replaces a customer's default shipping address.
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

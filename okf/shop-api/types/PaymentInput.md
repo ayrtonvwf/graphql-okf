@@ -8,24 +8,20 @@ generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
-<!-- Regenerated on each run. Do not edit inside this block; edits below the end marker are preserved. -->
-
 # PaymentInput
 
 Exactly one payment instrument.
 
 Supply exactly one field; supplying zero or more than one is an error.
 
-Directives: `@oneOf`.
-
 # Schema
 
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| `creditCardToken` | `String` |  |  |
-| `giftCardCode` | `String` |  |  |
-| `payPalToken` | `String` |  |  |
+```graphql
+input PaymentInput @oneOf {
+  creditCardToken: String
+  giftCardCode: String
+  payPalToken: String
+}
+```
 
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

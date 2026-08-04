@@ -8,23 +8,23 @@ generated: { by: "graphql-okf/0.1", at: "2026-05-20T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
-<!-- Regenerated on each run. Do not edit inside this block; edits below the end marker are preserved. -->
-
 # OrderStatus
 
 The lifecycle stage of an order.
 
 # Schema
 
-| Value | Description |
-| --- | --- |
-| `CANCELLED` |  |
-| `DELIVERED` |  |
-| `PAID` |  |
-| `PENDING` | Created but not yet paid. |
-| `REFUNDED` | Paid, then fully refunded. |
-| `SHIPPED` |  |
+```graphql
+enum OrderStatus {
+  CANCELLED
+  DELIVERED
+  PAID
+  "Created but not yet paid."
+  PENDING
+  "Paid, then fully refunded."
+  REFUNDED
+  SHIPPED
+}
+```
 
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

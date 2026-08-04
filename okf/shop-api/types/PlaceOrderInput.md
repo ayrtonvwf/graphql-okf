@@ -8,20 +8,20 @@ generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
-<!-- Regenerated on each run. Do not edit inside this block; edits below the end marker are preserved. -->
-
 # PlaceOrderInput
 
 Everything needed to turn a basket into an order.
 
 # Schema
 
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| `payWith` | [`PaymentInput!`](/types/PaymentInput.md) |  |  |
-| `productIds` | `[ID!]!` |  |  |
-| `shipTo` | [`AddressInput!`](/types/AddressInput.md) |  |  |
+```graphql
+input PlaceOrderInput {
+  payWith: PaymentInput!
+  productIds: [ID!]!
+  shipTo: AddressInput!
+}
+```
+
+References: [`AddressInput`](/types/AddressInput.md), [`PaymentInput`](/types/PaymentInput.md).
 
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

@@ -6,6 +6,30 @@ type: Log
 
 ## 2026-08-04
 
+### 16:53:04.837Z
+
+**Migrated**
+
+* OKF bundle format 0.1 → 0.2 (`timestamp` → `generated`) across 18 concepts.
+
+**Changed**
+
+* [`continent`](/queries/continent.md)
+* [`continents`](/queries/continents.md)
+* [`countries`](/queries/countries.md)
+* [`country`](/queries/country.md)
+* [`language`](/queries/language.md)
+* [`languages`](/queries/languages.md)
+* [`Continent`](/types/Continent.md)
+* [`ContinentFilterInput`](/types/ContinentFilterInput.md)
+* [`Country`](/types/Country.md)
+* [`CountryFilterInput`](/types/CountryFilterInput.md)
+* [`Language`](/types/Language.md)
+* [`LanguageFilterInput`](/types/LanguageFilterInput.md)
+* [`State`](/types/State.md)
+* [`StringQueryOperatorInput`](/types/StringQueryOperatorInput.md)
+* [`Subdivision`](/types/Subdivision.md)
+
 ### 00:52:49.068Z
 
 **Migrated**
