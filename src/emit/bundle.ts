@@ -77,9 +77,6 @@ export const SIGNATURE_NOTE =
   `\`/${DIRECTORY_BY_KIND.object}/<Name>.md\`; ` +
   `\`/${DIRECTORY_BY_KIND.object}/index.md\` lists them all.`;
 
-/** The kinds whose index rows carry a signature, and so a convention note. */
-const SIGNATURE_KINDS = new Set<ConceptKind>(["query", "mutation", "subscription", "directive"]);
-
 function signatureOf(concept: ConceptNode): string | null {
   switch (concept.kind) {
     case "query":
@@ -243,7 +240,7 @@ export function buildBundle(
     const note =
       dir === "."
         ? SPEC_DEFINED_NOTE
-        : concepts.some((concept) => SIGNATURE_KINDS.has(concept.kind))
+        : concepts.some((concept) => signatureOf(concept) !== null)
           ? SIGNATURE_NOTE
           : undefined;
     bundle.set(indexPath, renderDirectoryIndex(title, sections, { frontmatter, note }));
