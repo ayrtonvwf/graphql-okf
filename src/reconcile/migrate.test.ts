@@ -195,6 +195,39 @@ describe("migrateBundle", () => {
     expect(result.migrated).toEqual(["types/Order.md"]);
   });
 
+  it("reports a hint-only strip as hintStripped, not frontmatterMigrated (#24)", () => {
+    const result = migrateBundle(
+      new Map([["types/Order.md", legacyFile(LEGACY_EMPTY)]]),
+      emitContext("0.2", "2026-08-04T00:00:00.000Z"),
+    );
+
+    expect(result.hintStripped).toEqual(["types/Order.md"]);
+    expect(result.frontmatterMigrated).toEqual([]);
+  });
+
+  it("reports a provenance-only conversion as frontmatterMigrated, not hintStripped", () => {
+    const result = migrateBundle(new Map([["types/Country.md", v1]]), emitContext("0.2", T));
+
+    expect(result.frontmatterMigrated).toEqual(["types/Country.md"]);
+    expect(result.hintStripped).toEqual([]);
+  });
+
+  it("reports a file hit by both conversions in both lists", () => {
+    const both = assembleFile(
+      {
+        preamble:
+          '---\ntype: "GraphQL Object Type"\ntitle: "Order"\ntimestamp: "2026-01-15T09:00:00.000Z"\n---\n\n',
+        generated: "\n# Order\n\n",
+      },
+      LEGACY_EMPTY,
+    );
+    const result = migrateBundle(new Map([["types/Order.md", both]]), emitContext("0.2", T));
+
+    expect(result.migrated).toEqual(["types/Order.md"]);
+    expect(result.frontmatterMigrated).toEqual(["types/Order.md"]);
+    expect(result.hintStripped).toEqual(["types/Order.md"]);
+  });
+
   it("leaves a human region a human has written in completely alone", () => {
     const written = `\n\n${LEGACY_HUMAN_HINT}\n\nOwned by the Catalog team.\n`;
     const result = migrateBundle(
