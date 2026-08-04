@@ -54,13 +54,28 @@ export interface BundlePlan {
   };
 }
 
+interface OwnedFiles {
+  readonly files: Map<string, SplitFile>;
+  /**
+   * Index paths adopted by reserved name rather than by markers (a legacy or
+   * hand-written marker-less `index.md`). For these, `SplitFile.human` is
+   * forced to `""` by construction — the whole file landed in `preamble`
+   * because there is no generated-region boundary to split on — not because
+   * the file genuinely has no human content. Any pass that would delete or
+   * rewrite an orphaned index based on `hasHumanText` must treat a path in
+   * this set as "can't tell", not "safe to delete" (finding 1, #23 review).
+   */
+  readonly markerless: ReadonlySet<string>;
+}
+
 /**
  * Files graphql-okf owns, keyed by path. A file is owned when it carries the
  * generated markers; `index.md` is owned by its reserved name, so a legacy
  * marker-less index is picked up and upgraded rather than mistaken for a stray.
  */
-function ownedFiles(existing: ReadonlyMap<string, string>): Map<string, SplitFile> {
+function ownedFiles(existing: ReadonlyMap<string, string>): OwnedFiles {
   const owned = new Map<string, SplitFile>();
+  const markerless = new Set<string>();
   for (const [path, text] of existing) {
     if (path === "log.md") {
       continue;
@@ -70,9 +85,29 @@ function ownedFiles(existing: ReadonlyMap<string, string>): Map<string, SplitFil
       owned.set(path, split);
     } else if (isIndexPath(path)) {
       owned.set(path, { parts: { preamble: text, generated: "" }, human: "" });
+      markerless.add(path);
     }
   }
-  return owned;
+  return { files: owned, markerless };
+}
+
+/**
+ * Whether `path`'s directory (on disk, before this run's own writes) still
+ * holds any file other than `path` itself — including in nested
+ * subdirectories, mirroring the physical `rmdir`-fails-if-non-empty check
+ * `apply.ts`'s `removeIfEmpty` performs. Used to decide whether an orphaned
+ * index's directory is genuinely empty or still anchors a human's stray file
+ * (finding 2, #23 review).
+ */
+function dirStillHasOtherFiles(path: string, files: ReadonlyMap<string, string>): boolean {
+  const slash = path.lastIndexOf("/");
+  const dir = slash === -1 ? "" : path.slice(0, slash + 1);
+  for (const other of files.keys()) {
+    if (other !== path && other.startsWith(dir)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function sameContent(rendered: FileParts, existing: FileParts): boolean {
@@ -90,7 +125,7 @@ export function reconcile(
   const relayout = relayoutBundle(existing);
   const pruned = pruneBundle(relayout.files);
   const { files, migrated } = migrateBundle(pruned.files, ctx);
-  const owned = ownedFiles(files);
+  const { files: owned, markerless } = ownedFiles(files);
 
   const irPaths = new Set(ir.concepts.map((concept) => concept.path));
   const tombstones: TombstoneEntry[] = [];
@@ -217,15 +252,26 @@ export function reconcile(
   // A human-annotated orphaned index is never deleted (GOAL-8.3): mirroring
   // relayout.ts's own precedent for a legacy kind index carrying human text,
   // it is rewritten with an empty generated region — dropping the stale,
-  // now-broken links — while `split.human` is preserved verbatim.
+  // now-broken links — while `split.human` is preserved verbatim. The same
+  // keep-alive applies when the directory isn't actually empty — a human's
+  // stray file left in it would otherwise become unreachable from the bundle's
+  // link graph, violating GOAL-7.4 (finding 2, #23 review).
+  //
+  // A marker-less orphaned index (`markerless`, finding 1) is never touched
+  // here at all: `hasHumanText(split.human)` is structurally always false for
+  // it (the whole file landed in `preamble`, not because it has no human
+  // content), so this pass cannot tell delete-safe from a hand-written page.
+  // Mirroring prune.ts's polarity for an unsplittable file, "can't tell" means
+  // "leave it alone" — no delete, no rewrite.
   for (const [path, split] of owned) {
     if (
       isIndexPath(path) &&
       !built.has(path) &&
       !acted.has(path) &&
-      split.parts.generated !== REDIRECT_REGION
+      split.parts.generated !== REDIRECT_REGION &&
+      !markerless.has(path)
     ) {
-      if (hasHumanText(split.human)) {
+      if (hasHumanText(split.human) || dirStillHasOtherFiles(path, files)) {
         // Already settled into its rewritten form (empty generated region) —
         // re-emitting here every run would break the "unchanged bundle is a
         // no-op" guarantee, even though the output would be identical.
@@ -235,6 +281,7 @@ export function reconcile(
             path,
             contents: assembleFile({ preamble: split.parts.preamble, generated: "" }, split.human),
           });
+          indexes += 1;
         }
       } else {
         actions.push({ kind: "delete", path });

@@ -618,4 +618,159 @@ describe("pruning spec-defined concepts", () => {
       plan.actions.some((action) => action.kind === "delete" && action.path === "index.md"),
     ).toBe(false);
   });
+
+  // Finding 1 (final whole-branch review, #23): a marker-less orphaned index is
+  // adopted by ownedFiles with its entire content synthesized into `preamble`
+  // and `human` forced to "" — so hasHumanText(split.human) is structurally
+  // always false for it, regardless of what the file actually contains. The
+  // orphaned-index pass must not treat that as "safe to delete"; it must leave
+  // a marker-less orphaned index alone entirely, mirroring prune.ts's
+  // splitFile-is-null-means-don't-touch polarity.
+  it("leaves a marker-less orphaned directory index untouched, even though it has no way to detect human text", () => {
+    const ir: SchemaIr = {
+      resource: "https://x.example/graphql",
+      origin: "sdl",
+      concepts: [
+        {
+          kind: "object",
+          name: "Product",
+          path: "types/Product.md",
+          description: null,
+          appliedDirectives: [],
+          interfaces: [],
+          fields: [],
+        },
+      ],
+    };
+    const legacyIndex = "# Directives\n\nHand-curated page, do not touch.\n";
+    const existing = new Map([
+      ["index.md", "# API interface\n"],
+      ["directives/index.md", legacyIndex],
+    ]);
+
+    const plan = reconcile(ir, existing, emitContext("0.2", "2026-08-03T00:00:00.000Z"));
+
+    expect(plan.actions.some((action) => action.path === "directives/index.md")).toBe(false);
+  });
+
+  // Finding 2: a directory pruned of all its owned concepts but still holding a
+  // human's stray file (no generated markers, not owned by graphql-okf) must
+  // keep its index — deleting it would strand the stray file, unreachable from
+  // the bundle's link graph, violating GOAL-7.4.
+  it("keeps a directory index alive when the directory still holds a human's stray file, even once its concepts are pruned", () => {
+    const ir: SchemaIr = {
+      resource: "https://x.example/graphql",
+      origin: "sdl",
+      concepts: [
+        {
+          kind: "object",
+          name: "Product",
+          path: "types/Product.md",
+          description: null,
+          appliedDirectives: [],
+          interfaces: [],
+          fields: [],
+        },
+      ],
+    };
+    const existing = new Map([
+      ["index.md", "# API interface\n"],
+      [
+        "directives/deprecated.md",
+        assembleFile(
+          { preamble: '---\ntitle: "deprecated"\n---\n\n', generated: "\n# deprecated\n\n" },
+          EMPTY_HUMAN,
+        ),
+      ],
+      [
+        "directives/index.md",
+        assembleFile(
+          {
+            preamble: "# Directives\n\n",
+            generated: "\n* [deprecated](/directives/deprecated.md)\n",
+          },
+          EMPTY_HUMAN,
+        ),
+      ],
+      ["directives/MY-NOTES.md", "# Team notes\n\nDon't remove this without asking.\n"],
+    ]);
+
+    const plan = reconcile(ir, existing, emitContext("0.2", "2026-08-03T00:00:00.000Z"));
+
+    expect(plan.migrated.pruned).toEqual(["directives/deprecated.md"]);
+    expect(
+      plan.actions.some(
+        (action) => action.kind === "delete" && action.path === "directives/index.md",
+      ),
+    ).toBe(false);
+
+    const action = plan.actions.find((entry) => entry.path === "directives/index.md");
+    expect(action).toBeDefined();
+    expect(action && isNotDelete(action) ? action.contents : "").not.toContain(
+      "/directives/deprecated.md",
+    );
+  });
+
+  // Finding 3: the orphaned-index pass's human-text-preserving rewrite pushes an
+  // `index`-kind action, exactly like the main loop's index rewrites — it must
+  // feed the same `indexes` counter, or a run whose only change is this rewrite
+  // is invisible in every reported channel.
+  it("counts the orphaned-index human-preserving rewrite in plan.indexes", () => {
+    const ir: SchemaIr = {
+      resource: "https://x.example/graphql",
+      origin: "sdl",
+      concepts: [
+        {
+          kind: "object",
+          name: "Product",
+          path: "types/Product.md",
+          description: null,
+          appliedDirectives: [],
+          interfaces: [],
+          fields: [],
+        },
+      ],
+    };
+    const humanNote = "\nOur team relies on the deprecated directive; do not remove lightly.\n";
+    const existing = new Map([
+      ["index.md", "# API interface\n"],
+      [
+        "directives/deprecated.md",
+        assembleFile(
+          { preamble: '---\ntitle: "deprecated"\n---\n\n', generated: "\n# deprecated\n\n" },
+          EMPTY_HUMAN,
+        ),
+      ],
+      [
+        "directives/index.md",
+        assembleFile(
+          {
+            preamble: "# Directives\n\n",
+            generated: "\n* [deprecated](/directives/deprecated.md)\n",
+          },
+          humanNote,
+        ),
+      ],
+    ]);
+
+    const plan = reconcile(ir, existing, emitContext("0.2", "2026-08-03T00:00:00.000Z"));
+
+    const rewrite = plan.actions.find((entry) => entry.path === "directives/index.md");
+    expect(rewrite).toBeDefined();
+    expect(rewrite?.kind).toBe("index");
+
+    // Isolate the orphan rewrite's contribution to `indexes` from whatever the
+    // root index's own main-loop action contributes (same `existing`/`ir` in
+    // both runs, so that contribution is identical): settle the bundle by hand
+    // — as the "does not re-emit" test does — so the orphan pass has nothing
+    // left to do, then diff the two counts. The only thing that can account
+    // for a difference is the orphan action itself.
+    const settled = new Map(existing);
+    settled.delete("directives/deprecated.md");
+    settled.set("directives/index.md", rewrite && isNotDelete(rewrite) ? rewrite.contents : "");
+    const settledPlan = reconcile(ir, settled, emitContext("0.2", "2026-08-03T01:00:00.000Z"));
+    expect(settledPlan.actions.some((action) => action.path === "directives/index.md")).toBe(false);
+
+    expect(plan.indexes).toBe(settledPlan.indexes + 1);
+  });
 });
