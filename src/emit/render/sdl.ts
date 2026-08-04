@@ -1,4 +1,19 @@
-import type { AppliedDirective, Deprecation, FieldNode, InputValueNode } from "../../model/ir.js";
+import type {
+  AppliedDirective,
+  ConceptNode,
+  Deprecation,
+  DirectiveDefinitionNode,
+  EnumTypeNode,
+  FieldNode,
+  InputObjectTypeNode,
+  InputValueNode,
+  InterfaceTypeNode,
+  ObjectTypeNode,
+  OperationNode,
+  ScalarTypeNode,
+  TypeRef,
+  UnionTypeNode,
+} from "../../model/ir.js";
 import { decoratedType } from "./links.js";
 
 /**
@@ -125,4 +140,120 @@ export function fieldLines(field: FieldNode, indent: string): string[] {
 /** One input-object field or one enum-adjacent input value, as a definition line. */
 export function inputValueLines(value: InputValueNode, indent: string): string[] {
   return [...docstringLines(value.description, indent), `${indent}${argumentText(value)}`];
+}
+
+const INDENT = "  ";
+
+function implementsClause(interfaces: readonly TypeRef[]): string {
+  return interfaces.length === 0
+    ? ""
+    : ` implements ${interfaces.map((ref) => ref.name).join(" & ")}`;
+}
+
+/**
+ * A definition with members. GraphQL has no empty braces, so a member-less type
+ * is its header alone — which is valid SDL and says exactly as much.
+ */
+function withBody(header: string, members: readonly string[]): string[] {
+  return members.length === 0 ? [header] : [`${header} {`, ...members, "}"];
+}
+
+function objectBlock(node: ObjectTypeNode | InterfaceTypeNode): string[] {
+  const keyword = node.kind === "object" ? "type" : "interface";
+  const header = `${keyword} ${node.name}${implementsClause(node.interfaces)}${appliedSdl(node.appliedDirectives)}`;
+  return withBody(
+    header,
+    node.fields.flatMap((field) => fieldLines(field, INDENT)),
+  );
+}
+
+function inputBlock(node: InputObjectTypeNode): string[] {
+  return withBody(
+    `input ${node.name}${appliedSdl(node.appliedDirectives)}`,
+    node.fields.flatMap((value) => inputValueLines(value, INDENT)),
+  );
+}
+
+function enumBlock(node: EnumTypeNode): string[] {
+  return withBody(
+    `enum ${node.name}${appliedSdl(node.appliedDirectives)}`,
+    node.values.flatMap((value) => [
+      ...docstringLines(value.description, INDENT),
+      `${INDENT}${value.name}${appliedSdl(value.appliedDirectives)}${deprecatedSdl(value.deprecation)}`,
+    ]),
+  );
+}
+
+function unionBlock(node: UnionTypeNode): string[] {
+  const header = `union ${node.name}${appliedSdl(node.appliedDirectives)}`;
+  return node.members.length === 0
+    ? [header]
+    : [`${header} = ${node.members.map((ref) => ref.name).join(" | ")}`];
+}
+
+/**
+ * `@specifiedBy` is printed from `specifiedByUrl` rather than from
+ * `appliedDirectives`, where `project.ts` deliberately does not put it.
+ */
+function scalarBlock(node: ScalarTypeNode): string[] {
+  const specifiedBy =
+    node.specifiedByUrl === null ? "" : ` @specifiedBy(url: ${sdlString(node.specifiedByUrl)})`;
+  return [`scalar ${node.name}${appliedSdl(node.appliedDirectives)}${specifiedBy}`];
+}
+
+/**
+ * An operation is one field of a root type, so it prints as a field definition —
+ * a valid SDL fragment rather than a standalone document. The root type name is
+ * not lost with it: the concept's `resource` anchor carries it.
+ */
+function operationBlock(node: OperationNode): string[] {
+  return fieldLines(
+    {
+      name: node.name,
+      description: null,
+      type: node.type,
+      args: node.args,
+      deprecation: node.deprecation,
+      appliedDirectives: node.appliedDirectives,
+    },
+    "",
+  );
+}
+
+/** Locations are already sorted by `project.ts`; this prints them as the IR holds them. */
+function directiveBlock(node: DirectiveDefinitionNode): string[] {
+  const args = argumentLines(node.args, "");
+  const repeatable = node.isRepeatable ? " repeatable" : "";
+  const on = ` on ${node.locations.join(" | ")}`;
+  const head = args.slice(0, -1);
+  const tail = args[args.length - 1] ?? "";
+
+  if (head.length === 0) {
+    return [`directive @${node.name}${tail}${repeatable}${on}`];
+  }
+  const [open, ...middle] = head;
+  return [`directive @${node.name}${open}`, ...middle, `${tail}${repeatable}${on}`];
+}
+
+/** The lines inside a concept file's fenced `graphql` block. */
+export function sdlBlock(concept: ConceptNode): readonly string[] {
+  switch (concept.kind) {
+    case "object":
+    case "interface":
+      return objectBlock(concept);
+    case "input":
+      return inputBlock(concept);
+    case "enum":
+      return enumBlock(concept);
+    case "union":
+      return unionBlock(concept);
+    case "scalar":
+      return scalarBlock(concept);
+    case "query":
+    case "mutation":
+    case "subscription":
+      return operationBlock(concept);
+    case "directive":
+      return directiveBlock(concept);
+  }
 }
