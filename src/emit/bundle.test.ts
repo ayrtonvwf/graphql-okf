@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { ObjectTypeNode, ScalarTypeNode, SchemaIr } from "../model/ir.js";
 import { project } from "../model/project.js";
 import type { LoadedSchema } from "../source/types.js";
-import { buildBundle, SPEC_DEFINED_NOTE } from "./bundle.js";
+import { buildBundle, SIGNATURE_NOTE, SPEC_DEFINED_NOTE } from "./bundle.js";
 import { emitContext } from "./context.js";
 import type { FileParts } from "./render/seam.js";
 import { assembleFile, EMPTY_HUMAN } from "./render/seam.js";
@@ -81,7 +81,7 @@ describe("buildBundle", () => {
   it("uses a structural fallback summary when a concept has no description", () => {
     const bundle = bundleFrom("type Query { hello: String }");
     expect(assembled(bundle, "queries/index.md")).toContain(
-      "* [hello](/queries/hello.md) - Query operation.",
+      "* [`hello: String`](/queries/hello.md) - Query operation.",
     );
   });
 
@@ -153,6 +153,92 @@ describe("buildBundle", () => {
         expect(bundle.has(resolved), `${fromPath} -> ${target} (${resolved})`).toBe(true);
       }
     }
+  });
+
+  it("carries an SDL signature as the link label on an operation row", () => {
+    const bundle = bundleFrom(`
+      input ProductFilter { term: String }
+      type Product { id: ID! }
+      type Query {
+        "Lists products."
+        products(filter: ProductFilter, first: Int = 20): [Product!]!
+      }
+    `);
+
+    expect(assembled(bundle, "queries/index.md")).toContain(
+      "* [`products(filter: ProductFilter, first: Int = 20): [Product!]!`](/queries/products.md) - Lists products.",
+    );
+  });
+
+  it("carries an SDL signature on a directive row", () => {
+    const bundle = bundleFrom(`
+      "Restricts a field."
+      directive @auth(requires: String! = "CUSTOMER") on FIELD_DEFINITION | OBJECT
+      type Query { hello: String }
+    `);
+
+    expect(assembled(bundle, "directives/index.md")).toContain(
+      '* [`@auth(requires: String! = "CUSTOMER") on FIELD_DEFINITION | OBJECT`](/directives/auth.md) - Restricts a field.',
+    );
+  });
+
+  it("marks a deprecated operation on its index row", () => {
+    const bundle = bundleFrom(`
+      type Query {
+        "An old field."
+        legacy: String @deprecated(reason: "Use hello.")
+        hello: String
+      }
+    `);
+
+    expect(assembled(bundle, "queries/index.md")).toContain(
+      "* [`legacy: String`](/queries/legacy.md) - **(deprecated)** An old field.",
+    );
+  });
+
+  it("puts the signature convention note on an index that carries signatures", () => {
+    const bundle = bundleFrom("type Query { hello: String }");
+
+    expect(assembled(bundle, "queries/index.md")).toContain(SIGNATURE_NOTE);
+  });
+
+  it("leaves the type index without a signature note and without signatures", () => {
+    const bundle = bundleFrom(`
+      "An ISO country."
+      type Country { code: ID! }
+      type Query { countries: [Country!]! }
+    `);
+
+    const types = assembled(bundle, "types/index.md");
+    expect(types).not.toContain(SIGNATURE_NOTE);
+    expect(types).toContain("* [Country](/types/Country.md) - An ISO country.");
+  });
+
+  it("keeps the root index note about spec-defined elements", () => {
+    const bundle = bundleFrom("type Query { hello: String }");
+
+    const root = assembled(bundle, "index.md");
+    expect(root).toContain(SPEC_DEFINED_NOTE);
+    expect(root).not.toContain(SIGNATURE_NOTE);
+  });
+
+  it("orders operation rows by name, not by rendered signature", () => {
+    const bundle = bundleFrom(`
+      type Query {
+        product(id: ID!): String
+        products: String
+        me: String
+      }
+    `);
+
+    const names = assembled(bundle, "queries/index.md")
+      .split("\n")
+      .filter((line) => line.startsWith("* ["))
+      .map((line) =>
+        line.slice(line.indexOf("](/queries/") + "](/queries/".length, line.indexOf(".md)")),
+      );
+
+    expect(names).toEqual(["me", "product", "products"]);
   });
 });
 

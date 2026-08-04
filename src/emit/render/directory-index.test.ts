@@ -173,4 +173,69 @@ describe("renderDirectoryIndex", () => {
       expect(parts.generated).toBe("\n* [Country](/types/Country.md) - A country.\n");
     });
   });
+
+  it("wraps the label in a code span when the entry is code", () => {
+    const parts = renderDirectoryIndex("Query operations", [
+      {
+        entries: [
+          {
+            label: "me: Customer",
+            code: true,
+            link: "/queries/me.md",
+            summary: "The current customer.",
+          },
+        ],
+      },
+    ]);
+
+    expect(parts.generated).toContain("* [`me: Customer`](/queries/me.md) - The current customer.");
+  });
+
+  it("marks a deprecated entry ahead of its summary", () => {
+    const parts = renderDirectoryIndex("Query operations", [
+      {
+        entries: [
+          {
+            label: "legacy: String",
+            code: true,
+            deprecated: true,
+            link: "/queries/legacy.md",
+            summary: "An old field.",
+          },
+        ],
+      },
+    ]);
+
+    expect(parts.generated).toContain(
+      "* [`legacy: String`](/queries/legacy.md) - **(deprecated)** An old field.",
+    );
+  });
+
+  it("marks a deprecated entry that has no summary, without a trailing space", () => {
+    const parts = renderDirectoryIndex("Query operations", [
+      {
+        entries: [
+          {
+            label: "legacy: String",
+            code: true,
+            deprecated: true,
+            link: "/queries/legacy.md",
+            summary: "",
+          },
+        ],
+      },
+    ]);
+
+    expect(parts.generated).toContain(
+      "* [`legacy: String`](/queries/legacy.md) - **(deprecated)**\n",
+    );
+  });
+
+  it("renders a plain entry exactly as before when neither flag is set", () => {
+    const parts = renderDirectoryIndex("Types", [
+      { entries: [{ label: "Country", link: "/types/Country.md", summary: "An ISO country." }] },
+    ]);
+
+    expect(parts.generated).toBe("\n* [Country](/types/Country.md) - An ISO country.\n");
+  });
 });

@@ -59,6 +59,19 @@ the convention is consistent and documented; the bundle's own root `index.md`
 states it too, so an agent traversing the tree reads it before it can notice
 anything missing.
 
+### Signatures in index files
+
+An index row for an operation or a directive carries its full GraphQL SDL
+signature as the link text:
+
+    * [`products(filter: ProductFilter, first: Int = 20): [Product!]!`](/queries/products.md) - Lists products, most recently created first.
+
+so "what does this take, and what does it return?" is answered by the directory
+listing rather than by opening the file. Type names inside a signature are not
+links — a Markdown code span cannot contain one, and linking each would roughly
+double the row; each names a concept file listed in `/types/index.md`. Each index
+that carries signatures says so in a note above its list.
+
 ## Milestones
 
 - **M1 — Frontend-only utility.** Describe the public GraphQL interface using only

@@ -4,6 +4,17 @@ export interface IndexEntry {
   readonly label: string;
   readonly link: string;
   readonly summary: string;
+  /**
+   * Wrap the label in a code span. Set for signature rows (issue #21), where the
+   * label is SDL rather than a bare name.
+   */
+  readonly code?: boolean;
+  /**
+   * Prefix the summary with a bold marker. Outside the code span deliberately:
+   * the label stays valid SDL, and the marker stays visible ahead of a long
+   * description. The deprecation reason stays in the concept file.
+   */
+  readonly deprecated?: boolean;
 }
 
 /**
@@ -30,9 +41,11 @@ export interface DirectoryIndexOptions {
 }
 
 function bullet(entry: IndexEntry): string {
-  return entry.summary === ""
-    ? `* [${entry.label}](${entry.link})`
-    : `* [${entry.label}](${entry.link}) - ${entry.summary}`;
+  const label = entry.code === true ? `\`${entry.label}\`` : entry.label;
+  const link = `* [${label}](${entry.link})`;
+  const summary =
+    entry.deprecated === true ? `**(deprecated)** ${entry.summary}`.trimEnd() : entry.summary;
+  return summary === "" ? link : `${link} - ${summary}`;
 }
 
 /**
