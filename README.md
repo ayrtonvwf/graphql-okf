@@ -40,6 +40,25 @@ frontmatter).
 The first beneficiary is anyone integrating against the API who wants an accurate,
 agent-readable map of what it exposes and how its types relate.
 
+### Built-in scalars and spec directives
+
+The bundle describes *your* schema, not GraphQL itself. The five built-in scalars
+(`Boolean`, `Float`, `ID`, `Int`, `String`) and the five spec directives
+(`@deprecated`, `@include`, `@oneOf`, `@skip`, `@specifiedBy`) therefore get no
+concept files, and references to them render as plain code — `` `ID!` `` rather
+than a link. Their meaning comes from the GraphQL specification, which every
+consumer of the bundle already has; a page restating it is bytes an agent pays
+for and a link inviting a turn spent re-reading what it knew.
+
+Everything schema-specific is unaffected: custom scalars keep their files
+(including their `@specifiedBy` URL), custom directives keep theirs, and an
+*applied* spec directive still appears — `PaymentInput` renders
+``Directives: `@oneOf`.`` — because which types carry it is a fact about your
+schema. `OKF §6.1` and this project's `GOAL-7.3` both allow the omission provided
+the convention is consistent and documented; the bundle's own root `index.md`
+states it too, so an agent traversing the tree reads it before it can notice
+anything missing.
+
 ## Milestones
 
 - **M1 — Frontend-only utility.** Describe the public GraphQL interface using only
@@ -211,6 +230,16 @@ untouched. The run records a single line in `log.md`:
     **Migrated**
 
     * OKF bundle format 0.1 → 0.2 (`timestamp` → `generated`) across 43 concepts.
+
+A bundle written before this convention has its built-in concept files removed on
+the next run — deleted outright rather than marked removed, since a tombstone is
+larger than the page it replaces. A file you have written into is never deleted:
+it keeps your text and is marked removed like any other retired concept. The run
+records the count:
+
+    **Migrated**
+
+    * Built-in scalars and spec directives: 10 concepts no longer emitted (GOAL-7.3).
 
 Migration is idempotent and resumable — a re-run is a byte-identical no-op, and
 an interrupted run is finished by the next one. The reverse is refused:

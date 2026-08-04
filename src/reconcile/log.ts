@@ -14,7 +14,8 @@ export function hasLoggableChanges(plan: BundlePlan): boolean {
       plan.changed.length +
       plan.removed.length +
       plan.migrated.frontmatter.length +
-      plan.migrated.relocated.length >
+      plan.migrated.relocated.length +
+      plan.migrated.pruned.length >
     0
   );
 }
@@ -47,6 +48,11 @@ function migrationGroup(plan: BundlePlan): string[] {
   if (plan.migrated.relocated.length > 0) {
     lines.push(
       `* Bundle layout: \`types/<kind>/\` flattened into \`types/\` across ${plan.migrated.relocated.length} concepts.`,
+    );
+  }
+  if (plan.migrated.pruned.length > 0) {
+    lines.push(
+      `* Built-in scalars and spec directives: ${plan.migrated.pruned.length} concepts no longer emitted (GOAL-7.3).`,
     );
   }
   return lines.length === 0 ? [] : ["**Migrated**", "", ...lines, ""];

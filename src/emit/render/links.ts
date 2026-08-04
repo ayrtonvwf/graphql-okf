@@ -24,5 +24,6 @@ export function bundleLink(toPath: string): string {
 }
 
 export function typeLink(ref: TypeRef): string {
-  return `[\`${decoratedType(ref)}\`](${bundleLink(ref.path)})`;
+  const decorated = `\`${decoratedType(ref)}\``;
+  return ref.path === null ? decorated : `[${decorated}](${bundleLink(ref.path)})`;
 }

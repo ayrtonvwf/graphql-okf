@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { emitContext } from "../src/emit/context.js";
+import { assembleFile, EMPTY_HUMAN, GENERATED_HINT, HUMAN_HINT } from "../src/emit/render/seam.js";
 import { readSchema, syncOkfBundle } from "../src/index.js";
 import { applyPlan } from "../src/reconcile/apply.js";
 import { reconcile } from "../src/reconcile/plan.js";
@@ -336,7 +337,7 @@ describe("migrating a bundle from the nested types layout", () => {
     expect(result.relocated.length).toBeGreaterThan(0);
 
     // A type that links to nothing still reached its new path — the sameContent trap.
-    expect(after.has("types/Boolean.md")).toBe(true);
+    expect(after.has("types/DateTime.md")).toBe(true);
 
     // Human text survived both moves.
     expect(after.get("types/Post.md")).toContain("Ping #catalog.");
@@ -397,5 +398,86 @@ describe("migrating a bundle from the nested types layout", () => {
 
     const after = await readTree(outDir);
     expect(after.get("types/objects/notes.md")).toBe("# My notes\n");
+  });
+});
+
+/** A spec-defined concept file as a pre-#23 release wrote it. */
+function builtInFile(title: string, kindLabel: string, human = EMPTY_HUMAN): string {
+  return assembleFile(
+    {
+      preamble: `---\ntype: ${JSON.stringify(kindLabel)}\ntitle: ${JSON.stringify(title)}\n---\n\n`,
+      generated: `\n${GENERATED_HINT}\n\n# ${title}\n\nSpecification prose.\n\n`,
+    },
+    human,
+  );
+}
+
+describe("a bundle written before spec-defined concepts were pruned", () => {
+  it("deletes them outright rather than tombstoning them", async () => {
+    const outDir = await freshBundle(BASE);
+    const tree = await readTree(outDir);
+    tree.set("types/ID.md", builtInFile("ID", "GraphQL Scalar Type"));
+    tree.set("directives/skip.md", builtInFile("skip", "GraphQL Directive"));
+    await writeTree(outDir, tree);
+
+    const result = await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir, now: T2 });
+
+    expect([...result.pruned].sort()).toEqual(["directives/skip.md", "types/ID.md"]);
+    expect(result.removed).toEqual([]);
+
+    const after = await readTree(outDir);
+    expect(after.has("types/ID.md")).toBe(false);
+    expect(after.has("directives/skip.md")).toBe(false);
+    expect(after.get("log.md")).toContain(
+      "* Built-in scalars and spec directives: 2 concepts no longer emitted (GOAL-7.3).",
+    );
+  });
+
+  it("finds the built-in under the pre-flatten layout too", async () => {
+    const outDir = await freshBundle(BASE);
+    const tree = await readTree(outDir);
+    tree.set("types/scalars/ID.md", builtInFile("ID", "GraphQL Scalar Type"));
+    await writeTree(outDir, tree);
+
+    const result = await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir, now: T2 });
+
+    expect([...result.pruned]).toEqual(["types/ID.md"]);
+
+    const after = await readTree(outDir);
+    expect(after.has("types/scalars/ID.md")).toBe(false);
+    expect(after.has("types/ID.md")).toBe(false);
+  });
+
+  it("keeps a built-in someone wrote into, as a tombstone", async () => {
+    const outDir = await freshBundle(BASE);
+    const tree = await readTree(outDir);
+    tree.set(
+      "types/ID.md",
+      builtInFile("ID", "GraphQL Scalar Type", `\n\n${HUMAN_HINT}\n\nWe mint UUIDv7 here.\n`),
+    );
+    await writeTree(outDir, tree);
+
+    const result = await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir, now: T2 });
+
+    expect(result.pruned).toEqual([]);
+    expect(result.removed).toEqual(["types/ID.md"]);
+
+    const survivor = (await readTree(outDir)).get("types/ID.md") ?? "";
+    expect(survivor).toContain("We mint UUIDv7 here.");
+    expect(survivor).toContain("**Removed.**");
+  });
+
+  it("is a byte-for-byte no-op on the next run", async () => {
+    const outDir = await freshBundle(BASE);
+    const tree = await readTree(outDir);
+    tree.set("types/ID.md", builtInFile("ID", "GraphQL Scalar Type"));
+    await writeTree(outDir, tree);
+    await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir, now: T2 });
+    const before = await readTree(outDir);
+
+    const result = await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir, now: T3 });
+
+    expect(result.pruned).toEqual([]);
+    expect(await readTree(outDir)).toEqual(before);
   });
 });

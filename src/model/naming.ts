@@ -81,6 +81,49 @@ export function elementId(element: ElementName): string {
 
 const RESERVED_BASENAMES = new Set(["index", "log"]);
 
+/**
+ * The elements GraphQL's own specification defines. `GOAL-7.3` lets us omit
+ * links to built-in scalars under a documented convention; issue #23 extends the
+ * same convention to the spec directives, for the same reason — both are prose
+ * every model already carries, and every link to one invites a consumer to spend
+ * a turn re-reading what it knew before it started.
+ *
+ * Matching on name is exact, not approximate: GraphQL forbids a schema from
+ * redefining a specified scalar or directive, so no custom element can ever carry
+ * one of these names in the matching kind. Names are case-sensitive, so a
+ * `type id` is a different element from the built-in `ID` and keeps its file.
+ */
+const SPEC_DEFINED_SCALARS = new Set(["Boolean", "Float", "ID", "Int", "String"]);
+const SPEC_DEFINED_DIRECTIVES = new Set(["deprecated", "include", "oneOf", "skip", "specifiedBy"]);
+
+/** Whether this element gets a concept file of its own. See the note above. */
+export function hasConceptFile(element: ElementName): boolean {
+  if (element.kind === "scalar") {
+    return !SPEC_DEFINED_SCALARS.has(element.name);
+  }
+  if (element.kind === "directive") {
+    return !SPEC_DEFINED_DIRECTIVES.has(element.name);
+  }
+  return true;
+}
+
+const SPEC_DEFINED_ELEMENTS: readonly ElementName[] = [
+  ...[...SPEC_DEFINED_SCALARS].map((name): ElementName => ({ kind: "scalar", name })),
+  ...[...SPEC_DEFINED_DIRECTIVES].map((name): ElementName => ({ kind: "directive", name })),
+];
+
+/**
+ * The paths spec-defined concepts occupied before issue #23, sorted. Derived by
+ * running the same two sets `hasConceptFile` consults through `resolvePaths`,
+ * rather than written out: these paths are a function of the current rule, so the
+ * prune pre-pass that consumes them cannot drift from the emitter's behaviour.
+ * (Contrast `relayout.ts`'s `LEGACY_TYPE_DIRS`, which is a historical fact about
+ * bundles on disk and must survive the naming scheme forgetting it.)
+ */
+export const SPEC_DEFINED_PATHS: readonly string[] = [
+  ...resolvePaths(SPEC_DEFINED_ELEMENTS).values(),
+].sort();
+
 function shortHash(name: string): string {
   return createHash("sha256").update(name, "utf8").digest("hex").slice(0, 8);
 }

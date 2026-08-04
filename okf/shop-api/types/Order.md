@@ -25,7 +25,7 @@ Implements [`Node`](/types/Node.md), [`Timestamped`](/types/Timestamped.md).
 | `createdAt` | [`DateTime!`](/types/DateTime.md) |  |
 | `currency` | [`Currency!`](/types/Currency.md) |  |
 | `customer` | [`Customer!`](/types/Customer.md) |  |
-| `id` | [`ID!`](/types/ID.md) |  |
+| `id` | `ID!` |  |
 | `lines` | [`[OrderLine!]!`](/types/OrderLine.md) |  |
 | `paidWith` | [`PaymentMethod`](/types/PaymentMethod.md) |  |
 | `shipTo` | [`Address!`](/types/Address.md) |  |

@@ -12,7 +12,6 @@ const scalar: ScalarTypeNode = {
   description: null,
   appliedDirectives: [],
   specifiedByUrl: null,
-  isBuiltIn: true,
 };
 
 describe("renderConcept", () => {

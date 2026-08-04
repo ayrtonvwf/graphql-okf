@@ -22,7 +22,7 @@ Repeatable.
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `name` | [`String!`](/types/String.md) |  |  |
+| `name` | `String!` |  |  |
 
 <!-- graphql-okf:generated:end -->
 

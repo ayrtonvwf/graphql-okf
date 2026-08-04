@@ -18,11 +18,11 @@ A postal address supplied by a client.
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `city` | [`String!`](/types/String.md) |  |  |
-| `country` | [`String!`](/types/String.md) |  |  |
-| `line1` | [`String!`](/types/String.md) |  |  |
-| `line2` | [`String`](/types/String.md) |  |  |
-| `postalCode` | [`String!`](/types/String.md) |  |  |
+| `city` | `String!` |  |  |
+| `country` | `String!` |  |  |
+| `line1` | `String!` |  |  |
+| `line2` | `String` |  |  |
+| `postalCode` | `String!` |  |  |
 
 <!-- graphql-okf:generated:end -->
 

@@ -3,7 +3,7 @@ type: "GraphQL Object Type"
 title: "Subdivision"
 resource: "https://countries.trevorblades.com/graphql#Subdivision"
 tags: ["graphql", "object"]
-generated: { by: "graphql-okf/0.1", at: "2026-08-03T21:36:02.273Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-04T00:52:49.068Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -15,9 +15,9 @@ generated: { by: "graphql-okf/0.1", at: "2026-08-03T21:36:02.273Z" }
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `code` | [`ID!`](/types/ID.md) |  |
-| `emoji` | [`String`](/types/String.md) |  |
-| `name` | [`String!`](/types/String.md) |  |
+| `code` | `ID!` |  |
+| `emoji` | `String` |  |
+| `name` | `String!` |  |
 
 <!-- graphql-okf:generated:end -->
 

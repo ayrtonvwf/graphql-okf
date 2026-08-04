@@ -18,11 +18,11 @@ Narrows a product listing. Every field is optional; omitted fields do not filter
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `inStockOnly` | [`Boolean`](/types/Boolean.md) | `false` |  |
-| `labels` | [`[String!]`](/types/String.md) | `[]` | Only products carrying all of these labels. |
-| `maxPriceCents` | [`Int`](/types/Int.md) |  |  |
-| `minPriceCents` | [`Int`](/types/Int.md) | `0` |  |
-| `nameContains` | [`String`](/types/String.md) | `""` | Case-insensitive substring match against the product name. |
+| `inStockOnly` | `Boolean` | `false` |  |
+| `labels` | `[String!]` | `[]` | Only products carrying all of these labels. |
+| `maxPriceCents` | `Int` |  |  |
+| `minPriceCents` | `Int` | `0` |  |
+| `nameContains` | `String` | `""` | Case-insensitive substring match against the product name. |
 | `visibleTo` | [`Role`](/types/Role.md) | `GUEST` | Only products a caller of this role may see. |
 
 <!-- graphql-okf:generated:end -->

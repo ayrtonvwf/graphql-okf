@@ -24,9 +24,9 @@ Implements [`Node`](/types/Node.md), [`Timestamped`](/types/Timestamped.md).
 | --- | --- | --- |
 | `createdAt` | [`DateTime!`](/types/DateTime.md) |  |
 | `defaultAddress` | [`Address`](/types/Address.md) | Where orders are shipped by default. |
-| `displayName` | [`String!`](/types/String.md) |  |
+| `displayName` | `String!` |  |
 | `email` | [`EmailAddress!`](/types/EmailAddress.md) | [`@auth`](/directives/auth.md)(requires: STAFF) |
-| `id` | [`ID!`](/types/ID.md) |  |
+| `id` | `ID!` |  |
 | `updatedAt` | [`DateTime`](/types/DateTime.md) |  |
 
 <!-- graphql-okf:generated:end -->

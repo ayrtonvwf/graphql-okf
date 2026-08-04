@@ -3,7 +3,7 @@ type: "GraphQL Object Type"
 title: "Country"
 resource: "https://countries.trevorblades.com/graphql#Country"
 tags: ["graphql", "object"]
-generated: { by: "graphql-okf/0.1", at: "2026-08-03T21:36:02.273Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-04T00:52:49.068Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -15,19 +15,19 @@ generated: { by: "graphql-okf/0.1", at: "2026-08-03T21:36:02.273Z" }
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `awsRegion` | [`String!`](/types/String.md) |  |
-| `capital` | [`String`](/types/String.md) |  |
-| `code` | [`ID!`](/types/ID.md) |  |
+| `awsRegion` | `String!` |  |
+| `capital` | `String` |  |
+| `code` | `ID!` |  |
 | `continent` | [`Continent!`](/types/Continent.md) |  |
-| `currencies` | [`[String!]!`](/types/String.md) |  |
-| `currency` | [`String`](/types/String.md) |  |
-| `emoji` | [`String!`](/types/String.md) |  |
-| `emojiU` | [`String!`](/types/String.md) |  |
+| `currencies` | `[String!]!` |  |
+| `currency` | `String` |  |
+| `emoji` | `String!` |  |
+| `emojiU` | `String!` |  |
 | `languages` | [`[Language!]!`](/types/Language.md) |  |
-| `name` | [`String!`](/types/String.md) |  |
-| `native` | [`String!`](/types/String.md) |  |
-| `phone` | [`String!`](/types/String.md) |  |
-| `phones` | [`[String!]!`](/types/String.md) |  |
+| `name` | `String!` |  |
+| `native` | `String!` |  |
+| `phone` | `String!` |  |
+| `phones` | `[String!]!` |  |
 | `states` | [`[State!]!`](/types/State.md) |  |
 | `subdivisions` | [`[Subdivision!]!`](/types/Subdivision.md) |  |
 
@@ -37,7 +37,7 @@ generated: { by: "graphql-okf/0.1", at: "2026-08-03T21:36:02.273Z" }
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `lang` | [`String`](/types/String.md) |  |  |
+| `lang` | `String` |  |  |
 
 <!-- graphql-okf:generated:end -->
 

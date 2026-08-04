@@ -26,7 +26,7 @@ describe("the v1 example schema", () => {
       resource: RESOURCE,
     });
 
-    expect(result.added).toHaveLength(43);
+    expect(result.added).toHaveLength(34);
     for (const path of [
       "types/Product.md",
       "types/Purchasable.md",
@@ -71,7 +71,7 @@ describe("reconciling v1 to v2", () => {
     ]);
     expect(result.removed).toEqual(["queries/searchProducts.md"]);
     expect(result.changed).toHaveLength(8);
-    expect(result.unchanged).toBe(34);
+    expect(result.unchanged).toBe(25);
   });
 });
 
@@ -92,7 +92,7 @@ describe("reconciling v2 to v3", () => {
     expect(result.added).toEqual([]);
     expect(result.removed).toEqual(["types/GiftCard.md"]);
     expect(result.changed).toHaveLength(5);
-    expect(result.unchanged).toBe(40);
+    expect(result.unchanged).toBe(31);
     expect(await readFile(join(outDir, "queries/searchProducts.md"), "utf8")).toBe(
       tombstoneAfterV2,
     );

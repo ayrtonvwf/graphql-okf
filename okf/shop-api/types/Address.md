@@ -18,11 +18,11 @@ A postal address.
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `city` | [`String!`](/types/String.md) |  |
-| `country` | [`String!`](/types/String.md) | An ISO-3166-1 alpha-2 country code. |
-| `line1` | [`String!`](/types/String.md) |  |
-| `line2` | [`String`](/types/String.md) |  |
-| `postalCode` | [`String!`](/types/String.md) |  |
+| `city` | `String!` |  |
+| `country` | `String!` | An ISO-3166-1 alpha-2 country code. |
+| `line1` | `String!` |  |
+| `line2` | `String` |  |
+| `postalCode` | `String!` |  |
 
 <!-- graphql-okf:generated:end -->
 

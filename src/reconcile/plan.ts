@@ -4,8 +4,9 @@ import { assembleFile, EMPTY_HUMAN, type FileParts } from "../emit/render/seam.j
 import type { SchemaIr } from "../model/ir.js";
 import { mergeFrontmatter, withoutProvenance } from "./frontmatter.js";
 import { migrateBundle } from "./migrate.js";
-import { isIndexPath, type SplitFile, splitFile } from "./parse.js";
-import { relayoutBundle } from "./relayout.js";
+import { hasHumanText, isIndexPath, type SplitFile, splitFile } from "./parse.js";
+import { pruneBundle } from "./prune.js";
+import { REDIRECT_REGION, relayoutBundle } from "./relayout.js";
 import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
 
 export interface ConceptChange {
@@ -48,7 +49,23 @@ export interface BundlePlan {
   readonly migrated: {
     readonly frontmatter: readonly string[];
     readonly relocated: readonly string[];
+    /** `pruned` — spec-defined concepts deleted because they are no longer emitted (#23). */
+    readonly pruned: readonly string[];
   };
+}
+
+interface OwnedFiles {
+  readonly files: Map<string, SplitFile>;
+  /**
+   * Index paths adopted by reserved name rather than by markers (a legacy or
+   * hand-written marker-less `index.md`). For these, `SplitFile.human` is
+   * forced to `""` by construction — the whole file landed in `preamble`
+   * because there is no generated-region boundary to split on — not because
+   * the file genuinely has no human content. Any pass that would delete or
+   * rewrite an orphaned index based on `hasHumanText` must treat a path in
+   * this set as "can't tell", not "safe to delete" (finding 1, #23 review).
+   */
+  readonly markerless: ReadonlySet<string>;
 }
 
 /**
@@ -56,8 +73,9 @@ export interface BundlePlan {
  * generated markers; `index.md` is owned by its reserved name, so a legacy
  * marker-less index is picked up and upgraded rather than mistaken for a stray.
  */
-function ownedFiles(existing: ReadonlyMap<string, string>): Map<string, SplitFile> {
+function ownedFiles(existing: ReadonlyMap<string, string>): OwnedFiles {
   const owned = new Map<string, SplitFile>();
+  const markerless = new Set<string>();
   for (const [path, text] of existing) {
     if (path === "log.md") {
       continue;
@@ -67,9 +85,29 @@ function ownedFiles(existing: ReadonlyMap<string, string>): Map<string, SplitFil
       owned.set(path, split);
     } else if (isIndexPath(path)) {
       owned.set(path, { parts: { preamble: text, generated: "" }, human: "" });
+      markerless.add(path);
     }
   }
-  return owned;
+  return { files: owned, markerless };
+}
+
+/**
+ * Whether `path`'s directory (on disk, before this run's own writes) still
+ * holds any file other than `path` itself — including in nested
+ * subdirectories, mirroring the physical `rmdir`-fails-if-non-empty check
+ * `apply.ts`'s `removeIfEmpty` performs. Used to decide whether an orphaned
+ * index's directory is genuinely empty or still anchors a human's stray file
+ * (finding 2, #23 review).
+ */
+function dirStillHasOtherFiles(path: string, files: ReadonlyMap<string, string>): boolean {
+  const slash = path.lastIndexOf("/");
+  const dir = slash === -1 ? "" : path.slice(0, slash + 1);
+  for (const other of files.keys()) {
+    if (other !== path && other.startsWith(dir)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function sameContent(rendered: FileParts, existing: FileParts): boolean {
@@ -85,8 +123,9 @@ export function reconcile(
   ctx: EmitContext,
 ): BundlePlan {
   const relayout = relayoutBundle(existing);
-  const { files, migrated } = migrateBundle(relayout.files, ctx);
-  const owned = ownedFiles(files);
+  const pruned = pruneBundle(relayout.files);
+  const { files, migrated } = migrateBundle(pruned.files, ctx);
+  const { files: owned, markerless } = ownedFiles(files);
 
   const irPaths = new Set(ir.concepts.map((concept) => concept.path));
   const tombstones: TombstoneEntry[] = [];
@@ -112,7 +151,9 @@ export function reconcile(
 
   const names = new Map(ir.concepts.map((concept) => [concept.path, concept.name]));
 
-  for (const [path, rendered] of buildBundle(ir, ctx, tombstones)) {
+  const built = buildBundle(ir, ctx, tombstones);
+
+  for (const [path, rendered] of built) {
     const current = owned.get(path);
     const index = isIndexPath(path);
 
@@ -200,7 +241,56 @@ export function reconcile(
     acted.add(redirect.path);
   }
 
-  for (const path of relayout.deletes) {
+  // A directory that loses its last concept (outright-deleted by prune, not
+  // tombstoned) is absent from `allDirs` in bundle.ts, so `built` never gets an
+  // entry for its index — `buildBundle` only emits an index for a directory that
+  // still has a live concept, tombstone, or child directory. That leaves the
+  // owned index on disk pointing at files that no longer exist. The root index
+  // is exempt: bundle.ts always seeds "." into `allDirs`, so it is always in
+  // `built` and never matches this check.
+  //
+  // A human-annotated orphaned index is never deleted (GOAL-8.3): mirroring
+  // relayout.ts's own precedent for a legacy kind index carrying human text,
+  // it is rewritten with an empty generated region — dropping the stale,
+  // now-broken links — while `split.human` is preserved verbatim. The same
+  // keep-alive applies when the directory isn't actually empty — a human's
+  // stray file left in it would otherwise become unreachable from the bundle's
+  // link graph, violating GOAL-7.4 (finding 2, #23 review).
+  //
+  // A marker-less orphaned index (`markerless`, finding 1) is never touched
+  // here at all: `hasHumanText(split.human)` is structurally always false for
+  // it (the whole file landed in `preamble`, not because it has no human
+  // content), so this pass cannot tell delete-safe from a hand-written page.
+  // Mirroring prune.ts's polarity for an unsplittable file, "can't tell" means
+  // "leave it alone" — no delete, no rewrite.
+  for (const [path, split] of owned) {
+    if (
+      isIndexPath(path) &&
+      !built.has(path) &&
+      !acted.has(path) &&
+      split.parts.generated !== REDIRECT_REGION &&
+      !markerless.has(path)
+    ) {
+      if (hasHumanText(split.human) || dirStillHasOtherFiles(path, files)) {
+        // Already settled into its rewritten form (empty generated region) —
+        // re-emitting here every run would break the "unchanged bundle is a
+        // no-op" guarantee, even though the output would be identical.
+        if (split.parts.generated !== "") {
+          actions.push({
+            kind: "index",
+            path,
+            contents: assembleFile({ preamble: split.parts.preamble, generated: "" }, split.human),
+          });
+          indexes += 1;
+        }
+      } else {
+        actions.push({ kind: "delete", path });
+      }
+      acted.add(path);
+    }
+  }
+
+  for (const path of [...relayout.deletes, ...pruned.pruned]) {
     actions.push({ kind: "delete", path });
   }
 
@@ -211,6 +301,10 @@ export function reconcile(
     removed,
     unchanged,
     indexes,
-    migrated: { frontmatter: migrated, relocated: relayout.moves.map((move) => move.to) },
+    migrated: {
+      frontmatter: migrated,
+      relocated: relayout.moves.map((move) => move.to),
+      pruned: pruned.pruned,
+    },
   };
 }

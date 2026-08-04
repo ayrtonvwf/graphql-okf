@@ -12,6 +12,7 @@ import { buildBundle } from "./emit/bundle.js";
 import { emitContext } from "./emit/context.js";
 import { assembleFile, EMPTY_HUMAN } from "./emit/render/seam.js";
 import { readSchema, syncOkfBundle } from "./index.js";
+import { SPEC_DEFINED_PATHS } from "./model/naming.js";
 
 const TIMESTAMP = "2026-07-25T00:00:00.000Z";
 
@@ -170,6 +171,14 @@ describe("OKF §9 conformance", () => {
     const nested = [...files.keys()].filter((path) => /^types\/[^/]+\//.test(path));
 
     expect(nested).toEqual([]);
+  });
+
+  it("emits no concept file for a spec-defined element", async () => {
+    const files = await bundleFor("examples/shop-api/v3.graphql");
+
+    for (const path of SPEC_DEFINED_PATHS) {
+      expect(files.has(path), `${path} should not be in the bundle`).toBe(false);
+    }
   });
 
   it("emits a top-level # Schema section the reference tooling can parse", async () => {

@@ -21,7 +21,7 @@ Replaces a customer's default shipping address.
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
 | `address` | [`AddressInput!`](/types/AddressInput.md) |  |  |
-| `customerId` | [`ID!`](/types/ID.md) |  |  |
+| `customerId` | `ID!` |  |  |
 
 <!-- graphql-okf:generated:end -->
 

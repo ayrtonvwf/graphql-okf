@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { ObjectTypeNode, ScalarTypeNode, SchemaIr } from "../model/ir.js";
 import { project } from "../model/project.js";
 import type { LoadedSchema } from "../source/types.js";
-import { buildBundle } from "./bundle.js";
+import { buildBundle, SPEC_DEFINED_NOTE } from "./bundle.js";
 import { emitContext } from "./context.js";
 import type { FileParts } from "./render/seam.js";
 import { assembleFile, EMPTY_HUMAN } from "./render/seam.js";
@@ -53,16 +53,18 @@ describe("buildBundle", () => {
   });
 
   it("lists child directories in the root index and concepts in a leaf index", () => {
-    const bundle = bundleFrom("type Query { hello: String }");
+    const bundle = bundleFrom("scalar Slug\ntype Query { hello: Slug }");
     expect(assembled(bundle, "index.md")).toContain("* [types/](/types/index.md)");
     expect(assembled(bundle, "index.md")).toContain("* [queries/](/queries/index.md)");
-    expect(assembled(bundle, "types/index.md")).toContain("* [String](/types/String.md)");
+    expect(assembled(bundle, "types/index.md")).toContain("* [Slug](/types/Slug.md)");
   });
 
   it("groups a directory index by kind when it holds more than one kind", () => {
     const bundle = bundleFrom(`
+      "An ISO 3166-1 alpha-2 code."
+      scalar CountryCode
       "An ISO country."
-      type Country { code: ID! }
+      type Country { code: CountryCode! }
       type Query { countries: [Country!]! }
     `);
 
@@ -72,7 +74,7 @@ describe("buildBundle", () => {
     );
     expect(assembled(bundle, "types/index.md")).toContain("## Scalar types");
     expect(assembled(bundle, "types/index.md")).toContain(
-      "* [ID](/types/ID.md) - The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache.",
+      "* [CountryCode](/types/CountryCode.md) - An ISO 3166-1 alpha-2 code.",
     );
   });
 
@@ -198,12 +200,11 @@ const MULTI_KIND_IR: SchemaIr = {
     } satisfies ObjectTypeNode,
     {
       kind: "scalar",
-      name: "ID",
-      path: "types/ID.md",
+      name: "Slug",
+      path: "types/Slug.md",
       description: null,
       appliedDirectives: [],
       specifiedByUrl: null,
-      isBuiltIn: true,
     } satisfies ScalarTypeNode,
   ],
 };
@@ -220,7 +221,7 @@ describe("an index for a directory holding more than one kind", () => {
         "",
         "## Scalar types",
         "",
-        "* [ID](/types/ID.md) - Scalar type.",
+        "* [Slug](/types/Slug.md) - Scalar type.",
       ].join("\n"),
     );
   });
@@ -239,5 +240,30 @@ describe("an index for a directory holding more than one kind", () => {
     const bundle = bundleFrom("type Query { hello: String }");
 
     expect(assembled(bundle, "queries/index.md")).not.toContain("## ");
+  });
+});
+
+describe("the built-in convention note", () => {
+  it("states the convention on the bundle root index only", () => {
+    const ir = {
+      resource: "https://x.example/graphql",
+      origin: "sdl" as const,
+      concepts: [
+        {
+          kind: "object" as const,
+          name: "Product",
+          path: "types/Product.md",
+          description: null,
+          appliedDirectives: [],
+          interfaces: [],
+          fields: [],
+        },
+      ],
+    };
+
+    const bundle = buildBundle(ir, emitContext("0.2", "2026-08-03T00:00:00.000Z"));
+
+    expect(bundle.get("index.md")?.generated).toContain(SPEC_DEFINED_NOTE);
+    expect(bundle.get("types/index.md")?.generated).not.toContain(SPEC_DEFINED_NOTE);
   });
 });

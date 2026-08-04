@@ -3,14 +3,16 @@ import type { ConceptKind } from "./naming.js";
 export type TypeRef = {
   readonly wrappers: readonly ("nonNull" | "list")[];
   readonly name: string;
-  readonly path: string;
+  /** Null for a spec-defined element, which has no concept file (issue #23). */
+  readonly path: string | null;
 };
 
 export type Deprecation = { readonly reason: string | null };
 
 export type AppliedDirective = {
   readonly name: string;
-  readonly path: string;
+  /** Null for a spec directive, which has no concept file (issue #23). */
+  readonly path: string | null;
   readonly args: readonly { readonly name: string; readonly value: string }[];
 };
 
@@ -78,7 +80,6 @@ export type InputObjectTypeNode = ConceptBase & {
 export type ScalarTypeNode = ConceptBase & {
   readonly kind: "scalar";
   readonly specifiedByUrl: string | null;
-  readonly isBuiltIn: boolean;
 };
 
 export type OperationNode = ConceptBase & {
@@ -95,7 +96,6 @@ export type DirectiveDefinitionNode = ConceptBase & {
   readonly locations: readonly string[];
   readonly args: readonly InputValueNode[];
   readonly isRepeatable: boolean;
-  readonly isBuiltIn: boolean;
 };
 
 export type ConceptNode =

@@ -4,6 +4,26 @@ type: Log
 
 # Update Log
 
+## 2026-08-04
+
+### 00:52:49.068Z
+
+**Migrated**
+
+* Built-in scalars and spec directives: 10 concepts no longer emitted (GOAL-7.3).
+
+**Changed**
+
+* [`continent`](/queries/continent.md)
+* [`country`](/queries/country.md)
+* [`language`](/queries/language.md)
+* [`Continent`](/types/Continent.md)
+* [`Country`](/types/Country.md)
+* [`Language`](/types/Language.md)
+* [`State`](/types/State.md)
+* [`StringQueryOperatorInput`](/types/StringQueryOperatorInput.md)
+* [`Subdivision`](/types/Subdivision.md)
+
 ## 2026-08-03
 
 ### 21:36:02.273Z

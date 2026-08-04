@@ -35,7 +35,9 @@ function appliedInline(applied: readonly AppliedDirective[], escapeArgs: boolean
           : `(${directive.args
               .map((arg) => `${arg.name}: ${escapeArgs ? cell(arg.value) : arg.value}`)
               .join(", ")})`;
-      return `[\`@${directive.name}\`](${bundleLink(directive.path)})${args}`;
+      const label = `\`@${directive.name}\``;
+      const head = directive.path === null ? label : `[${label}](${bundleLink(directive.path)})`;
+      return `${head}${args}`;
     })
     .join(", ");
 }
@@ -238,9 +240,8 @@ export function renderInputBody(node: InputObjectTypeNode): string {
 }
 
 export function renderScalarBody(node: ScalarTypeNode): string {
-  const note = node.isBuiltIn
-    ? "Built-in GraphQL scalar."
-    : node.specifiedByUrl === null
+  const note =
+    node.specifiedByUrl === null
       ? "Custom scalar."
       : `Custom scalar. Specified by <${node.specifiedByUrl}>.`;
   return [

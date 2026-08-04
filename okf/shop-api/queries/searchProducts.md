@@ -26,8 +26,8 @@ Full-text search across the catalog.
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `fuzzy` | [`Boolean`](/types/Boolean.md) | `false` | Ignored since the search backend migration. (deprecated: The backend always matches fuzzily.) |
-| `query` | [`String!`](/types/String.md) |  |  |
+| `fuzzy` | `Boolean` | `false` | Ignored since the search backend migration. (deprecated: The backend always matches fuzzily.) |
+| `query` | `String!` |  |  |
 
 <!-- graphql-okf:generated:end -->
 

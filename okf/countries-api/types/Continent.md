@@ -3,7 +3,7 @@ type: "GraphQL Object Type"
 title: "Continent"
 resource: "https://countries.trevorblades.com/graphql#Continent"
 tags: ["graphql", "object"]
-generated: { by: "graphql-okf/0.1", at: "2026-08-03T21:36:02.273Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-04T00:52:49.068Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
@@ -15,9 +15,9 @@ generated: { by: "graphql-okf/0.1", at: "2026-08-03T21:36:02.273Z" }
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `code` | [`ID!`](/types/ID.md) |  |
+| `code` | `ID!` |  |
 | `countries` | [`[Country!]!`](/types/Country.md) |  |
-| `name` | [`String!`](/types/String.md) |  |
+| `name` | `String!` |  |
 
 <!-- graphql-okf:generated:end -->
 

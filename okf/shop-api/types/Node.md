@@ -20,7 +20,7 @@ Implemented by [`Customer`](/types/Customer.md), [`Order`](/types/Order.md), [`P
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `id` | [`ID!`](/types/ID.md) | The globally unique identifier. |
+| `id` | `ID!` | The globally unique identifier. |
 
 <!-- graphql-okf:generated:end -->
 

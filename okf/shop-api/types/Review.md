@@ -21,11 +21,11 @@ Implements [`Node`](/types/Node.md), [`Timestamped`](/types/Timestamped.md).
 | Field | Type | Description |
 | --- | --- | --- |
 | `author` | [`Customer!`](/types/Customer.md) |  |
-| `body` | [`String`](/types/String.md) |  |
+| `body` | `String` |  |
 | `createdAt` | [`DateTime!`](/types/DateTime.md) |  |
-| `id` | [`ID!`](/types/ID.md) |  |
+| `id` | `ID!` |  |
 | `product` | [`Product!`](/types/Product.md) |  |
-| `rating` | [`Int!`](/types/Int.md) | A rating from 1 to 5 inclusive. |
+| `rating` | `Int!` | A rating from 1 to 5 inclusive. |
 | `updatedAt` | [`DateTime`](/types/DateTime.md) |  |
 
 <!-- graphql-okf:generated:end -->
