@@ -1,6 +1,6 @@
-import { assembleFile, HUMAN_HINT } from "../emit/render/seam.js";
+import { assembleFile } from "../emit/render/seam.js";
 import { GraphqlOkfError } from "../errors.js";
-import { isOwnedFile, splitFile } from "./parse.js";
+import { hasHumanText, isOwnedFile, splitFile } from "./parse.js";
 
 /**
  * The six directories type concepts used to live in, before issue #22 flattened
@@ -53,10 +53,6 @@ function legacyBasename(path: string): string | null {
     return basename.includes("/") ? null : basename;
   }
   return null;
-}
-
-function hasHumanText(human: string): boolean {
-  return human.replace(HUMAN_HINT, "").trim() !== "";
 }
 
 /**

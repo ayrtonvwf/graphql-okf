@@ -1,4 +1,4 @@
-import { type FileParts, GENERATED_END, GENERATED_START } from "../emit/render/seam.js";
+import { type FileParts, GENERATED_END, GENERATED_START, HUMAN_HINT } from "../emit/render/seam.js";
 import { GraphqlOkfError } from "../errors.js";
 
 export interface SplitFile {
@@ -68,4 +68,14 @@ export function splitFile(text: string, path: string): SplitFile | null {
     },
     human: text.slice(end + GENERATED_END.length),
   };
+}
+
+/**
+ * Whether a file's human region holds anything the machine did not put there.
+ * The single predicate every pre-pass uses to decide whether a file is safe to
+ * delete: a human's words are never destroyed, however the generated region
+ * looks (GOAL-8.3).
+ */
+export function hasHumanText(human: string): boolean {
+  return human.replace(HUMAN_HINT, "").trim() !== "";
 }
