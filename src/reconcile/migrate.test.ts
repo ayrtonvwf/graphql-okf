@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import { emitContext } from "../emit/context.js";
+import { assembleFile, EMPTY_HUMAN, LEGACY_HUMAN_HINT } from "../emit/render/seam.js";
 import { migrateBundle } from "./migrate.js";
 
 const T = "2026-07-27T09:00:00.000Z";
@@ -170,5 +171,67 @@ describe("migrateBundle", () => {
     );
 
     expect(result.migrated).toEqual(["types/Ant.md", "types/Zebra.md"]);
+  });
+
+  const LEGACY_EMPTY = `\n\n${LEGACY_HUMAN_HINT}\n`;
+
+  function legacyFile(human: string): string {
+    return assembleFile(
+      {
+        preamble: '---\ntype: "GraphQL Object Type"\ntitle: "Order"\n---\n\n',
+        generated: "\n# Order\n\n",
+      },
+      human,
+    );
+  }
+
+  it("strips the human hint from a pristine human region (issue #24)", () => {
+    const result = migrateBundle(
+      new Map([["types/Order.md", legacyFile(LEGACY_EMPTY)]]),
+      emitContext("0.2", "2026-08-04T00:00:00.000Z"),
+    );
+
+    expect(result.files.get("types/Order.md")).toBe(legacyFile(EMPTY_HUMAN));
+    expect(result.migrated).toEqual(["types/Order.md"]);
+  });
+
+  it("leaves a human region a human has written in completely alone", () => {
+    const written = `\n\n${LEGACY_HUMAN_HINT}\n\nOwned by the Catalog team.\n`;
+    const result = migrateBundle(
+      new Map([["types/Order.md", legacyFile(written)]]),
+      emitContext("0.2", "2026-08-04T00:00:00.000Z"),
+    );
+
+    expect(result.files.get("types/Order.md")).toBe(legacyFile(written));
+    expect(result.migrated).toEqual([]);
+  });
+
+  it("strips the hint under okf-version 0.1 too", () => {
+    const result = migrateBundle(
+      new Map([["types/Order.md", legacyFile(LEGACY_EMPTY)]]),
+      emitContext("0.1", "2026-08-04T00:00:00.000Z"),
+    );
+
+    expect(result.files.get("types/Order.md")).toBe(legacyFile(EMPTY_HUMAN));
+  });
+
+  it("is idempotent", () => {
+    const ctx = emitContext("0.2", "2026-08-04T00:00:00.000Z");
+    const once = migrateBundle(new Map([["types/Order.md", legacyFile(LEGACY_EMPTY)]]), ctx);
+    const twice = migrateBundle(once.files, ctx);
+
+    expect(twice.migrated).toEqual([]);
+    expect(twice.files.get("types/Order.md")).toBe(once.files.get("types/Order.md"));
+  });
+
+  it("does not touch a file graphql-okf does not own", () => {
+    const stray = `# Notes\n\n${LEGACY_HUMAN_HINT}\n`;
+    const result = migrateBundle(
+      new Map([["types/notes.md", stray]]),
+      emitContext("0.2", "2026-08-04T00:00:00.000Z"),
+    );
+
+    expect(result.files.get("types/notes.md")).toBe(stray);
+    expect(result.migrated).toEqual([]);
   });
 });
