@@ -1,27 +1,9 @@
-import type { DirectiveDefinitionNode, InputValueNode, OperationNode } from "../../model/ir.js";
+import type { DirectiveDefinitionNode, OperationNode } from "../../model/ir.js";
 import { decoratedType } from "./links.js";
-
-/**
- * The SDL argument list. Empty parentheses are not SDL, so an element with no
- * arguments renders as a bare `name: Type`. `decoratedType` rather than
- * `typeLink`: a signature is a code span, and a Markdown code span cannot hold a
- * link (see the issue #21 design).
- */
-function argumentList(args: readonly InputValueNode[]): string {
-  if (args.length === 0) {
-    return "";
-  }
-  const rendered = args.map((arg) => {
-    const type = decoratedType(arg.type);
-    return arg.defaultValue === null
-      ? `${arg.name}: ${type}`
-      : `${arg.name}: ${type} = ${arg.defaultValue}`;
-  });
-  return `(${rendered.join(", ")})`;
-}
+import { inlineArgumentList } from "./sdl.js";
 
 export function operationSignature(node: OperationNode): string {
-  return `${node.name}${argumentList(node.args)}: ${decoratedType(node.type)}`;
+  return `${node.name}${inlineArgumentList(node.args)}: ${decoratedType(node.type)}`;
 }
 
 /**
@@ -31,5 +13,5 @@ export function operationSignature(node: OperationNode): string {
  */
 export function directiveSignature(node: DirectiveDefinitionNode): string {
   const repeatable = node.isRepeatable ? " repeatable" : "";
-  return `@${node.name}${argumentList(node.args)}${repeatable} on ${node.locations.join(" | ")}`;
+  return `@${node.name}${inlineArgumentList(node.args)}${repeatable} on ${node.locations.join(" | ")}`;
 }
