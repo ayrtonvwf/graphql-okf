@@ -65,6 +65,16 @@ export const SPEC_DEFINED_NOTE =
   "they are defined by the GraphQL specification and appear as plain code, not links.";
 
 /**
+ * The generated-region contract, stated once (issue #24). It used to be repeated
+ * as an HTML comment inside every file, which spent a fifth of a small concept
+ * file restating a rule nothing parses. The bundle root is where a consumer who
+ * has only the bundle will look for it.
+ */
+export const SEAM_NOTE =
+  "Content between the `graphql-okf:generated` markers is rewritten on every run: " +
+  "do not edit inside it. Anything below the end marker is yours and is preserved.";
+
+/**
  * `GOAL-7.3`'s "documented convention", applied to signatures. It sits on every
  * index that carries one rather than only on the root: an agent frequently enters
  * at `queries/index.md` without passing through the root, and a convention it
@@ -237,13 +247,13 @@ export function buildBundle(
             `resource: ${JSON.stringify(ir.resource)}`,
           ]
         : undefined;
-    const note =
+    const notes =
       dir === "."
-        ? SPEC_DEFINED_NOTE
+        ? [SPEC_DEFINED_NOTE, SEAM_NOTE]
         : concepts.some((concept) => signatureOf(concept) !== null)
-          ? SIGNATURE_NOTE
+          ? [SIGNATURE_NOTE]
           : undefined;
-    bundle.set(indexPath, renderDirectoryIndex(title, sections, { frontmatter, note }));
+    bundle.set(indexPath, renderDirectoryIndex(title, sections, { frontmatter, notes }));
   }
 
   return bundle;

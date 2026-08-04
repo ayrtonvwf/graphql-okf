@@ -154,7 +154,7 @@ describe("renderDirectoryIndex", () => {
       const parts = renderDirectoryIndex(
         "API interface",
         [{ entries: [{ label: "types/", link: "/types/index.md", summary: "Types" }] }],
-        { frontmatter: ['okf_version: "0.2"'], note: "Built-ins have no concept files." },
+        { frontmatter: ['okf_version: "0.2"'], notes: ["Built-ins have no concept files."] },
       );
 
       expect(parts.preamble).toBe('---\nokf_version: "0.2"\n---\n\n# API interface\n\n');
@@ -237,5 +237,15 @@ describe("renderDirectoryIndex", () => {
     ]);
 
     expect(parts.generated).toBe("\n* [Country](/types/Country.md) - An ISO country.\n");
+  });
+
+  it("renders each note as its own paragraph above the bullets", () => {
+    const parts = renderDirectoryIndex(
+      "Types",
+      [{ entries: [{ label: "A", link: "/types/A.md", summary: "An A." }] }],
+      { notes: ["First note.", "Second note."] },
+    );
+
+    expect(parts.generated).toBe("\nFirst note.\n\nSecond note.\n\n* [A](/types/A.md) - An A.\n");
   });
 });

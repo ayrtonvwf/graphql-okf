@@ -72,6 +72,25 @@ links — a Markdown code span cannot contain one, and linking each would roughl
 double the row; each names a concept file listed in `/types/index.md`. Each index
 that carries signatures says so in a note above its list.
 
+### The generated region
+
+Every file graphql-okf owns is split by two markers:
+
+    <!-- graphql-okf:generated:start -->
+    ...regenerated from the schema on every run...
+    <!-- graphql-okf:generated:end -->
+    ...yours, preserved forever...
+
+Everything between the markers is rewritten on each run — edit it and your edit
+is gone next sync. Everything below the end marker is human-authored and is
+never touched (`GOAL-8.3`), which is where notes, ownership, and links to
+internal docs belong.
+
+Bundles written before this rule was hoisted out of the files repeated it as an
+HTML comment in every file. Running a current release strips that comment from
+files whose human region is otherwise empty, and leaves it alone in any file a
+human has written in.
+
 ## Milestones
 
 - **M1 — Frontend-only utility.** Describe the public GraphQL interface using only
