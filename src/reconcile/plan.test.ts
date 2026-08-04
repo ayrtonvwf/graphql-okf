@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildBundle } from "../emit/bundle.js";
 import { emitContext } from "../emit/context.js";
-import { assembleFile, EMPTY_HUMAN, HUMAN_HINT } from "../emit/render/seam.js";
+import { assembleFile, EMPTY_HUMAN, LEGACY_HUMAN_HINT } from "../emit/render/seam.js";
 import type { SchemaIr } from "../model/ir.js";
 import { type FileAction, reconcile } from "./plan.js";
 
@@ -396,7 +396,7 @@ describe("reconcile migrating a legacy-layout bundle", () => {
             preamble: "# Object types\n\n",
             generated: "\n* [Country](/types/objects/Country.md)\n",
           },
-          `\n\n${HUMAN_HINT}\nSee ADR-14.\n`,
+          `\n\n${LEGACY_HUMAN_HINT}\nSee ADR-14.\n`,
         ),
       ],
     ]);

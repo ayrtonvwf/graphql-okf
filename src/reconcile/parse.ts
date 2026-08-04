@@ -1,4 +1,9 @@
-import { type FileParts, GENERATED_END, GENERATED_START, HUMAN_HINT } from "../emit/render/seam.js";
+import {
+  type FileParts,
+  GENERATED_END,
+  GENERATED_START,
+  LEGACY_HUMAN_HINT,
+} from "../emit/render/seam.js";
 import { GraphqlOkfError } from "../errors.js";
 
 export interface SplitFile {
@@ -77,5 +82,5 @@ export function splitFile(text: string, path: string): SplitFile | null {
  * looks (GOAL-8.3).
  */
 export function hasHumanText(human: string): boolean {
-  return human.replace(HUMAN_HINT, "").trim() !== "";
+  return human.replace(LEGACY_HUMAN_HINT, "").trim() !== "";
 }

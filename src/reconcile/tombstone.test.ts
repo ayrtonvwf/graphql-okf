@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import { emitContext } from "../emit/context.js";
-import { GENERATED_HINT } from "../emit/render/seam.js";
+import { LEGACY_GENERATED_HINT } from "../emit/render/seam.js";
 import { splitFile } from "./parse.js";
 import { isTombstoned, renderTombstone, titleOf } from "./tombstone.js";
 
@@ -27,7 +27,7 @@ const existingConcept = [
 ].join("\n");
 
 const live = split(
-  `---\ntype: object\ntitle: "LegacyOrder"\nresource: "x"\ntags: [graphql, object]\ntimestamp: 2026-07-01T10:00:00.000Z\n---\n\n<!-- graphql-okf:generated:start -->\n${GENERATED_HINT}\n\n# LegacyOrder\n\n## Fields\n\n- **\`id\`**: \`ID!\`\n\n<!-- graphql-okf:generated:end -->\n\nour notes\n`,
+  `---\ntype: object\ntitle: "LegacyOrder"\nresource: "x"\ntags: [graphql, object]\ntimestamp: 2026-07-01T10:00:00.000Z\n---\n\n<!-- graphql-okf:generated:start -->\n${LEGACY_GENERATED_HINT}\n\n# LegacyOrder\n\n## Fields\n\n- **\`id\`**: \`ID!\`\n\n<!-- graphql-okf:generated:end -->\n\nour notes\n`,
 );
 
 describe("titleOf", () => {
@@ -87,7 +87,7 @@ describe("renderTombstone", () => {
   });
 
   it("drops the regenerate-me hint, which no longer applies", () => {
-    expect(parts.generated).not.toContain(GENERATED_HINT);
+    expect(parts.generated).not.toContain(LEGACY_GENERATED_HINT);
   });
 
   it("does not nest the preserved H1 under a lower-level heading", () => {

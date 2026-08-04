@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assembleFile, EMPTY_HUMAN, GENERATED_END, GENERATED_START, HUMAN_HINT } from "./seam.js";
+import { assembleFile, EMPTY_HUMAN, GENERATED_END, GENERATED_START } from "./seam.js";
 
 describe("assembleFile", () => {
   it("concatenates preamble, markers, generated content, and the human region", () => {
@@ -8,7 +8,7 @@ describe("assembleFile", () => {
     expect(out).toBe(`# Title\n\n${GENERATED_START}\nbody\n${GENERATED_END}\n\ntrailing\n`);
   });
 
-  it("uses the human hint as the starting human region for a fresh file", () => {
-    expect(EMPTY_HUMAN).toBe(`\n\n${HUMAN_HINT}\n`);
+  it("starts a fresh file's human region empty (issue #24)", () => {
+    expect(EMPTY_HUMAN).toBe("\n");
   });
 });

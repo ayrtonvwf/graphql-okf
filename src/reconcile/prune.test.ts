@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { assembleFile, EMPTY_HUMAN, GENERATED_HINT, HUMAN_HINT } from "../emit/render/seam.js";
+import {
+  assembleFile,
+  EMPTY_HUMAN,
+  LEGACY_GENERATED_HINT,
+  LEGACY_HUMAN_HINT,
+} from "../emit/render/seam.js";
 import { pruneBundle } from "./prune.js";
 
 /** A spec-defined concept file as a pre-#23 release wrote it. */
@@ -7,7 +12,7 @@ function builtInFile(title: string, human = EMPTY_HUMAN): string {
   return assembleFile(
     {
       preamble: `---\ntype: "GraphQL Scalar Type"\ntitle: ${JSON.stringify(title)}\n---\n\n`,
-      generated: `\n${GENERATED_HINT}\n\n# ${title}\n\nBuilt-in GraphQL scalar.\n\n`,
+      generated: `\n${LEGACY_GENERATED_HINT}\n\n# ${title}\n\nBuilt-in GraphQL scalar.\n\n`,
     },
     human,
   );
@@ -39,7 +44,7 @@ describe("pruneBundle", () => {
 
   it("keeps a file carrying human-authored text", () => {
     const existing = new Map([
-      ["types/ID.md", builtInFile("ID", `\n\n${HUMAN_HINT}\n\nWe mint these as UUIDv7.\n`)],
+      ["types/ID.md", builtInFile("ID", `\n\n${LEGACY_HUMAN_HINT}\n\nWe mint these as UUIDv7.\n`)],
     ]);
 
     const result = pruneBundle(existing);
