@@ -138,7 +138,7 @@ export function fieldLines(field: FieldNode, indent: string): string[] {
 }
 
 /** One input-object field or one enum-adjacent input value, as a definition line. */
-export function inputValueLines(value: InputValueNode, indent: string): string[] {
+function inputValueLines(value: InputValueNode, indent: string): string[] {
   return [...docstringLines(value.description, indent), `${indent}${argumentText(value)}`];
 }
 
