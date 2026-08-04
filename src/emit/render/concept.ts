@@ -2,7 +2,7 @@ import type { ConceptNode } from "../../model/ir.js";
 import type { EmitContext } from "../context.js";
 import { renderBody } from "./body.js";
 import { renderFrontmatter } from "./frontmatter.js";
-import { assembleFile, EMPTY_HUMAN, type FileParts, GENERATED_HINT } from "./seam.js";
+import { assembleFile, EMPTY_HUMAN, type FileParts } from "./seam.js";
 
 export function renderConceptParts(
   concept: ConceptNode,
@@ -11,7 +11,7 @@ export function renderConceptParts(
 ): FileParts {
   return {
     preamble: `${renderFrontmatter(concept, resource, ctx)}\n`,
-    generated: `\n${GENERATED_HINT}\n\n${renderBody(concept).trimEnd()}\n\n`,
+    generated: `\n${renderBody(concept).trimEnd()}\n\n`,
   };
 }
 

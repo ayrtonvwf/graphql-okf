@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { ObjectTypeNode, ScalarTypeNode, SchemaIr } from "../model/ir.js";
 import { project } from "../model/project.js";
 import type { LoadedSchema } from "../source/types.js";
-import { buildBundle, SIGNATURE_NOTE, SPEC_DEFINED_NOTE } from "./bundle.js";
+import { buildBundle, SEAM_NOTE, SIGNATURE_NOTE, SPEC_DEFINED_NOTE } from "./bundle.js";
 import { emitContext } from "./context.js";
 import type { FileParts } from "./render/seam.js";
 import { assembleFile, EMPTY_HUMAN } from "./render/seam.js";
@@ -330,26 +330,44 @@ describe("an index for a directory holding more than one kind", () => {
 });
 
 describe("the built-in convention note", () => {
-  it("states the convention on the bundle root index only", () => {
-    const ir = {
-      resource: "https://x.example/graphql",
-      origin: "sdl" as const,
-      concepts: [
-        {
-          kind: "object" as const,
-          name: "Product",
-          path: "types/Product.md",
-          description: null,
-          appliedDirectives: [],
-          interfaces: [],
-          fields: [],
-        },
-      ],
-    };
+  const ir = {
+    resource: "https://x.example/graphql",
+    origin: "sdl" as const,
+    concepts: [
+      {
+        kind: "object" as const,
+        name: "Product",
+        path: "types/Product.md",
+        description: null,
+        appliedDirectives: [],
+        interfaces: [],
+        fields: [],
+      },
+    ],
+  };
 
+  it("states the convention on the bundle root index only", () => {
     const bundle = buildBundle(ir, emitContext("0.2", "2026-08-03T00:00:00.000Z"));
 
     expect(bundle.get("index.md")?.generated).toContain(SPEC_DEFINED_NOTE);
     expect(bundle.get("types/index.md")?.generated).not.toContain(SPEC_DEFINED_NOTE);
+  });
+
+  it("puts the generated-region convention on the bundle root index (issue #24)", () => {
+    const bundle = buildBundle(ir, emitContext("0.2", TS));
+    const root = bundle.get("index.md");
+
+    expect(root?.generated).toContain(SEAM_NOTE);
+    expect(root?.generated).toContain(SPEC_DEFINED_NOTE);
+  });
+
+  it("puts it on the root index only", () => {
+    const bundle = buildBundle(ir, emitContext("0.2", TS));
+
+    for (const [path, parts] of bundle) {
+      if (path !== "index.md") {
+        expect(parts.generated, `${path} should not repeat the seam note`).not.toContain(SEAM_NOTE);
+      }
+    }
   });
 });

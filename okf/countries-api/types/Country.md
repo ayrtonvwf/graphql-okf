@@ -3,42 +3,34 @@ type: "GraphQL Object Type"
 title: "Country"
 resource: "https://countries.trevorblades.com/graphql#Country"
 tags: ["graphql", "object"]
-generated: { by: "graphql-okf/0.1", at: "2026-08-04T00:52:49.068Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-04T17:21:04.374Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
-<!-- Regenerated on each run. Do not edit inside this block; edits below the end marker are preserved. -->
-
 # Country
 
 # Schema
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `awsRegion` | `String!` |  |
-| `capital` | `String` |  |
-| `code` | `ID!` |  |
-| `continent` | [`Continent!`](/types/Continent.md) |  |
-| `currencies` | `[String!]!` |  |
-| `currency` | `String` |  |
-| `emoji` | `String!` |  |
-| `emojiU` | `String!` |  |
-| `languages` | [`[Language!]!`](/types/Language.md) |  |
-| `name` | `String!` |  |
-| `native` | `String!` |  |
-| `phone` | `String!` |  |
-| `phones` | `[String!]!` |  |
-| `states` | [`[State!]!`](/types/State.md) |  |
-| `subdivisions` | [`[Subdivision!]!`](/types/Subdivision.md) |  |
+```graphql
+type Country {
+  awsRegion: String!
+  capital: String
+  code: ID!
+  continent: Continent!
+  currencies: [String!]!
+  currency: String
+  emoji: String!
+  emojiU: String!
+  languages: [Language!]!
+  name(lang: String): String!
+  native: String!
+  phone: String!
+  phones: [String!]!
+  states: [State!]!
+  subdivisions: [Subdivision!]!
+}
+```
 
-## Arguments
-
-### `name`
-
-| Argument | Type | Default | Description |
-| --- | --- | --- | --- |
-| `lang` | `String` |  |  |
+References: [`Continent`](/types/Continent.md), [`Language`](/types/Language.md), [`State`](/types/State.md), [`Subdivision`](/types/Subdivision.md).
 
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

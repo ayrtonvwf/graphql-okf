@@ -43,14 +43,16 @@ export interface BundlePlan {
    * Whole-bundle format conversions this run performed. Reported as counts in
    * log.md, not lists: naming five thousand paths is noise.
    *
-   * `frontmatter` — concepts converted from OKF v0.1 to v0.2.
-   * `relocated`   — new paths of concepts moved into the flattened `types/`.
+   * `frontmatter`  — concepts converted from OKF v0.1 to v0.2.
+   * `relocated`    — new paths of concepts moved into the flattened `types/`.
+   * `hintStripped` — concepts whose legacy human-region hint was removed (#24).
    */
   readonly migrated: {
     readonly frontmatter: readonly string[];
     readonly relocated: readonly string[];
     /** `pruned` — spec-defined concepts deleted because they are no longer emitted (#23). */
     readonly pruned: readonly string[];
+    readonly hintStripped: readonly string[];
   };
 }
 
@@ -124,7 +126,7 @@ export function reconcile(
 ): BundlePlan {
   const relayout = relayoutBundle(existing);
   const pruned = pruneBundle(relayout.files);
-  const { files, migrated } = migrateBundle(pruned.files, ctx);
+  const { files, migrated, frontmatterMigrated, hintStripped } = migrateBundle(pruned.files, ctx);
   const { files: owned, markerless } = ownedFiles(files);
 
   const irPaths = new Set(ir.concepts.map((concept) => concept.path));
@@ -302,9 +304,10 @@ export function reconcile(
     unchanged,
     indexes,
     migrated: {
-      frontmatter: migrated,
+      frontmatter: frontmatterMigrated,
       relocated: relayout.moves.map((move) => move.to),
       pruned: pruned.pruned,
+      hintStripped,
     },
   };
 }

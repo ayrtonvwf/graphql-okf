@@ -10,5 +10,3 @@ Signatures are GraphQL SDL. A type name in a signature is a concept file at `/ty
 * [`products(filter: ProductFilter, first: Int = 20): [Product!]!`](/queries/products.md) - Lists products, most recently created first.
 * [searchProducts](/queries/searchProducts.md) - (removed)
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

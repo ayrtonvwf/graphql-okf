@@ -1,6 +1,7 @@
 import type { EmitContext } from "../emit/context.js";
+import { assembleFile, EMPTY_HUMAN, LEGACY_HUMAN_HINT } from "../emit/render/seam.js";
 import { frontmatterValue, replaceEntry } from "./frontmatter.js";
-import { isOwnedFile } from "./parse.js";
+import { isOwnedFile, splitFile } from "./parse.js";
 
 const LOG_FILE = "log.md";
 const REMOVED = "removed";
@@ -11,6 +12,10 @@ export interface MigrationResult {
   readonly files: ReadonlyMap<string, string>;
   /** Paths this pass rewrote, sorted — the plan's action order must not depend on map order. */
   readonly migrated: readonly string[];
+  /** The subset of `migrated` whose provenance or tombstone key was converted (v0.1 -> v0.2). */
+  readonly frontmatterMigrated: readonly string[];
+  /** The subset of `migrated` whose legacy human hint was stripped (#24). Overlaps the above. */
+  readonly hintStripped: readonly string[];
 }
 
 function unquote(raw: string): string {
@@ -60,24 +65,66 @@ function migrateTombstoneKey(text: string): string | null {
   return replaceEntry(text, LEGACY_TOMBSTONE_KEY, `${TOMBSTONE_KEY}: "${REMOVED}"`);
 }
 
-/** Runs both v0.1 → v0.2 conversions for one file; either may fire independently. */
-function migrateConcept(text: string, ctx: EmitContext): string | null {
+/** The human region the emitter wrote at file creation before issue #24. */
+const LEGACY_EMPTY_HUMAN = `\n\n${LEGACY_HUMAN_HINT}\n`;
+
+/**
+ * Issue #24 stopped emitting the human-region hint, but an existing bundle's copy
+ * sits inside the region the reconciler must never rewrite (GOAL-8.3). The
+ * exception is made safe by being unable to fire on anything a human wrote: the
+ * whole region must be byte-identical to what the emitter itself put there at
+ * creation. A region with so much as a blank line added is left alone.
+ */
+function migrateHumanHint(text: string, path: string): string | null {
+  const split = splitFile(text, path);
+  if (split === null || split.human !== LEGACY_EMPTY_HUMAN) {
+    return null;
+  }
+  return assembleFile(split.parts, EMPTY_HUMAN);
+}
+
+interface ConceptMigration {
+  readonly text: string;
+  /** Whether provenance or the tombstone key changed, so the caller can log it separately. */
+  readonly frontmatterMigrated: boolean;
+  /** Whether this file's hint strip fired, so the caller can log it separately. */
+  readonly hintStripped: boolean;
+}
+
+/**
+ * Every conversion for one file. The v0.1 -> v0.2 pair is version-gated; the
+ * hint strip is not, because the hint has nothing to do with the OKF version.
+ * The two are tracked separately (not just as one `changed` bit) so the log can
+ * describe what actually happened rather than always naming the v0.1 -> v0.2
+ * conversion, which a hint-only strip never performs.
+ */
+function migrateConcept(text: string, path: string, ctx: EmitContext): ConceptMigration | null {
   let current = text;
-  let changed = false;
+  let frontmatterMigrated = false;
 
-  const withProvenance = migrateProvenance(current, ctx);
-  if (withProvenance !== null) {
-    current = withProvenance;
-    changed = true;
+  if (ctx.okfVersion === "0.2") {
+    const withProvenance = migrateProvenance(current, ctx);
+    if (withProvenance !== null) {
+      current = withProvenance;
+      frontmatterMigrated = true;
+    }
+
+    const withTombstoneKey = migrateTombstoneKey(current);
+    if (withTombstoneKey !== null) {
+      current = withTombstoneKey;
+      frontmatterMigrated = true;
+    }
   }
 
-  const withTombstoneKey = migrateTombstoneKey(current);
-  if (withTombstoneKey !== null) {
-    current = withTombstoneKey;
-    changed = true;
+  const withoutHint = migrateHumanHint(current, path);
+  const hintStripped = withoutHint !== null;
+  if (hintStripped) {
+    current = withoutHint;
   }
 
-  return changed ? current : null;
+  return frontmatterMigrated || hintStripped
+    ? { text: current, frontmatterMigrated, hintStripped }
+    : null;
 }
 
 /**
@@ -86,31 +133,38 @@ function migrateConcept(text: string, ctx: EmitContext): string | null {
  * the IR, so the emitter never re-renders it, and a render-based migration would
  * strand every tombstone in v0.1 form forever.
  *
- * The bundle-root index needs no rule here — it is re-rendered every run and its
- * okf_version comes from the emit context.
+ * The bundle-root index needs no frontmatter rule here — it is re-rendered every
+ * run and its okf_version comes from the emit context — but it does carry a human
+ * region, so the hint strip applies to it like any other owned file.
  */
 export function migrateBundle(
   existing: ReadonlyMap<string, string>,
   ctx: EmitContext,
 ): MigrationResult {
-  if (ctx.okfVersion !== "0.2") {
-    return { files: existing, migrated: [] };
-  }
-
   const files = new Map(existing);
   const migrated: string[] = [];
+  const frontmatterMigrated: string[] = [];
+  const hintStripped: string[] = [];
 
   for (const [path, text] of existing) {
     if (path === LOG_FILE || !isOwnedFile(path, text)) {
       continue;
     }
-    const next = migrateConcept(text, ctx);
-    if (next !== null && next !== text) {
-      files.set(path, next);
+    const result = migrateConcept(text, path, ctx);
+    if (result !== null && result.text !== text) {
+      files.set(path, result.text);
       migrated.push(path);
+      if (result.frontmatterMigrated) {
+        frontmatterMigrated.push(path);
+      }
+      if (result.hintStripped) {
+        hintStripped.push(path);
+      }
     }
   }
 
   migrated.sort();
-  return { files, migrated };
+  frontmatterMigrated.sort();
+  hintStripped.sort();
+  return { files, migrated, frontmatterMigrated, hintStripped };
 }

@@ -6,6 +6,30 @@ type: Log
 
 ## 2026-08-04
 
+### 17:21:04.374Z
+
+**Migrated**
+
+* Legacy human-region hint removed from 18 concepts (#24).
+
+**Changed**
+
+* [`continent`](/queries/continent.md)
+* [`continents`](/queries/continents.md)
+* [`countries`](/queries/countries.md)
+* [`country`](/queries/country.md)
+* [`language`](/queries/language.md)
+* [`languages`](/queries/languages.md)
+* [`Continent`](/types/Continent.md)
+* [`ContinentFilterInput`](/types/ContinentFilterInput.md)
+* [`Country`](/types/Country.md)
+* [`CountryFilterInput`](/types/CountryFilterInput.md)
+* [`Language`](/types/Language.md)
+* [`LanguageFilterInput`](/types/LanguageFilterInput.md)
+* [`State`](/types/State.md)
+* [`StringQueryOperatorInput`](/types/StringQueryOperatorInput.md)
+* [`Subdivision`](/types/Subdivision.md)
+
 ### 00:52:49.068Z
 
 **Migrated**

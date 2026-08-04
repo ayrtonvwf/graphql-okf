@@ -18,17 +18,16 @@ removedAt: "2026-03-02T09:00:00.000Z"
 
 Full-text search across the catalog.
 
-**Deprecated: Use products(filter:) instead.**
-
-**Returns** [`[Product!]!`](/types/Product.md)
-
 # Schema
 
-| Argument | Type | Default | Description |
-| --- | --- | --- | --- |
-| `fuzzy` | `Boolean` | `false` | Ignored since the search backend migration. (deprecated: The backend always matches fuzzily.) |
-| `query` | `String!` |  |  |
+```graphql
+searchProducts(
+  "Ignored since the search backend migration."
+  fuzzy: Boolean = false @deprecated(reason: "The backend always matches fuzzily.")
+  query: String!
+): [Product!]! @deprecated(reason: "Use products(filter:) instead.")
+```
+
+References: [`Product`](/types/Product.md).
 
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

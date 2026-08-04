@@ -16,5 +16,3 @@
 * [LanguageFilterInput](/types/LanguageFilterInput.md) - Input object type.
 * [StringQueryOperatorInput](/types/StringQueryOperatorInput.md) - Input object type.
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

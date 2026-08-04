@@ -20,11 +20,11 @@ A prepaid gift card redeemed against an order.
 
 # Schema
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `balanceCents` | `Int!` |  |
-| `code` | `String!` |  |
+```graphql
+type GiftCard {
+  balanceCents: Int!
+  code: String!
+}
+```
 
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

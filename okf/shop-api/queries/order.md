@@ -8,22 +8,16 @@ generated: { by: "graphql-okf/0.1", at: "2026-01-15T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
-<!-- Regenerated on each run. Do not edit inside this block; edits below the end marker are preserved. -->
-
 # order
 
 Looks up a single order.
 
-Directives: [`@auth`](/directives/auth.md)(requires: CUSTOMER).
-
-**Returns** [`Order`](/types/Order.md)
-
 # Schema
 
-| Argument | Type | Default | Description |
-| --- | --- | --- | --- |
-| `id` | `ID!` |  |  |
+```graphql
+order(id: ID!): Order @auth(requires: CUSTOMER)
+```
+
+References: [`@auth`](/directives/auth.md), [`Order`](/types/Order.md).
 
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

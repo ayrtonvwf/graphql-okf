@@ -1,6 +1,7 @@
 import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { parse as parseSdl } from "graphql";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import {
@@ -181,11 +182,28 @@ describe("OKF §9 conformance", () => {
     }
   });
 
-  it("emits a top-level # Schema section the reference tooling can parse", async () => {
+  it("emits a top-level # Schema section holding an SDL block", async () => {
     const files = await bundleFor("examples/shop-api/v1.graphql");
     const product = files.get("types/Product.md");
 
     expect(product).toContain("\n# Schema\n");
-    expect(product).toContain("| Field | Type | Description |");
+    expect(product).toContain("\n```graphql\ntype Product");
+    expect(product).not.toContain("| --- |");
+  });
+
+  it("emits only parseable SDL in every graphql block", async () => {
+    const files = await bundleFor("examples/shop-api/v1.graphql");
+    const blocks = /```graphql\n([\s\S]*?)```/g;
+
+    for (const [path, contents] of files) {
+      for (const [, block = ""] of contents.matchAll(blocks)) {
+        // An operation renders as a field definition, which is a fragment
+        // rather than a document; it parses inside a type.
+        const document = /^(type|interface|input|enum|union|scalar|directive)\b/.test(block)
+          ? block
+          : `type Wrapper {\n${block}}`;
+        expect(() => parseSdl(document), `${path} holds unparseable SDL:\n${block}`).not.toThrow();
+      }
+    }
   });
 });

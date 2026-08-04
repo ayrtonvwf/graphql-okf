@@ -34,10 +34,11 @@ export interface DirectoryIndexOptions {
    */
   readonly frontmatter?: readonly string[];
   /**
-   * A paragraph above the bullets. Inside the generated region, not the preamble,
-   * so it is rewritten on every run like everything else the machine owns.
+   * Paragraphs above the bullets, each rendered as its own block. Inside the
+   * generated region, not the preamble, so they are rewritten on every run like
+   * everything else the machine owns.
    */
-  readonly note?: string;
+  readonly notes?: readonly string[];
 }
 
 function bullet(entry: IndexEntry): string {
@@ -64,7 +65,7 @@ export function renderDirectoryIndex(
       return section.heading === undefined ? bullets : `## ${section.heading}\n\n${bullets}`;
     });
 
-  const body = options.note === undefined ? blocks : [options.note, ...blocks];
+  const body = options.notes === undefined ? blocks : [...options.notes, ...blocks];
 
   const { frontmatter } = options;
   const block =

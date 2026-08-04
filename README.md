@@ -72,6 +72,54 @@ links — a Markdown code span cannot contain one, and linking each would roughl
 double the row; each names a concept file listed in `/types/index.md`. Each index
 that carries signatures says so in a note above its list.
 
+### The generated region
+
+Every file graphql-okf owns is split by two markers:
+
+    <!-- graphql-okf:generated:start -->
+    ...regenerated from the schema on every run...
+    <!-- graphql-okf:generated:end -->
+    ...yours, preserved forever...
+
+Everything between the markers is rewritten on each run — edit it and your edit
+is gone next sync. Everything below the end marker is human-authored and is
+never touched (`GOAL-8.3`), which is where notes, ownership, and links to
+internal docs belong.
+
+Bundles written before this rule was hoisted out of the files repeated it as an
+HTML comment in every file. Running a current release strips that comment from
+files whose human region is otherwise empty, and leaves it alone in any file a
+human has written in.
+
+### Schema sections are SDL
+
+A concept file's `# Schema` section is a fenced `graphql` block holding the
+element's own SDL definition, followed by a `References:` line linking each
+concept it names:
+
+    # Schema
+
+    ```graphql
+    type Customer implements Node & Timestamped {
+      "Where orders are shipped by default."
+      defaultAddress: Address
+      email: EmailAddress! @auth(requires: STAFF)
+    }
+    ```
+
+    References: [`Address`](/types/Address.md), [`@auth`](/directives/auth.md), ...
+
+SDL rather than a table because it is the notation GraphQL is written in, it
+carries applied directives that a table drops, and OKF §4.2 names fenced code
+blocks as structural markdown alongside tables. The links move to their own line
+because a code fence cannot hold one, and they stay rather than being left
+derivable from file names: §6.1 treats a link as an asserted relationship, and
+the bundle's graph is meant to be readable by consumers that know nothing about
+this tool's naming scheme.
+
+An operation's block is a field definition rather than a whole type, since that
+is what the concept is; its root type is recorded in the file's `resource` field.
+
 ## Milestones
 
 - **M1 — Frontend-only utility.** Describe the public GraphQL interface using only

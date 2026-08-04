@@ -1,6 +1,6 @@
 import type { EmitContext } from "../emit/context.js";
 import type { FileParts } from "../emit/render/seam.js";
-import { GENERATED_HINT } from "../emit/render/seam.js";
+import { LEGACY_GENERATED_HINT } from "../emit/render/seam.js";
 import { frontmatterValue } from "./frontmatter.js";
 import type { SplitFile } from "./parse.js";
 
@@ -43,7 +43,7 @@ export function titleOf(split: SplitFile, path: string): string {
 
 /** The previous generated region, minus the "regenerated on each run" hint. */
 function lastKnownBody(generated: string): string {
-  return generated.replace(GENERATED_HINT, "").trim();
+  return generated.replace(LEGACY_GENERATED_HINT, "").trim();
 }
 
 export function renderTombstone(split: SplitFile, ctx: EmitContext): FileParts {

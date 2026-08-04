@@ -8,27 +8,26 @@ generated: { by: "graphql-okf/0.1", at: "2026-03-02T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
-<!-- Regenerated on each run. Do not edit inside this block; edits below the end marker are preserved. -->
-
 # Customer
 
 A person who can place orders.
 
 A customer is created on first sign-in and is never hard-deleted.
 
-Implements [`Node`](/types/Node.md), [`Timestamped`](/types/Timestamped.md).
-
 # Schema
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `createdAt` | [`DateTime!`](/types/DateTime.md) |  |
-| `defaultAddress` | [`Address`](/types/Address.md) | Where orders are shipped by default. |
-| `displayName` | `String!` |  |
-| `email` | [`EmailAddress!`](/types/EmailAddress.md) | [`@auth`](/directives/auth.md)(requires: STAFF) |
-| `id` | `ID!` |  |
-| `updatedAt` | [`DateTime`](/types/DateTime.md) |  |
+```graphql
+type Customer implements Node & Timestamped {
+  createdAt: DateTime!
+  "Where orders are shipped by default."
+  defaultAddress: Address
+  displayName: String!
+  email: EmailAddress! @auth(requires: STAFF)
+  id: ID!
+  updatedAt: DateTime
+}
+```
+
+References: [`Address`](/types/Address.md), [`@auth`](/directives/auth.md), [`DateTime`](/types/DateTime.md), [`EmailAddress`](/types/EmailAddress.md), [`Node`](/types/Node.md), [`Timestamped`](/types/Timestamped.md).
 
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

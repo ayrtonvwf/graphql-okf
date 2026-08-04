@@ -3,7 +3,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { emitContext } from "../src/emit/context.js";
-import { assembleFile, EMPTY_HUMAN, GENERATED_HINT, HUMAN_HINT } from "../src/emit/render/seam.js";
+import {
+  assembleFile,
+  EMPTY_HUMAN,
+  LEGACY_GENERATED_HINT,
+  LEGACY_HUMAN_HINT,
+} from "../src/emit/render/seam.js";
 import { readSchema, syncOkfBundle } from "../src/index.js";
 import { applyPlan } from "../src/reconcile/apply.js";
 import { reconcile } from "../src/reconcile/plan.js";
@@ -406,7 +411,7 @@ function builtInFile(title: string, kindLabel: string, human = EMPTY_HUMAN): str
   return assembleFile(
     {
       preamble: `---\ntype: ${JSON.stringify(kindLabel)}\ntitle: ${JSON.stringify(title)}\n---\n\n`,
-      generated: `\n${GENERATED_HINT}\n\n# ${title}\n\nSpecification prose.\n\n`,
+      generated: `\n${LEGACY_GENERATED_HINT}\n\n# ${title}\n\nSpecification prose.\n\n`,
     },
     human,
   );
@@ -453,7 +458,11 @@ describe("a bundle written before spec-defined concepts were pruned", () => {
     const tree = await readTree(outDir);
     tree.set(
       "types/ID.md",
-      builtInFile("ID", "GraphQL Scalar Type", `\n\n${HUMAN_HINT}\n\nWe mint UUIDv7 here.\n`),
+      builtInFile(
+        "ID",
+        "GraphQL Scalar Type",
+        `\n\n${LEGACY_HUMAN_HINT}\n\nWe mint UUIDv7 here.\n`,
+      ),
     );
     await writeTree(outDir, tree);
 

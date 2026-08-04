@@ -1,18 +1,22 @@
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { appendFile, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import { emitContext } from "../src/emit/context.js";
+import { assembleFile, LEGACY_HUMAN_HINT } from "../src/emit/render/seam.js";
 import { readSchema, syncOkfBundle } from "../src/index.js";
 import { applyPlan } from "../src/reconcile/apply.js";
+import { splitFile } from "../src/reconcile/parse.js";
 import { reconcile } from "../src/reconcile/plan.js";
 import { readExistingBundle } from "../src/reconcile/read.js";
-import { readTree as snapshot } from "./support/bundle-tree.js";
+import { readTree as snapshot, writeTree } from "./support/bundle-tree.js";
 
 const BASE = new URL("./fixtures/kitchen-sink.graphql", import.meta.url).pathname;
 const EVOLVED = new URL("./fixtures/kitchen-sink-evolved.graphql", import.meta.url).pathname;
+const V1 = new URL("../examples/shop-api/v1.graphql", import.meta.url).pathname;
 
+const RESOURCE = "https://shop.example/graphql";
 const T1 = "2026-07-01T10:00:00.000Z";
 const T2 = "2026-07-24T09:00:00.000Z";
 const T3 = "2026-08-01T00:00:00.000Z";
@@ -20,6 +24,29 @@ const T3 = "2026-08-01T00:00:00.000Z";
 async function v1Bundle(sdl = BASE): Promise<string> {
   const outDir = join(await mkdtemp(join(tmpdir(), "okf-migrate-")), "bundle");
   await syncOkfBundle({ source: { kind: "sdl", path: sdl }, outDir, now: T1, okfVersion: "0.1" });
+  return outDir;
+}
+
+/**
+ * A bundle as a pre-#24 release wrote it: every owned file's human region holds
+ * only the hint comment the emitter used to write at creation. Today's
+ * `syncOkfBundle` no longer emits that hint, so this can only be reproduced by
+ * hand — sync a current bundle, then splice the legacy human region back in.
+ */
+async function writeLegacyBundle(): Promise<string> {
+  const outDir = join(await mkdtemp(join(tmpdir(), "okf-legacy-hint-")), "bundle");
+  await syncOkfBundle({ source: { kind: "sdl", path: V1 }, outDir, now: T1, resource: RESOURCE });
+
+  const LEGACY_EMPTY = `\n\n${LEGACY_HUMAN_HINT}\n`;
+  const tree = await snapshot(outDir);
+  for (const [path, text] of tree) {
+    const split = splitFile(text, path);
+    if (split !== null) {
+      tree.set(path, assembleFile(split.parts, LEGACY_EMPTY));
+    }
+  }
+  await writeTree(outDir, tree);
+
   return outDir;
 }
 
@@ -179,5 +206,19 @@ describe("migrating a v0.1 bundle to v0.2", () => {
     await syncOkfBundle({ source: { kind: "sdl", path: BASE }, outDir: second, now: T1 });
 
     expect(await snapshot(first)).toEqual(await snapshot(second));
+  });
+
+  it("strips the human hint from an untouched file and keeps a human's own words (#24)", async () => {
+    const outDir = await writeLegacyBundle();
+    await appendFile(join(outDir, "types/Product.md"), "\n## Ownership\n\nCatalog team.\n");
+
+    await syncOkfBundle({ source: { kind: "sdl", path: V1 }, outDir, now: T2, resource: RESOURCE });
+
+    const order = await readFile(join(outDir, "types/Order.md"), "utf8");
+    const product = await readFile(join(outDir, "types/Product.md"), "utf8");
+
+    expect(order).not.toContain("Human-authored content below this line");
+    expect(product).toContain("Human-authored content below this line");
+    expect(product).toContain("Catalog team.");
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assembleFile, EMPTY_HUMAN, HUMAN_HINT } from "../emit/render/seam.js";
+import { assembleFile, EMPTY_HUMAN, LEGACY_HUMAN_HINT } from "../emit/render/seam.js";
 import { GraphqlOkfError } from "../errors.js";
 import { relayoutBundle } from "./relayout.js";
 
@@ -22,7 +22,7 @@ describe("relayoutBundle", () => {
   });
 
   it("carries the human region across the move byte for byte", () => {
-    const human = `\n\n${HUMAN_HINT}\nOwned by the Catalog team.\n`;
+    const human = `\n\n${LEGACY_HUMAN_HINT}\nOwned by the Catalog team.\n`;
     const result = relayoutBundle(new Map([["types/objects/Product.md", owned("body", human)]]));
 
     expect(result.files.get("types/Product.md")).toContain("Owned by the Catalog team.");
@@ -66,7 +66,7 @@ describe("relayoutBundle", () => {
   it("redirects a kind index that carries human text", () => {
     const index = assembleFile(
       { preamble: "# Object types\n\n", generated: "\n* [Product](/types/objects/Product.md)\n" },
-      `\n\n${HUMAN_HINT}\nSee ADR-14.\n`,
+      `\n\n${LEGACY_HUMAN_HINT}\nSee ADR-14.\n`,
     );
     const result = relayoutBundle(new Map([["types/objects/index.md", index]]));
 
@@ -84,7 +84,7 @@ describe("relayoutBundle", () => {
   it("is a no-op on a second pass over an already-redirected index", () => {
     const index = assembleFile(
       { preamble: "# Object types\n\n", generated: "\n* [Product](/types/objects/Product.md)\n" },
-      `\n\n${HUMAN_HINT}\nSee ADR-14.\n`,
+      `\n\n${LEGACY_HUMAN_HINT}\nSee ADR-14.\n`,
     );
     const once = relayoutBundle(new Map([["types/objects/index.md", index]]));
     const twice = relayoutBundle(once.files);

@@ -8,19 +8,20 @@ generated: { by: "graphql-okf/0.1", at: "2026-03-02T09:00:00.000Z" }
 ---
 
 <!-- graphql-okf:generated:start -->
-<!-- Regenerated on each run. Do not edit inside this block; edits below the end marker are preserved. -->
-
 # Money
 
 An amount of money in a specific currency.
 
 # Schema
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `amountCents` | `Int!` | The amount in the smallest unit of the currency, e.g. cents. |
-| `currency` | [`Currency!`](/types/Currency.md) |  |
+```graphql
+type Money {
+  "The amount in the smallest unit of the currency, e.g. cents."
+  amountCents: Int!
+  currency: Currency!
+}
+```
+
+References: [`Currency`](/types/Currency.md).
 
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

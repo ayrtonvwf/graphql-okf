@@ -10,5 +10,3 @@ Signatures are GraphQL SDL. A type name in a signature is a concept file at `/ty
 * [`language(code: ID!): Language`](/queries/language.md) - Query operation.
 * [`languages(filter: LanguageFilterInput = {}): [Language!]!`](/queries/languages.md) - Query operation.
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->

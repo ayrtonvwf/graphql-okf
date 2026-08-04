@@ -45,5 +45,3 @@
 
 * [GiftCard](/types/GiftCard.md) - (removed)
 <!-- graphql-okf:generated:end -->
-
-<!-- Human-authored content below this line is preserved across regenerations. -->
