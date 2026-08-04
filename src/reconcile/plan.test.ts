@@ -551,6 +551,59 @@ describe("pruning spec-defined concepts", () => {
     );
   });
 
+  it("does not re-emit the human-preserving orphaned-index rewrite on a settled bundle", () => {
+    const ir: SchemaIr = {
+      resource: "https://x.example/graphql",
+      origin: "sdl",
+      concepts: [
+        {
+          kind: "object",
+          name: "Product",
+          path: "types/Product.md",
+          description: null,
+          appliedDirectives: [],
+          interfaces: [],
+          fields: [],
+        },
+      ],
+    };
+    const humanNote = "\nOur team relies on the deprecated directive; do not remove lightly.\n";
+    const existing = new Map([
+      ["index.md", "# API interface\n"],
+      [
+        "directives/deprecated.md",
+        assembleFile(
+          { preamble: '---\ntitle: "deprecated"\n---\n\n', generated: "\n# deprecated\n\n" },
+          EMPTY_HUMAN,
+        ),
+      ],
+      [
+        "directives/index.md",
+        assembleFile(
+          {
+            preamble: "# Directives\n\n",
+            generated: "\n* [deprecated](/directives/deprecated.md)\n",
+          },
+          humanNote,
+        ),
+      ],
+    ]);
+
+    const firstRun = reconcile(ir, existing, emitContext("0.2", "2026-08-03T00:00:00.000Z"));
+    const rewrite = firstRun.actions.find((entry) => entry.path === "directives/index.md");
+    expect(rewrite).toBeDefined();
+
+    // Apply the plan's effects by hand: prune deletes directives/deprecated.md,
+    // and the index gets rewritten to its settled (empty-generated) form.
+    const settled = new Map(existing);
+    settled.delete("directives/deprecated.md");
+    settled.set("directives/index.md", rewrite && isNotDelete(rewrite) ? rewrite.contents : "");
+
+    const secondRun = reconcile(ir, settled, emitContext("0.2", "2026-08-03T01:00:00.000Z"));
+
+    expect(secondRun.actions.some((action) => action.path === "directives/index.md")).toBe(false);
+  });
+
   it("never deletes the root index even when the bundle has no concepts", () => {
     const ir: SchemaIr = {
       resource: "https://x.example/graphql",

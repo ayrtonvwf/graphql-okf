@@ -226,11 +226,16 @@ export function reconcile(
       split.parts.generated !== REDIRECT_REGION
     ) {
       if (hasHumanText(split.human)) {
-        actions.push({
-          kind: "index",
-          path,
-          contents: assembleFile({ preamble: split.parts.preamble, generated: "" }, split.human),
-        });
+        // Already settled into its rewritten form (empty generated region) —
+        // re-emitting here every run would break the "unchanged bundle is a
+        // no-op" guarantee, even though the output would be identical.
+        if (split.parts.generated !== "") {
+          actions.push({
+            kind: "index",
+            path,
+            contents: assembleFile({ preamble: split.parts.preamble, generated: "" }, split.human),
+          });
+        }
       } else {
         actions.push({ kind: "delete", path });
       }
