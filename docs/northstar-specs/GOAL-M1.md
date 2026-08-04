@@ -82,6 +82,12 @@ inherits it. It MUST be settled and documented before the emitter is built.
   (built-in and custom), fields (with arguments and return types), root
   operations (queries, mutations, subscriptions), and directive definitions and
   their applications where they carry interface meaning (e.g. `@deprecated`).
+  - Recorded per issue #23: representation in the model does not imply a concept
+    file. The five specified scalars and five specified directives are
+    represented as *references* — every field naming one carries its name and
+    wrappers — but get no concept file and are never link targets, under the
+    convention `GOAL-7.3` permits. Custom scalars and custom directives are
+    unaffected.
 - `GOAL-4.2` — There MUST be a deterministic, documented naming scheme mapping
   each modeled element to a concept file path. Re-running against an unchanged
   schema MUST produce byte-identical paths.
