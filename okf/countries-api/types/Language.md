@@ -3,7 +3,7 @@ type: "GraphQL Object Type"
 title: "Language"
 resource: "https://countries.trevorblades.com/graphql#Language"
 tags: ["graphql", "object"]
-generated: { by: "graphql-okf/0.1", at: "2026-08-04T16:53:04.837Z" }
+generated: { by: "graphql-okf/0.1", at: "2026-08-04T17:21:04.374Z" }
 ---
 
 <!-- graphql-okf:generated:start -->

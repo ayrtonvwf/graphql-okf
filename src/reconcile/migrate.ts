@@ -12,6 +12,10 @@ export interface MigrationResult {
   readonly files: ReadonlyMap<string, string>;
   /** Paths this pass rewrote, sorted — the plan's action order must not depend on map order. */
   readonly migrated: readonly string[];
+  /** The subset of `migrated` whose provenance or tombstone key was converted (v0.1 -> v0.2). */
+  readonly frontmatterMigrated: readonly string[];
+  /** The subset of `migrated` whose legacy human hint was stripped (#24). Overlaps the above. */
+  readonly hintStripped: readonly string[];
 }
 
 function unquote(raw: string): string {
@@ -79,35 +83,48 @@ function migrateHumanHint(text: string, path: string): string | null {
   return assembleFile(split.parts, EMPTY_HUMAN);
 }
 
+interface ConceptMigration {
+  readonly text: string;
+  /** Whether provenance or the tombstone key changed, so the caller can log it separately. */
+  readonly frontmatterMigrated: boolean;
+  /** Whether this file's hint strip fired, so the caller can log it separately. */
+  readonly hintStripped: boolean;
+}
+
 /**
  * Every conversion for one file. The v0.1 -> v0.2 pair is version-gated; the
  * hint strip is not, because the hint has nothing to do with the OKF version.
+ * The two are tracked separately (not just as one `changed` bit) so the log can
+ * describe what actually happened rather than always naming the v0.1 -> v0.2
+ * conversion, which a hint-only strip never performs.
  */
-function migrateConcept(text: string, path: string, ctx: EmitContext): string | null {
+function migrateConcept(text: string, path: string, ctx: EmitContext): ConceptMigration | null {
   let current = text;
-  let changed = false;
+  let frontmatterMigrated = false;
 
   if (ctx.okfVersion === "0.2") {
     const withProvenance = migrateProvenance(current, ctx);
     if (withProvenance !== null) {
       current = withProvenance;
-      changed = true;
+      frontmatterMigrated = true;
     }
 
     const withTombstoneKey = migrateTombstoneKey(current);
     if (withTombstoneKey !== null) {
       current = withTombstoneKey;
-      changed = true;
+      frontmatterMigrated = true;
     }
   }
 
   const withoutHint = migrateHumanHint(current, path);
-  if (withoutHint !== null) {
+  const hintStripped = withoutHint !== null;
+  if (hintStripped) {
     current = withoutHint;
-    changed = true;
   }
 
-  return changed ? current : null;
+  return frontmatterMigrated || hintStripped
+    ? { text: current, frontmatterMigrated, hintStripped }
+    : null;
 }
 
 /**
@@ -126,18 +143,28 @@ export function migrateBundle(
 ): MigrationResult {
   const files = new Map(existing);
   const migrated: string[] = [];
+  const frontmatterMigrated: string[] = [];
+  const hintStripped: string[] = [];
 
   for (const [path, text] of existing) {
     if (path === LOG_FILE || !isOwnedFile(path, text)) {
       continue;
     }
-    const next = migrateConcept(text, path, ctx);
-    if (next !== null && next !== text) {
-      files.set(path, next);
+    const result = migrateConcept(text, path, ctx);
+    if (result !== null && result.text !== text) {
+      files.set(path, result.text);
       migrated.push(path);
+      if (result.frontmatterMigrated) {
+        frontmatterMigrated.push(path);
+      }
+      if (result.hintStripped) {
+        hintStripped.push(path);
+      }
     }
   }
 
   migrated.sort();
-  return { files, migrated };
+  frontmatterMigrated.sort();
+  hintStripped.sort();
+  return { files, migrated, frontmatterMigrated, hintStripped };
 }

@@ -14,7 +14,7 @@ const plan: BundlePlan = {
   removed: [{ name: "LegacyOrder", path: "types/LegacyOrder.md" }],
   unchanged: 12,
   indexes: 0,
-  migrated: { frontmatter: [], relocated: [], pruned: [] },
+  migrated: { frontmatter: [], relocated: [], pruned: [], hintStripped: [] },
 };
 
 describe("renderRunBlock", () => {
@@ -102,7 +102,7 @@ describe("hasLoggableChanges", () => {
       removed: [],
       unchanged: 3,
       indexes: 1,
-      migrated: { frontmatter: [], relocated: [], pruned: [] },
+      migrated: { frontmatter: [], relocated: [], pruned: [], hintStripped: [] },
     };
 
     expect(hasLoggableChanges(indexOnly)).toBe(false);
@@ -125,6 +125,7 @@ describe("a migration run", () => {
       frontmatter: Array.from({ length: 4975 }, (_, index) => `types/T${index}.md`),
       relocated: [],
       pruned: [],
+      hintStripped: [],
     },
   };
 
@@ -160,7 +161,10 @@ describe("a migration run", () => {
   it("emits no group when nothing was migrated", () => {
     expect(
       renderRunBlock(
-        { ...migrationPlan, migrated: { frontmatter: [], relocated: [], pruned: [] } },
+        {
+          ...migrationPlan,
+          migrated: { frontmatter: [], relocated: [], pruned: [], hintStripped: [] },
+        },
         "2026-07-27T09:00:00.000Z",
       ),
     ).not.toContain("**Migrated**");
@@ -175,7 +179,12 @@ describe("a layout migration run", () => {
         added: [],
         changed: [],
         removed: [],
-        migrated: { frontmatter: [], relocated: ["types/A.md", "types/B.md"], pruned: [] },
+        migrated: {
+          frontmatter: [],
+          relocated: ["types/A.md", "types/B.md"],
+          pruned: [],
+          hintStripped: [],
+        },
       },
       T,
     );
@@ -188,7 +197,15 @@ describe("a layout migration run", () => {
 
   it("records both migrations when both fire, frontmatter first", () => {
     const block = renderRunBlock(
-      { ...plan, migrated: { frontmatter: ["types/A.md"], relocated: ["types/A.md"], pruned: [] } },
+      {
+        ...plan,
+        migrated: {
+          frontmatter: ["types/A.md"],
+          relocated: ["types/A.md"],
+          pruned: [],
+          hintStripped: [],
+        },
+      },
       T,
     );
 
@@ -197,11 +214,35 @@ describe("a layout migration run", () => {
 
   it("emits no Migrated group when neither fired", () => {
     const block = renderRunBlock(
-      { ...plan, migrated: { frontmatter: [], relocated: [], pruned: [] } },
+      { ...plan, migrated: { frontmatter: [], relocated: [], pruned: [], hintStripped: [] } },
       T,
     );
 
     expect(block).not.toContain("**Migrated**");
+  });
+});
+
+describe("the hint-strip migration line", () => {
+  it("reports the count and makes the run loggable, without claiming a frontmatter conversion", () => {
+    const hintOnlyPlan = {
+      actions: [],
+      added: [],
+      changed: [],
+      removed: [],
+      unchanged: 0,
+      indexes: 0,
+      migrated: {
+        frontmatter: [],
+        relocated: [],
+        pruned: [],
+        hintStripped: ["types/A.md", "types/B.md"],
+      },
+    } satisfies BundlePlan;
+
+    expect(hasLoggableChanges(hintOnlyPlan)).toBe(true);
+    const block = renderRunBlock(hintOnlyPlan, "2026-08-04T09:00:00.000Z");
+    expect(block).toContain("* Legacy human-region hint removed from 2 concepts (#24).");
+    expect(block).not.toContain("OKF bundle format");
   });
 });
 
@@ -214,7 +255,12 @@ describe("the prune migration line", () => {
       removed: [],
       unchanged: 0,
       indexes: 0,
-      migrated: { frontmatter: [], relocated: [], pruned: ["types/ID.md", "types/Int.md"] },
+      migrated: {
+        frontmatter: [],
+        relocated: [],
+        pruned: ["types/ID.md", "types/Int.md"],
+        hintStripped: [],
+      },
     } satisfies BundlePlan;
 
     expect(hasLoggableChanges(plan)).toBe(true);

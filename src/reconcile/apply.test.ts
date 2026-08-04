@@ -14,7 +14,7 @@ const empty: BundlePlan = {
   removed: [],
   unchanged: 4,
   indexes: 0,
-  migrated: { frontmatter: [], relocated: [], pruned: [] },
+  migrated: { frontmatter: [], relocated: [], pruned: [], hintStripped: [] },
 };
 
 async function workspace(): Promise<string> {
@@ -85,7 +85,7 @@ describe("applyPlan", () => {
       removed: [],
       unchanged: 0,
       indexes: 0,
-      migrated: { frontmatter: [], relocated: [], pruned: [] },
+      migrated: { frontmatter: [], relocated: [], pruned: [], hintStripped: [] },
     };
 
     await applyPlan(plan, dir, "2026-07-24T09:00:00.000Z");

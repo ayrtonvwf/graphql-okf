@@ -126,11 +126,29 @@ describe("inlineArgumentList", () => {
   it("prints a default value", () => {
     expect(inlineArgumentList([arg({ defaultValue: "20" })])).toBe("(first: Int = 20)");
   });
+
+  it("drops applied directives and deprecation, which could otherwise hold a block string", () => {
+    const decorated = arg({
+      appliedDirectives: [{ name: "auth", path: "directives/auth.md", args: [] }],
+      deprecation: { reason: 'Use "next" instead.' },
+    });
+
+    const result = inlineArgumentList([decorated]);
+
+    expect(result).toBe("(first: Int)");
+    expect(result).not.toContain("\n");
+  });
 });
 
 describe("argumentLines", () => {
   it("stays inline when no argument is described", () => {
     expect(argumentLines([arg({ defaultValue: "20" })], "  ")).toEqual(["(first: Int = 20)"]);
+  });
+
+  it("keeps applied directives and deprecation on the inline fast path, unlike inlineArgumentList", () => {
+    expect(argumentLines([arg({ deprecation: { reason: "Use next." } })], "  ")).toEqual([
+      '(first: Int @deprecated(reason: "Use next."))',
+    ]);
   });
 
   it("breaks across lines when any argument is described", () => {

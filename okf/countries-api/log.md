@@ -6,11 +6,11 @@ type: Log
 
 ## 2026-08-04
 
-### 16:53:04.837Z
+### 17:21:04.374Z
 
 **Migrated**
 
-* OKF bundle format 0.1 → 0.2 (`timestamp` → `generated`) across 18 concepts.
+* Legacy human-region hint removed from 18 concepts (#24).
 
 **Changed**
 

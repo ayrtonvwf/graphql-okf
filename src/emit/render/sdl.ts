@@ -74,38 +74,46 @@ export function deprecatedSdl(deprecation: Deprecation | null): string {
     : ` @deprecated(reason: ${sdlString(deprecation.reason)})`;
 }
 
-function argumentText(arg: InputValueNode): string {
+function argumentBase(arg: InputValueNode): string {
   const type = decoratedType(arg.type);
-  const base =
-    arg.defaultValue === null
-      ? `${arg.name}: ${type}`
-      : `${arg.name}: ${type} = ${arg.defaultValue}`;
-  return `${base}${appliedSdl(arg.appliedDirectives)}${deprecatedSdl(arg.deprecation)}`;
+  return arg.defaultValue === null
+    ? `${arg.name}: ${type}`
+    : `${arg.name}: ${type} = ${arg.defaultValue}`;
+}
+
+function argumentText(arg: InputValueNode): string {
+  return `${argumentBase(arg)}${appliedSdl(arg.appliedDirectives)}${deprecatedSdl(arg.deprecation)}`;
 }
 
 /**
- * The one-line argument list. Empty parentheses are not SDL, so an element with
- * no arguments renders as a bare `name: Type`. Descriptions are dropped: this is
- * the form index rows use (issue #21), and a row must stay one line.
+ * The one-line argument list index rows use (issue #21): name, type, and
+ * default only. Empty parentheses are not SDL, so an element with no arguments
+ * renders as a bare `name: Type`. Descriptions, applied directives, and
+ * deprecation are all dropped here — not because they don't apply, but because
+ * a deprecation reason can be a block string, and a literal newline inside the
+ * markdown link label this feeds (`signature.ts`) would break the list item.
+ * The fenced `# Schema` block has no such constraint, so it uses `argumentText`
+ * directly instead of this form.
  */
 export function inlineArgumentList(args: readonly InputValueNode[]): string {
   if (args.length === 0) {
     return "";
   }
-  return `(${args.map(argumentText).join(", ")})`;
+  return `(${args.map(argumentBase).join(", ")})`;
 }
 
 /**
  * The argument list as it appears inside a block: inline when nothing is
- * described, one argument per line when anything is. Delegating the inline case
- * keeps a single spelling of it shared with `signature.ts`.
+ * described, one argument per line when anything is. The inline case is not
+ * `inlineArgumentList` — a fenced code block tolerates the embedded newlines a
+ * block-string deprecation reason can hold, so directives and deprecation stay.
  */
 export function argumentLines(args: readonly InputValueNode[], indent: string): string[] {
   if (args.length === 0) {
     return [""];
   }
   if (args.every((arg) => arg.description === null)) {
-    return [inlineArgumentList(args)];
+    return [`(${args.map(argumentText).join(", ")})`];
   }
   const inner = `${indent}  `;
   return [
