@@ -1,7 +1,7 @@
 import { posix } from "node:path";
 import { firstSentence } from "../model/description.js";
 import type { ConceptNode, SchemaIr } from "../model/ir.js";
-import { type ConceptKind, KIND_ORDER } from "../model/naming.js";
+import { type ConceptKind, DIRECTORY_BY_KIND, KIND_ORDER } from "../model/naming.js";
 import type { EmitContext } from "./context.js";
 import { renderConceptParts } from "./render/concept.js";
 import {
@@ -12,6 +12,7 @@ import {
 import { bundleLink } from "./render/links.js";
 import { conceptResource } from "./render/resource.js";
 import type { FileParts } from "./render/seam.js";
+import { directiveSignature, operationSignature } from "./render/signature.js";
 
 const KIND_SUMMARY: Record<ConceptKind, string> = {
   object: "Object type.",
@@ -63,10 +64,47 @@ export const SPEC_DEFINED_NOTE =
   "(`@deprecated`, `@include`, `@oneOf`, `@skip`, `@specifiedBy`) have no concept files: " +
   "they are defined by the GraphQL specification and appear as plain code, not links.";
 
-function sortByLabel(entries: IndexEntry[]): IndexEntry[] {
-  return entries.sort((left, right) =>
-    left.label < right.label ? -1 : left.label > right.label ? 1 : 0,
-  );
+/**
+ * `GOAL-7.3`'s "documented convention", applied to signatures. It sits on every
+ * index that carries one rather than only on the root: an agent frequently enters
+ * at `queries/index.md` without passing through the root, and a convention it
+ * never read is a convention that does not exist. `/types/index.md` is named as
+ * the authority because `resolvePaths` hashes a basename when two type names
+ * differ only by case, so the `<Name>.md` form is the rule, not a guarantee.
+ */
+export const SIGNATURE_NOTE =
+  "Signatures are GraphQL SDL. A type name in a signature is a concept file at " +
+  `\`/${DIRECTORY_BY_KIND.object}/<Name>.md\`; ` +
+  `\`/${DIRECTORY_BY_KIND.object}/index.md\` lists them all.`;
+
+/** The kinds whose index rows carry a signature, and so a convention note. */
+const SIGNATURE_KINDS = new Set<ConceptKind>(["query", "mutation", "subscription", "directive"]);
+
+function signatureOf(concept: ConceptNode): string | null {
+  switch (concept.kind) {
+    case "query":
+    case "mutation":
+    case "subscription":
+      return operationSignature(concept);
+    case "directive":
+      return directiveSignature(concept);
+    default:
+      return null;
+  }
+}
+
+/**
+ * An index row's order comes from the element it describes, never from the text
+ * it renders as. Signature labels happen to sort the same way bare names do —
+ * every GraphQL name character sorts above `(` — but relying on that would make
+ * ordering hostage to the next format change (issue #24).
+ */
+type KeyedEntry = { readonly key: string; readonly entry: IndexEntry };
+
+function ordered(items: readonly KeyedEntry[]): IndexEntry[] {
+  return [...items]
+    .sort((left, right) => (left.key < right.key ? -1 : left.key > right.key ? 1 : 0))
+    .map((item) => item.entry);
 }
 
 export interface TombstoneEntry {
@@ -133,46 +171,63 @@ export function buildBundle(
 
   // One index.md per directory.
   for (const dir of allDirs) {
-    const childEntries: IndexEntry[] = [];
+    const childEntries: KeyedEntry[] = [];
     for (const child of childDirs.get(dir) ?? []) {
       const base = posix.basename(child);
       childEntries.push({
-        label: `${base}/`,
-        link: bundleLink(`${child}/index.md`),
-        summary: DIRECTORY_LABELS[child] ?? base,
+        key: `${base}/`,
+        entry: {
+          label: `${base}/`,
+          link: bundleLink(`${child}/index.md`),
+          summary: DIRECTORY_LABELS[child] ?? base,
+        },
       });
     }
 
     const concepts = filesByDir.get(dir) ?? [];
-    const conceptEntry = (concept: ConceptNode): IndexEntry => ({
-      label: concept.name,
-      link: bundleLink(concept.path),
-      summary: firstSentence(concept.description) ?? KIND_SUMMARY[concept.kind],
-    });
+    const conceptEntry = (concept: ConceptNode): KeyedEntry => {
+      const signature = signatureOf(concept);
+      const summary = firstSentence(concept.description) ?? KIND_SUMMARY[concept.kind];
+      const deprecated =
+        "deprecation" in concept && concept.deprecation !== null ? { deprecated: true } : {};
+      return {
+        key: concept.name,
+        entry: {
+          label: signature ?? concept.name,
+          link: bundleLink(concept.path),
+          summary,
+          ...(signature === null ? {} : { code: true }),
+          ...deprecated,
+        },
+      };
+    };
 
-    const tombstoneEntries: IndexEntry[] = (tombstonesByDir.get(dir) ?? []).map((tombstone) => ({
-      label: tombstone.title,
-      link: bundleLink(tombstone.path),
-      summary: "(removed)",
+    const tombstoneEntries: KeyedEntry[] = (tombstonesByDir.get(dir) ?? []).map((tombstone) => ({
+      key: tombstone.title,
+      entry: {
+        label: tombstone.title,
+        link: bundleLink(tombstone.path),
+        summary: "(removed)",
+      },
     }));
 
     const kinds = new Set(concepts.map((concept) => concept.kind));
     const sections: IndexSection[] = [];
 
     if (kinds.size > 1) {
-      sections.push({ entries: sortByLabel(childEntries) });
+      sections.push({ entries: ordered(childEntries) });
       for (const kind of KIND_ORDER) {
         const entries = concepts.filter((concept) => concept.kind === kind).map(conceptEntry);
         if (entries.length > 0) {
-          sections.push({ heading: KIND_SECTION_LABELS[kind], entries: sortByLabel(entries) });
+          sections.push({ heading: KIND_SECTION_LABELS[kind], entries: ordered(entries) });
         }
       }
       if (tombstoneEntries.length > 0) {
-        sections.push({ heading: "Removed", entries: sortByLabel(tombstoneEntries) });
+        sections.push({ heading: "Removed", entries: ordered(tombstoneEntries) });
       }
     } else {
       sections.push({
-        entries: sortByLabel([...childEntries, ...concepts.map(conceptEntry), ...tombstoneEntries]),
+        entries: ordered([...childEntries, ...concepts.map(conceptEntry), ...tombstoneEntries]),
       });
     }
 
@@ -185,14 +240,13 @@ export function buildBundle(
             `resource: ${JSON.stringify(ir.resource)}`,
           ]
         : undefined;
-    bundle.set(
-      indexPath,
-      renderDirectoryIndex(
-        title,
-        sections,
-        dir === "." ? { frontmatter, note: SPEC_DEFINED_NOTE } : { frontmatter },
-      ),
-    );
+    const note =
+      dir === "."
+        ? SPEC_DEFINED_NOTE
+        : concepts.some((concept) => SIGNATURE_KINDS.has(concept.kind))
+          ? SIGNATURE_NOTE
+          : undefined;
+    bundle.set(indexPath, renderDirectoryIndex(title, sections, { frontmatter, note }));
   }
 
   return bundle;
